@@ -227,6 +227,8 @@ State: unavailable/offline
   coordinates.
 - Before the first Central release, verify namespace `io.github.aleksandrkdev`, generate a Central
   Portal user token, distribute a public GPG key, and add the four documented repository secrets.
+- GitHub macOS jobs use `macos-15`, whose default Xcode 16.4 supports project format 77 and includes
+  the iOS 18.5 SDK required by the current Filament KMP native artifacts.
 
 ## Completed local Maven alpha milestone
 
