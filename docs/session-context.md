@@ -276,6 +276,25 @@ State: unavailable/offline
 - Android, Desktop and iOS compilation and linkage pass. HDR environment maps still require a
   portable preprocessed cubemap format; transparency requires a separate blended shader.
 
+## Current checkpoint (2026-07-18)
+
+- Branch `main` is clean and pushed through commit `945a71e Add portable textured materials`.
+- The preceding feature commits are `fe434a4 Add portable colors materials and local lights` and
+  `05ee982 Add shared primitives and PBR materials`.
+- Development version is `0.1.0-alpha03-SNAPSHOT`; Maven Central `0.1.0-alpha02` remains the latest
+  public release.
+- Latest verification passed `scene-core`, `scene-compose` and `renderer-filament` JVM tests,
+  Android debug APK assembly, Desktop JVM compilation, iOS simulator framework linkage, both iOS
+  renderer compilation targets and `checkKotlinAbi`.
+- Next implementation step: add an explicitly blended transparent material using a separately
+  compiled portable Filament shader. Do not pretend alpha works with the current opaque standard
+  shaders.
+- Following step: define a backend-neutral preprocessed cubemap/IBL source and loader. Filament KMP
+  does not currently provide a common HDR equirectangular-to-cubemap decoder, so raw HDR loading
+  must not be promised by the public API.
+- After materials and IBL are validated on Android, Desktop and iOS, begin the independent Web/Wasm
+  renderer behind the same `SceneRenderer` contract.
+
 ## Completed local Maven alpha milestone
 
 - Fixed project coordinates: `dev.composescene3d:*:0.1.0-alpha01`.
@@ -290,9 +309,9 @@ State: unavailable/offline
   completed `clean build` successfully.
 - CI now regenerates all local Maven publications on every push and pull request.
 
-## Following milestone
+## Historical pre-Central publication plan (completed)
 
-Before publishing outside the local machine:
+The original plan before publishing outside the local machine was:
 
 1. Choose the permanent GitHub organization/repository URL and Maven group ownership.
 2. Add complete POM metadata (project URL, SCM, developer) and artifact signing.
@@ -344,5 +363,6 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Then implement the next milestone without exposing Filament types in the public commonMain API.
+Start with the transparent blended-material milestone described in the current checkpoint. Preserve
+the released alpha02 API where practical and do not expose Filament types in public commonMain API.
 ```
