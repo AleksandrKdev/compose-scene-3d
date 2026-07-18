@@ -253,6 +253,18 @@ State: unavailable/offline
   reaches the Filament primitive instead of being ignored.
 - Android, Desktop and iOS samples show a metallic sphere, rough cylinder and ground plane.
 
+## Color, material and local lighting milestone
+
+- Added backend-neutral `Color3D` with explicit sRGB/linear-sRGB semantics, alpha, 8-bit
+  RGB/RGBA/ARGB factories and named colors.
+- Primitive nodes now accept the sealed `Material3D` API: `PbrMaterial`, `UnlitMaterial` and
+  `EmissiveMaterial`.
+- Added validated `PointLightNode` and `SpotLightNode` plus matching Compose DSL functions.
+- Filament converts sRGB colors to its required linear color space and maps all three material
+  modes and both local light types to its built-in cross-platform implementations.
+- The standard shaders in this stage remain opaque. Textures, transparent blending and HDR
+  environment/IBL loading belong to the following material-resource milestone.
+
 ## Completed local Maven alpha milestone
 
 - Fixed project coordinates: `dev.composescene3d:*:0.1.0-alpha01`.

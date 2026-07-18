@@ -47,7 +47,7 @@ Scene3D(controller) {
     sphere(
         key = "accent",
         material = PbrMaterial(
-            baseColor = Vec3(0.9f, 0.55f, 0.12f),
+            baseColor = Color3D(0.9f, 0.55f, 0.12f),
             metallic = 1f,
             roughness = 0.2f,
         ),
@@ -59,8 +59,19 @@ Scene3D(controller) {
         transform = Transform(scale = Vec3(0.5f, 0.5f, 0.5f)),
     )
     directionalLight(key = "sun", intensity = 50_000f)
+    pointLight(
+        key = "warm-fill",
+        intensity = 1_500f,
+        color = Color3D.rgb(255, 170, 100),
+        transform = Transform(translation = Vec3(-2f, 2f, 2f)),
+    )
 }
 ```
+
+`Color3D` distinguishes sRGB input from linear-sRGB values and supports RGB/RGBA/ARGB factories
+and named colors. Primitive materials can be `PbrMaterial`, `UnlitMaterial` or
+`EmissiveMaterial`. The current standard shaders are opaque; alpha is retained in the shared color
+model for the upcoming transparent and textured material API.
 
 ## Roadmap
 

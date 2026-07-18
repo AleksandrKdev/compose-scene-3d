@@ -38,15 +38,19 @@ public final class dev/composescene3d/compose/SceneScope {
 	public static final field $stable I
 	public final fun box (Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Transform;)V
 	public static synthetic fun box$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Transform;ILjava/lang/Object;)V
-	public final fun cylinder (Ljava/lang/String;FFILdev/composescene3d/core/PbrMaterial;Ldev/composescene3d/core/Transform;)V
-	public static synthetic fun cylinder$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;FFILdev/composescene3d/core/PbrMaterial;Ldev/composescene3d/core/Transform;ILjava/lang/Object;)V
+	public final fun cylinder (Ljava/lang/String;FFILdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;)V
+	public static synthetic fun cylinder$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;FFILdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ILjava/lang/Object;)V
 	public final fun directionalLight (Ljava/lang/String;FLdev/composescene3d/core/Vec3;Ldev/composescene3d/core/Transform;)V
 	public static synthetic fun directionalLight$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;FLdev/composescene3d/core/Vec3;Ldev/composescene3d/core/Transform;ILjava/lang/Object;)V
 	public final fun model (Ljava/lang/String;Ldev/composescene3d/core/ModelSource;Ldev/composescene3d/core/Transform;Z)V
 	public static synthetic fun model$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;Ldev/composescene3d/core/ModelSource;Ldev/composescene3d/core/Transform;ZILjava/lang/Object;)V
-	public final fun plane (Ljava/lang/String;FFZLdev/composescene3d/core/PbrMaterial;Ldev/composescene3d/core/Transform;)V
-	public static synthetic fun plane$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;FFZLdev/composescene3d/core/PbrMaterial;Ldev/composescene3d/core/Transform;ILjava/lang/Object;)V
-	public final fun sphere (Ljava/lang/String;FIILdev/composescene3d/core/PbrMaterial;Ldev/composescene3d/core/Transform;)V
-	public static synthetic fun sphere$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;FIILdev/composescene3d/core/PbrMaterial;Ldev/composescene3d/core/Transform;ILjava/lang/Object;)V
+	public final fun plane (Ljava/lang/String;FFZLdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;)V
+	public static synthetic fun plane$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;FFZLdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ILjava/lang/Object;)V
+	public final fun pointLight (Ljava/lang/String;FLdev/composescene3d/core/Color3D;FLdev/composescene3d/core/Transform;)V
+	public static synthetic fun pointLight$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;FLdev/composescene3d/core/Color3D;FLdev/composescene3d/core/Transform;ILjava/lang/Object;)V
+	public final fun sphere (Ljava/lang/String;FIILdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;)V
+	public static synthetic fun sphere$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;FIILdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ILjava/lang/Object;)V
+	public final fun spotLight (Ljava/lang/String;FLdev/composescene3d/core/Vec3;Ldev/composescene3d/core/Color3D;FFFLdev/composescene3d/core/Transform;)V
+	public static synthetic fun spotLight$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;FLdev/composescene3d/core/Vec3;Ldev/composescene3d/core/Color3D;FFFLdev/composescene3d/core/Transform;ILjava/lang/Object;)V
 }
 

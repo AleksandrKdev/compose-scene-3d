@@ -46,16 +46,33 @@ data class ModelNode(
     val visible: Boolean = true,
 ) : SceneNode
 
+sealed interface Material3D
+
 data class PbrMaterial(
-    val baseColor: Vec3 = Vec3(0.7f, 0.7f, 0.7f),
+    val baseColor: Color3D = Color3D(0.7f, 0.7f, 0.7f),
     val metallic: Float = 0f,
     val roughness: Float = 0.5f,
     val reflectance: Float = 0.5f,
-) {
+) : Material3D {
     init {
         require(metallic in 0f..1f) { "Metallic must be between 0 and 1" }
         require(roughness in 0f..1f) { "Roughness must be between 0 and 1" }
         require(reflectance in 0f..1f) { "Reflectance must be between 0 and 1" }
+    }
+}
+
+data class UnlitMaterial(
+    val color: Color3D = Color3D.White,
+) : Material3D
+
+data class EmissiveMaterial(
+    val color: Color3D = Color3D.White,
+    val intensity: Float = 1f,
+) : Material3D {
+    init {
+        require(intensity >= 0f && intensity.isFinite()) {
+            "Emissive intensity must be finite and non-negative"
+        }
     }
 }
 
@@ -75,7 +92,7 @@ data class SphereNode(
     val radius: Float = 0.5f,
     val rings: Int = 16,
     val segments: Int = 32,
-    val material: PbrMaterial = PbrMaterial(),
+    val material: Material3D = PbrMaterial(),
     override val transform: Transform = Transform(),
 ) : SceneNode {
     init {
@@ -90,7 +107,7 @@ data class PlaneNode(
     val width: Float = 1f,
     val depth: Float = 1f,
     val doubleSided: Boolean = true,
-    val material: PbrMaterial = PbrMaterial(),
+    val material: Material3D = PbrMaterial(),
     override val transform: Transform = Transform(),
 ) : SceneNode {
     init {
@@ -104,7 +121,7 @@ data class CylinderNode(
     val radius: Float = 0.5f,
     val height: Float = 1f,
     val segments: Int = 32,
-    val material: PbrMaterial = PbrMaterial(),
+    val material: Material3D = PbrMaterial(),
     override val transform: Transform = Transform(),
 ) : SceneNode {
     init {
@@ -122,6 +139,42 @@ data class DirectionalLightNode(
 ) : SceneNode {
     init {
         require(intensity >= 0f) { "Light intensity cannot be negative" }
+    }
+}
+
+data class PointLightNode(
+    override val key: NodeKey,
+    val intensity: Float,
+    val color: Color3D = Color3D.White,
+    val falloff: Float = 10f,
+    override val transform: Transform = Transform(),
+) : SceneNode {
+    init {
+        require(intensity >= 0f && intensity.isFinite()) { "Light intensity must be non-negative" }
+        require(falloff > 0f && falloff.isFinite()) { "Point light falloff must be positive" }
+    }
+}
+
+data class SpotLightNode(
+    override val key: NodeKey,
+    val intensity: Float,
+    val direction: Vec3 = Vec3(0f, -1f, 0f),
+    val color: Color3D = Color3D.White,
+    val falloff: Float = 10f,
+    val innerConeRadians: Float = 0.5f,
+    val outerConeRadians: Float = 0.6f,
+    override val transform: Transform = Transform(),
+) : SceneNode {
+    init {
+        require(intensity >= 0f && intensity.isFinite()) { "Light intensity must be non-negative" }
+        require(direction != Vec3.Zero) { "Spot light direction cannot be zero" }
+        require(falloff > 0f && falloff.isFinite()) { "Spot light falloff must be positive" }
+        require(innerConeRadians >= 0f && innerConeRadians <= outerConeRadians) {
+            "Spot light inner cone must be non-negative and no larger than its outer cone"
+        }
+        require(outerConeRadians <= 1.5707964f) {
+            "Spot light outer cone cannot exceed PI / 2"
+        }
     }
 }
 

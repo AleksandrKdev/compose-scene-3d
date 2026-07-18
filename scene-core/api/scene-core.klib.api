@@ -6,6 +6,17 @@
 // - Show declarations: true
 
 // Library unique name: <io.github.aleksandrkdev:scene-core>
+final enum class dev.composescene3d.core/ColorSpace3D : kotlin/Enum<dev.composescene3d.core/ColorSpace3D> { // dev.composescene3d.core/ColorSpace3D|null[0]
+    enum entry LinearSrgb // dev.composescene3d.core/ColorSpace3D.LinearSrgb|null[0]
+    enum entry Srgb // dev.composescene3d.core/ColorSpace3D.Srgb|null[0]
+
+    final val entries // dev.composescene3d.core/ColorSpace3D.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<dev.composescene3d.core/ColorSpace3D> // dev.composescene3d.core/ColorSpace3D.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): dev.composescene3d.core/ColorSpace3D // dev.composescene3d.core/ColorSpace3D.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<dev.composescene3d.core/ColorSpace3D> // dev.composescene3d.core/ColorSpace3D.values|values#static(){}[0]
+}
+
 abstract interface dev.composescene3d.core/SceneRenderer { // dev.composescene3d.core/SceneRenderer|null[0]
     abstract val capabilities // dev.composescene3d.core/SceneRenderer.capabilities|{}capabilities[0]
         abstract fun <get-capabilities>(): dev.composescene3d.core/RendererCapabilities // dev.composescene3d.core/SceneRenderer.capabilities.<get-capabilities>|<get-capabilities>(){}[0]
@@ -53,6 +64,8 @@ sealed interface dev.composescene3d.core/CameraProjection { // dev.composescene3
         final fun toString(): kotlin/String // dev.composescene3d.core/CameraProjection.Perspective.toString|toString(){}[0]
     }
 }
+
+sealed interface dev.composescene3d.core/Material3D // dev.composescene3d.core/Material3D|null[0]
 
 sealed interface dev.composescene3d.core/ModelSource { // dev.composescene3d.core/ModelSource|null[0]
     final class Bytes : dev.composescene3d.core/ModelSource { // dev.composescene3d.core/ModelSource.Bytes|null[0]
@@ -193,15 +206,66 @@ final class dev.composescene3d.core/CameraDescription { // dev.composescene3d.co
     final fun toString(): kotlin/String // dev.composescene3d.core/CameraDescription.toString|toString(){}[0]
 }
 
+final class dev.composescene3d.core/Color3D { // dev.composescene3d.core/Color3D|null[0]
+    constructor <init>(kotlin/Float, kotlin/Float, kotlin/Float, kotlin/Float = ..., dev.composescene3d.core/ColorSpace3D = ...) // dev.composescene3d.core/Color3D.<init>|<init>(kotlin.Float;kotlin.Float;kotlin.Float;kotlin.Float;dev.composescene3d.core.ColorSpace3D){}[0]
+
+    final val alpha // dev.composescene3d.core/Color3D.alpha|{}alpha[0]
+        final fun <get-alpha>(): kotlin/Float // dev.composescene3d.core/Color3D.alpha.<get-alpha>|<get-alpha>(){}[0]
+    final val blue // dev.composescene3d.core/Color3D.blue|{}blue[0]
+        final fun <get-blue>(): kotlin/Float // dev.composescene3d.core/Color3D.blue.<get-blue>|<get-blue>(){}[0]
+    final val colorSpace // dev.composescene3d.core/Color3D.colorSpace|{}colorSpace[0]
+        final fun <get-colorSpace>(): dev.composescene3d.core/ColorSpace3D // dev.composescene3d.core/Color3D.colorSpace.<get-colorSpace>|<get-colorSpace>(){}[0]
+    final val green // dev.composescene3d.core/Color3D.green|{}green[0]
+        final fun <get-green>(): kotlin/Float // dev.composescene3d.core/Color3D.green.<get-green>|<get-green>(){}[0]
+    final val red // dev.composescene3d.core/Color3D.red|{}red[0]
+        final fun <get-red>(): kotlin/Float // dev.composescene3d.core/Color3D.red.<get-red>|<get-red>(){}[0]
+
+    final fun component1(): kotlin/Float // dev.composescene3d.core/Color3D.component1|component1(){}[0]
+    final fun component2(): kotlin/Float // dev.composescene3d.core/Color3D.component2|component2(){}[0]
+    final fun component3(): kotlin/Float // dev.composescene3d.core/Color3D.component3|component3(){}[0]
+    final fun component4(): kotlin/Float // dev.composescene3d.core/Color3D.component4|component4(){}[0]
+    final fun component5(): dev.composescene3d.core/ColorSpace3D // dev.composescene3d.core/Color3D.component5|component5(){}[0]
+    final fun copy(kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ..., dev.composescene3d.core/ColorSpace3D = ...): dev.composescene3d.core/Color3D // dev.composescene3d.core/Color3D.copy|copy(kotlin.Float;kotlin.Float;kotlin.Float;kotlin.Float;dev.composescene3d.core.ColorSpace3D){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/Color3D.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/Color3D.hashCode|hashCode(){}[0]
+    final fun toLinearSrgb(): dev.composescene3d.core/Color3D // dev.composescene3d.core/Color3D.toLinearSrgb|toLinearSrgb(){}[0]
+    final fun toString(): kotlin/String // dev.composescene3d.core/Color3D.toString|toString(){}[0]
+
+    final object Companion { // dev.composescene3d.core/Color3D.Companion|null[0]
+        final val Black // dev.composescene3d.core/Color3D.Companion.Black|{}Black[0]
+            final fun <get-Black>(): dev.composescene3d.core/Color3D // dev.composescene3d.core/Color3D.Companion.Black.<get-Black>|<get-Black>(){}[0]
+        final val Blue // dev.composescene3d.core/Color3D.Companion.Blue|{}Blue[0]
+            final fun <get-Blue>(): dev.composescene3d.core/Color3D // dev.composescene3d.core/Color3D.Companion.Blue.<get-Blue>|<get-Blue>(){}[0]
+        final val Cyan // dev.composescene3d.core/Color3D.Companion.Cyan|{}Cyan[0]
+            final fun <get-Cyan>(): dev.composescene3d.core/Color3D // dev.composescene3d.core/Color3D.Companion.Cyan.<get-Cyan>|<get-Cyan>(){}[0]
+        final val Green // dev.composescene3d.core/Color3D.Companion.Green|{}Green[0]
+            final fun <get-Green>(): dev.composescene3d.core/Color3D // dev.composescene3d.core/Color3D.Companion.Green.<get-Green>|<get-Green>(){}[0]
+        final val Magenta // dev.composescene3d.core/Color3D.Companion.Magenta|{}Magenta[0]
+            final fun <get-Magenta>(): dev.composescene3d.core/Color3D // dev.composescene3d.core/Color3D.Companion.Magenta.<get-Magenta>|<get-Magenta>(){}[0]
+        final val Red // dev.composescene3d.core/Color3D.Companion.Red|{}Red[0]
+            final fun <get-Red>(): dev.composescene3d.core/Color3D // dev.composescene3d.core/Color3D.Companion.Red.<get-Red>|<get-Red>(){}[0]
+        final val Transparent // dev.composescene3d.core/Color3D.Companion.Transparent|{}Transparent[0]
+            final fun <get-Transparent>(): dev.composescene3d.core/Color3D // dev.composescene3d.core/Color3D.Companion.Transparent.<get-Transparent>|<get-Transparent>(){}[0]
+        final val White // dev.composescene3d.core/Color3D.Companion.White|{}White[0]
+            final fun <get-White>(): dev.composescene3d.core/Color3D // dev.composescene3d.core/Color3D.Companion.White.<get-White>|<get-White>(){}[0]
+        final val Yellow // dev.composescene3d.core/Color3D.Companion.Yellow|{}Yellow[0]
+            final fun <get-Yellow>(): dev.composescene3d.core/Color3D // dev.composescene3d.core/Color3D.Companion.Yellow.<get-Yellow>|<get-Yellow>(){}[0]
+
+        final fun argb(kotlin/Int): dev.composescene3d.core/Color3D // dev.composescene3d.core/Color3D.Companion.argb|argb(kotlin.Int){}[0]
+        final fun rgb(kotlin/Int, kotlin/Int, kotlin/Int): dev.composescene3d.core/Color3D // dev.composescene3d.core/Color3D.Companion.rgb|rgb(kotlin.Int;kotlin.Int;kotlin.Int){}[0]
+        final fun rgba(kotlin/Int, kotlin/Int, kotlin/Int, kotlin/Int): dev.composescene3d.core/Color3D // dev.composescene3d.core/Color3D.Companion.rgba|rgba(kotlin.Int;kotlin.Int;kotlin.Int;kotlin.Int){}[0]
+    }
+}
+
 final class dev.composescene3d.core/CylinderNode : dev.composescene3d.core/SceneNode { // dev.composescene3d.core/CylinderNode|null[0]
-    constructor <init>(dev.composescene3d.core/NodeKey, kotlin/Float = ..., kotlin/Float = ..., kotlin/Int = ..., dev.composescene3d.core/PbrMaterial = ..., dev.composescene3d.core/Transform = ...) // dev.composescene3d.core/CylinderNode.<init>|<init>(dev.composescene3d.core.NodeKey;kotlin.Float;kotlin.Float;kotlin.Int;dev.composescene3d.core.PbrMaterial;dev.composescene3d.core.Transform){}[0]
+    constructor <init>(dev.composescene3d.core/NodeKey, kotlin/Float = ..., kotlin/Float = ..., kotlin/Int = ..., dev.composescene3d.core/Material3D = ..., dev.composescene3d.core/Transform = ...) // dev.composescene3d.core/CylinderNode.<init>|<init>(dev.composescene3d.core.NodeKey;kotlin.Float;kotlin.Float;kotlin.Int;dev.composescene3d.core.Material3D;dev.composescene3d.core.Transform){}[0]
 
     final val height // dev.composescene3d.core/CylinderNode.height|{}height[0]
         final fun <get-height>(): kotlin/Float // dev.composescene3d.core/CylinderNode.height.<get-height>|<get-height>(){}[0]
     final val key // dev.composescene3d.core/CylinderNode.key|{}key[0]
         final fun <get-key>(): dev.composescene3d.core/NodeKey // dev.composescene3d.core/CylinderNode.key.<get-key>|<get-key>(){}[0]
     final val material // dev.composescene3d.core/CylinderNode.material|{}material[0]
-        final fun <get-material>(): dev.composescene3d.core/PbrMaterial // dev.composescene3d.core/CylinderNode.material.<get-material>|<get-material>(){}[0]
+        final fun <get-material>(): dev.composescene3d.core/Material3D // dev.composescene3d.core/CylinderNode.material.<get-material>|<get-material>(){}[0]
     final val radius // dev.composescene3d.core/CylinderNode.radius|{}radius[0]
         final fun <get-radius>(): kotlin/Float // dev.composescene3d.core/CylinderNode.radius.<get-radius>|<get-radius>(){}[0]
     final val segments // dev.composescene3d.core/CylinderNode.segments|{}segments[0]
@@ -213,9 +277,9 @@ final class dev.composescene3d.core/CylinderNode : dev.composescene3d.core/Scene
     final fun component2(): kotlin/Float // dev.composescene3d.core/CylinderNode.component2|component2(){}[0]
     final fun component3(): kotlin/Float // dev.composescene3d.core/CylinderNode.component3|component3(){}[0]
     final fun component4(): kotlin/Int // dev.composescene3d.core/CylinderNode.component4|component4(){}[0]
-    final fun component5(): dev.composescene3d.core/PbrMaterial // dev.composescene3d.core/CylinderNode.component5|component5(){}[0]
+    final fun component5(): dev.composescene3d.core/Material3D // dev.composescene3d.core/CylinderNode.component5|component5(){}[0]
     final fun component6(): dev.composescene3d.core/Transform // dev.composescene3d.core/CylinderNode.component6|component6(){}[0]
-    final fun copy(dev.composescene3d.core/NodeKey = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Int = ..., dev.composescene3d.core/PbrMaterial = ..., dev.composescene3d.core/Transform = ...): dev.composescene3d.core/CylinderNode // dev.composescene3d.core/CylinderNode.copy|copy(dev.composescene3d.core.NodeKey;kotlin.Float;kotlin.Float;kotlin.Int;dev.composescene3d.core.PbrMaterial;dev.composescene3d.core.Transform){}[0]
+    final fun copy(dev.composescene3d.core/NodeKey = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Int = ..., dev.composescene3d.core/Material3D = ..., dev.composescene3d.core/Transform = ...): dev.composescene3d.core/CylinderNode // dev.composescene3d.core/CylinderNode.copy|copy(dev.composescene3d.core.NodeKey;kotlin.Float;kotlin.Float;kotlin.Int;dev.composescene3d.core.Material3D;dev.composescene3d.core.Transform){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/CylinderNode.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // dev.composescene3d.core/CylinderNode.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // dev.composescene3d.core/CylinderNode.toString|toString(){}[0]
@@ -241,6 +305,22 @@ final class dev.composescene3d.core/DirectionalLightNode : dev.composescene3d.co
     final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/DirectionalLightNode.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // dev.composescene3d.core/DirectionalLightNode.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // dev.composescene3d.core/DirectionalLightNode.toString|toString(){}[0]
+}
+
+final class dev.composescene3d.core/EmissiveMaterial : dev.composescene3d.core/Material3D { // dev.composescene3d.core/EmissiveMaterial|null[0]
+    constructor <init>(dev.composescene3d.core/Color3D = ..., kotlin/Float = ...) // dev.composescene3d.core/EmissiveMaterial.<init>|<init>(dev.composescene3d.core.Color3D;kotlin.Float){}[0]
+
+    final val color // dev.composescene3d.core/EmissiveMaterial.color|{}color[0]
+        final fun <get-color>(): dev.composescene3d.core/Color3D // dev.composescene3d.core/EmissiveMaterial.color.<get-color>|<get-color>(){}[0]
+    final val intensity // dev.composescene3d.core/EmissiveMaterial.intensity|{}intensity[0]
+        final fun <get-intensity>(): kotlin/Float // dev.composescene3d.core/EmissiveMaterial.intensity.<get-intensity>|<get-intensity>(){}[0]
+
+    final fun component1(): dev.composescene3d.core/Color3D // dev.composescene3d.core/EmissiveMaterial.component1|component1(){}[0]
+    final fun component2(): kotlin/Float // dev.composescene3d.core/EmissiveMaterial.component2|component2(){}[0]
+    final fun copy(dev.composescene3d.core/Color3D = ..., kotlin/Float = ...): dev.composescene3d.core/EmissiveMaterial // dev.composescene3d.core/EmissiveMaterial.copy|copy(dev.composescene3d.core.Color3D;kotlin.Float){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/EmissiveMaterial.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/EmissiveMaterial.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.composescene3d.core/EmissiveMaterial.toString|toString(){}[0]
 }
 
 final class dev.composescene3d.core/GroupNode : dev.composescene3d.core/SceneNode { // dev.composescene3d.core/GroupNode|null[0]
@@ -281,11 +361,11 @@ final class dev.composescene3d.core/ModelNode : dev.composescene3d.core/SceneNod
     final fun toString(): kotlin/String // dev.composescene3d.core/ModelNode.toString|toString(){}[0]
 }
 
-final class dev.composescene3d.core/PbrMaterial { // dev.composescene3d.core/PbrMaterial|null[0]
-    constructor <init>(dev.composescene3d.core/Vec3 = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ...) // dev.composescene3d.core/PbrMaterial.<init>|<init>(dev.composescene3d.core.Vec3;kotlin.Float;kotlin.Float;kotlin.Float){}[0]
+final class dev.composescene3d.core/PbrMaterial : dev.composescene3d.core/Material3D { // dev.composescene3d.core/PbrMaterial|null[0]
+    constructor <init>(dev.composescene3d.core/Color3D = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ...) // dev.composescene3d.core/PbrMaterial.<init>|<init>(dev.composescene3d.core.Color3D;kotlin.Float;kotlin.Float;kotlin.Float){}[0]
 
     final val baseColor // dev.composescene3d.core/PbrMaterial.baseColor|{}baseColor[0]
-        final fun <get-baseColor>(): dev.composescene3d.core/Vec3 // dev.composescene3d.core/PbrMaterial.baseColor.<get-baseColor>|<get-baseColor>(){}[0]
+        final fun <get-baseColor>(): dev.composescene3d.core/Color3D // dev.composescene3d.core/PbrMaterial.baseColor.<get-baseColor>|<get-baseColor>(){}[0]
     final val metallic // dev.composescene3d.core/PbrMaterial.metallic|{}metallic[0]
         final fun <get-metallic>(): kotlin/Float // dev.composescene3d.core/PbrMaterial.metallic.<get-metallic>|<get-metallic>(){}[0]
     final val reflectance // dev.composescene3d.core/PbrMaterial.reflectance|{}reflectance[0]
@@ -293,18 +373,18 @@ final class dev.composescene3d.core/PbrMaterial { // dev.composescene3d.core/Pbr
     final val roughness // dev.composescene3d.core/PbrMaterial.roughness|{}roughness[0]
         final fun <get-roughness>(): kotlin/Float // dev.composescene3d.core/PbrMaterial.roughness.<get-roughness>|<get-roughness>(){}[0]
 
-    final fun component1(): dev.composescene3d.core/Vec3 // dev.composescene3d.core/PbrMaterial.component1|component1(){}[0]
+    final fun component1(): dev.composescene3d.core/Color3D // dev.composescene3d.core/PbrMaterial.component1|component1(){}[0]
     final fun component2(): kotlin/Float // dev.composescene3d.core/PbrMaterial.component2|component2(){}[0]
     final fun component3(): kotlin/Float // dev.composescene3d.core/PbrMaterial.component3|component3(){}[0]
     final fun component4(): kotlin/Float // dev.composescene3d.core/PbrMaterial.component4|component4(){}[0]
-    final fun copy(dev.composescene3d.core/Vec3 = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ...): dev.composescene3d.core/PbrMaterial // dev.composescene3d.core/PbrMaterial.copy|copy(dev.composescene3d.core.Vec3;kotlin.Float;kotlin.Float;kotlin.Float){}[0]
+    final fun copy(dev.composescene3d.core/Color3D = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ...): dev.composescene3d.core/PbrMaterial // dev.composescene3d.core/PbrMaterial.copy|copy(dev.composescene3d.core.Color3D;kotlin.Float;kotlin.Float;kotlin.Float){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/PbrMaterial.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // dev.composescene3d.core/PbrMaterial.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // dev.composescene3d.core/PbrMaterial.toString|toString(){}[0]
 }
 
 final class dev.composescene3d.core/PlaneNode : dev.composescene3d.core/SceneNode { // dev.composescene3d.core/PlaneNode|null[0]
-    constructor <init>(dev.composescene3d.core/NodeKey, kotlin/Float = ..., kotlin/Float = ..., kotlin/Boolean = ..., dev.composescene3d.core/PbrMaterial = ..., dev.composescene3d.core/Transform = ...) // dev.composescene3d.core/PlaneNode.<init>|<init>(dev.composescene3d.core.NodeKey;kotlin.Float;kotlin.Float;kotlin.Boolean;dev.composescene3d.core.PbrMaterial;dev.composescene3d.core.Transform){}[0]
+    constructor <init>(dev.composescene3d.core/NodeKey, kotlin/Float = ..., kotlin/Float = ..., kotlin/Boolean = ..., dev.composescene3d.core/Material3D = ..., dev.composescene3d.core/Transform = ...) // dev.composescene3d.core/PlaneNode.<init>|<init>(dev.composescene3d.core.NodeKey;kotlin.Float;kotlin.Float;kotlin.Boolean;dev.composescene3d.core.Material3D;dev.composescene3d.core.Transform){}[0]
 
     final val depth // dev.composescene3d.core/PlaneNode.depth|{}depth[0]
         final fun <get-depth>(): kotlin/Float // dev.composescene3d.core/PlaneNode.depth.<get-depth>|<get-depth>(){}[0]
@@ -313,7 +393,7 @@ final class dev.composescene3d.core/PlaneNode : dev.composescene3d.core/SceneNod
     final val key // dev.composescene3d.core/PlaneNode.key|{}key[0]
         final fun <get-key>(): dev.composescene3d.core/NodeKey // dev.composescene3d.core/PlaneNode.key.<get-key>|<get-key>(){}[0]
     final val material // dev.composescene3d.core/PlaneNode.material|{}material[0]
-        final fun <get-material>(): dev.composescene3d.core/PbrMaterial // dev.composescene3d.core/PlaneNode.material.<get-material>|<get-material>(){}[0]
+        final fun <get-material>(): dev.composescene3d.core/Material3D // dev.composescene3d.core/PlaneNode.material.<get-material>|<get-material>(){}[0]
     final val transform // dev.composescene3d.core/PlaneNode.transform|{}transform[0]
         final fun <get-transform>(): dev.composescene3d.core/Transform // dev.composescene3d.core/PlaneNode.transform.<get-transform>|<get-transform>(){}[0]
     final val width // dev.composescene3d.core/PlaneNode.width|{}width[0]
@@ -323,12 +403,37 @@ final class dev.composescene3d.core/PlaneNode : dev.composescene3d.core/SceneNod
     final fun component2(): kotlin/Float // dev.composescene3d.core/PlaneNode.component2|component2(){}[0]
     final fun component3(): kotlin/Float // dev.composescene3d.core/PlaneNode.component3|component3(){}[0]
     final fun component4(): kotlin/Boolean // dev.composescene3d.core/PlaneNode.component4|component4(){}[0]
-    final fun component5(): dev.composescene3d.core/PbrMaterial // dev.composescene3d.core/PlaneNode.component5|component5(){}[0]
+    final fun component5(): dev.composescene3d.core/Material3D // dev.composescene3d.core/PlaneNode.component5|component5(){}[0]
     final fun component6(): dev.composescene3d.core/Transform // dev.composescene3d.core/PlaneNode.component6|component6(){}[0]
-    final fun copy(dev.composescene3d.core/NodeKey = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Boolean = ..., dev.composescene3d.core/PbrMaterial = ..., dev.composescene3d.core/Transform = ...): dev.composescene3d.core/PlaneNode // dev.composescene3d.core/PlaneNode.copy|copy(dev.composescene3d.core.NodeKey;kotlin.Float;kotlin.Float;kotlin.Boolean;dev.composescene3d.core.PbrMaterial;dev.composescene3d.core.Transform){}[0]
+    final fun copy(dev.composescene3d.core/NodeKey = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Boolean = ..., dev.composescene3d.core/Material3D = ..., dev.composescene3d.core/Transform = ...): dev.composescene3d.core/PlaneNode // dev.composescene3d.core/PlaneNode.copy|copy(dev.composescene3d.core.NodeKey;kotlin.Float;kotlin.Float;kotlin.Boolean;dev.composescene3d.core.Material3D;dev.composescene3d.core.Transform){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/PlaneNode.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // dev.composescene3d.core/PlaneNode.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // dev.composescene3d.core/PlaneNode.toString|toString(){}[0]
+}
+
+final class dev.composescene3d.core/PointLightNode : dev.composescene3d.core/SceneNode { // dev.composescene3d.core/PointLightNode|null[0]
+    constructor <init>(dev.composescene3d.core/NodeKey, kotlin/Float, dev.composescene3d.core/Color3D = ..., kotlin/Float = ..., dev.composescene3d.core/Transform = ...) // dev.composescene3d.core/PointLightNode.<init>|<init>(dev.composescene3d.core.NodeKey;kotlin.Float;dev.composescene3d.core.Color3D;kotlin.Float;dev.composescene3d.core.Transform){}[0]
+
+    final val color // dev.composescene3d.core/PointLightNode.color|{}color[0]
+        final fun <get-color>(): dev.composescene3d.core/Color3D // dev.composescene3d.core/PointLightNode.color.<get-color>|<get-color>(){}[0]
+    final val falloff // dev.composescene3d.core/PointLightNode.falloff|{}falloff[0]
+        final fun <get-falloff>(): kotlin/Float // dev.composescene3d.core/PointLightNode.falloff.<get-falloff>|<get-falloff>(){}[0]
+    final val intensity // dev.composescene3d.core/PointLightNode.intensity|{}intensity[0]
+        final fun <get-intensity>(): kotlin/Float // dev.composescene3d.core/PointLightNode.intensity.<get-intensity>|<get-intensity>(){}[0]
+    final val key // dev.composescene3d.core/PointLightNode.key|{}key[0]
+        final fun <get-key>(): dev.composescene3d.core/NodeKey // dev.composescene3d.core/PointLightNode.key.<get-key>|<get-key>(){}[0]
+    final val transform // dev.composescene3d.core/PointLightNode.transform|{}transform[0]
+        final fun <get-transform>(): dev.composescene3d.core/Transform // dev.composescene3d.core/PointLightNode.transform.<get-transform>|<get-transform>(){}[0]
+
+    final fun component1(): dev.composescene3d.core/NodeKey // dev.composescene3d.core/PointLightNode.component1|component1(){}[0]
+    final fun component2(): kotlin/Float // dev.composescene3d.core/PointLightNode.component2|component2(){}[0]
+    final fun component3(): dev.composescene3d.core/Color3D // dev.composescene3d.core/PointLightNode.component3|component3(){}[0]
+    final fun component4(): kotlin/Float // dev.composescene3d.core/PointLightNode.component4|component4(){}[0]
+    final fun component5(): dev.composescene3d.core/Transform // dev.composescene3d.core/PointLightNode.component5|component5(){}[0]
+    final fun copy(dev.composescene3d.core/NodeKey = ..., kotlin/Float = ..., dev.composescene3d.core/Color3D = ..., kotlin/Float = ..., dev.composescene3d.core/Transform = ...): dev.composescene3d.core/PointLightNode // dev.composescene3d.core/PointLightNode.copy|copy(dev.composescene3d.core.NodeKey;kotlin.Float;dev.composescene3d.core.Color3D;kotlin.Float;dev.composescene3d.core.Transform){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/PointLightNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/PointLightNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.composescene3d.core/PointLightNode.toString|toString(){}[0]
 }
 
 final class dev.composescene3d.core/Quaternion { // dev.composescene3d.core/Quaternion|null[0]
@@ -409,12 +514,12 @@ final class dev.composescene3d.core/SceneDescription { // dev.composescene3d.cor
 }
 
 final class dev.composescene3d.core/SphereNode : dev.composescene3d.core/SceneNode { // dev.composescene3d.core/SphereNode|null[0]
-    constructor <init>(dev.composescene3d.core/NodeKey, kotlin/Float = ..., kotlin/Int = ..., kotlin/Int = ..., dev.composescene3d.core/PbrMaterial = ..., dev.composescene3d.core/Transform = ...) // dev.composescene3d.core/SphereNode.<init>|<init>(dev.composescene3d.core.NodeKey;kotlin.Float;kotlin.Int;kotlin.Int;dev.composescene3d.core.PbrMaterial;dev.composescene3d.core.Transform){}[0]
+    constructor <init>(dev.composescene3d.core/NodeKey, kotlin/Float = ..., kotlin/Int = ..., kotlin/Int = ..., dev.composescene3d.core/Material3D = ..., dev.composescene3d.core/Transform = ...) // dev.composescene3d.core/SphereNode.<init>|<init>(dev.composescene3d.core.NodeKey;kotlin.Float;kotlin.Int;kotlin.Int;dev.composescene3d.core.Material3D;dev.composescene3d.core.Transform){}[0]
 
     final val key // dev.composescene3d.core/SphereNode.key|{}key[0]
         final fun <get-key>(): dev.composescene3d.core/NodeKey // dev.composescene3d.core/SphereNode.key.<get-key>|<get-key>(){}[0]
     final val material // dev.composescene3d.core/SphereNode.material|{}material[0]
-        final fun <get-material>(): dev.composescene3d.core/PbrMaterial // dev.composescene3d.core/SphereNode.material.<get-material>|<get-material>(){}[0]
+        final fun <get-material>(): dev.composescene3d.core/Material3D // dev.composescene3d.core/SphereNode.material.<get-material>|<get-material>(){}[0]
     final val radius // dev.composescene3d.core/SphereNode.radius|{}radius[0]
         final fun <get-radius>(): kotlin/Float // dev.composescene3d.core/SphereNode.radius.<get-radius>|<get-radius>(){}[0]
     final val rings // dev.composescene3d.core/SphereNode.rings|{}rings[0]
@@ -428,12 +533,46 @@ final class dev.composescene3d.core/SphereNode : dev.composescene3d.core/SceneNo
     final fun component2(): kotlin/Float // dev.composescene3d.core/SphereNode.component2|component2(){}[0]
     final fun component3(): kotlin/Int // dev.composescene3d.core/SphereNode.component3|component3(){}[0]
     final fun component4(): kotlin/Int // dev.composescene3d.core/SphereNode.component4|component4(){}[0]
-    final fun component5(): dev.composescene3d.core/PbrMaterial // dev.composescene3d.core/SphereNode.component5|component5(){}[0]
+    final fun component5(): dev.composescene3d.core/Material3D // dev.composescene3d.core/SphereNode.component5|component5(){}[0]
     final fun component6(): dev.composescene3d.core/Transform // dev.composescene3d.core/SphereNode.component6|component6(){}[0]
-    final fun copy(dev.composescene3d.core/NodeKey = ..., kotlin/Float = ..., kotlin/Int = ..., kotlin/Int = ..., dev.composescene3d.core/PbrMaterial = ..., dev.composescene3d.core/Transform = ...): dev.composescene3d.core/SphereNode // dev.composescene3d.core/SphereNode.copy|copy(dev.composescene3d.core.NodeKey;kotlin.Float;kotlin.Int;kotlin.Int;dev.composescene3d.core.PbrMaterial;dev.composescene3d.core.Transform){}[0]
+    final fun copy(dev.composescene3d.core/NodeKey = ..., kotlin/Float = ..., kotlin/Int = ..., kotlin/Int = ..., dev.composescene3d.core/Material3D = ..., dev.composescene3d.core/Transform = ...): dev.composescene3d.core/SphereNode // dev.composescene3d.core/SphereNode.copy|copy(dev.composescene3d.core.NodeKey;kotlin.Float;kotlin.Int;kotlin.Int;dev.composescene3d.core.Material3D;dev.composescene3d.core.Transform){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/SphereNode.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // dev.composescene3d.core/SphereNode.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // dev.composescene3d.core/SphereNode.toString|toString(){}[0]
+}
+
+final class dev.composescene3d.core/SpotLightNode : dev.composescene3d.core/SceneNode { // dev.composescene3d.core/SpotLightNode|null[0]
+    constructor <init>(dev.composescene3d.core/NodeKey, kotlin/Float, dev.composescene3d.core/Vec3 = ..., dev.composescene3d.core/Color3D = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ..., dev.composescene3d.core/Transform = ...) // dev.composescene3d.core/SpotLightNode.<init>|<init>(dev.composescene3d.core.NodeKey;kotlin.Float;dev.composescene3d.core.Vec3;dev.composescene3d.core.Color3D;kotlin.Float;kotlin.Float;kotlin.Float;dev.composescene3d.core.Transform){}[0]
+
+    final val color // dev.composescene3d.core/SpotLightNode.color|{}color[0]
+        final fun <get-color>(): dev.composescene3d.core/Color3D // dev.composescene3d.core/SpotLightNode.color.<get-color>|<get-color>(){}[0]
+    final val direction // dev.composescene3d.core/SpotLightNode.direction|{}direction[0]
+        final fun <get-direction>(): dev.composescene3d.core/Vec3 // dev.composescene3d.core/SpotLightNode.direction.<get-direction>|<get-direction>(){}[0]
+    final val falloff // dev.composescene3d.core/SpotLightNode.falloff|{}falloff[0]
+        final fun <get-falloff>(): kotlin/Float // dev.composescene3d.core/SpotLightNode.falloff.<get-falloff>|<get-falloff>(){}[0]
+    final val innerConeRadians // dev.composescene3d.core/SpotLightNode.innerConeRadians|{}innerConeRadians[0]
+        final fun <get-innerConeRadians>(): kotlin/Float // dev.composescene3d.core/SpotLightNode.innerConeRadians.<get-innerConeRadians>|<get-innerConeRadians>(){}[0]
+    final val intensity // dev.composescene3d.core/SpotLightNode.intensity|{}intensity[0]
+        final fun <get-intensity>(): kotlin/Float // dev.composescene3d.core/SpotLightNode.intensity.<get-intensity>|<get-intensity>(){}[0]
+    final val key // dev.composescene3d.core/SpotLightNode.key|{}key[0]
+        final fun <get-key>(): dev.composescene3d.core/NodeKey // dev.composescene3d.core/SpotLightNode.key.<get-key>|<get-key>(){}[0]
+    final val outerConeRadians // dev.composescene3d.core/SpotLightNode.outerConeRadians|{}outerConeRadians[0]
+        final fun <get-outerConeRadians>(): kotlin/Float // dev.composescene3d.core/SpotLightNode.outerConeRadians.<get-outerConeRadians>|<get-outerConeRadians>(){}[0]
+    final val transform // dev.composescene3d.core/SpotLightNode.transform|{}transform[0]
+        final fun <get-transform>(): dev.composescene3d.core/Transform // dev.composescene3d.core/SpotLightNode.transform.<get-transform>|<get-transform>(){}[0]
+
+    final fun component1(): dev.composescene3d.core/NodeKey // dev.composescene3d.core/SpotLightNode.component1|component1(){}[0]
+    final fun component2(): kotlin/Float // dev.composescene3d.core/SpotLightNode.component2|component2(){}[0]
+    final fun component3(): dev.composescene3d.core/Vec3 // dev.composescene3d.core/SpotLightNode.component3|component3(){}[0]
+    final fun component4(): dev.composescene3d.core/Color3D // dev.composescene3d.core/SpotLightNode.component4|component4(){}[0]
+    final fun component5(): kotlin/Float // dev.composescene3d.core/SpotLightNode.component5|component5(){}[0]
+    final fun component6(): kotlin/Float // dev.composescene3d.core/SpotLightNode.component6|component6(){}[0]
+    final fun component7(): kotlin/Float // dev.composescene3d.core/SpotLightNode.component7|component7(){}[0]
+    final fun component8(): dev.composescene3d.core/Transform // dev.composescene3d.core/SpotLightNode.component8|component8(){}[0]
+    final fun copy(dev.composescene3d.core/NodeKey = ..., kotlin/Float = ..., dev.composescene3d.core/Vec3 = ..., dev.composescene3d.core/Color3D = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ..., dev.composescene3d.core/Transform = ...): dev.composescene3d.core/SpotLightNode // dev.composescene3d.core/SpotLightNode.copy|copy(dev.composescene3d.core.NodeKey;kotlin.Float;dev.composescene3d.core.Vec3;dev.composescene3d.core.Color3D;kotlin.Float;kotlin.Float;kotlin.Float;dev.composescene3d.core.Transform){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/SpotLightNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/SpotLightNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.composescene3d.core/SpotLightNode.toString|toString(){}[0]
 }
 
 final class dev.composescene3d.core/Transform { // dev.composescene3d.core/Transform|null[0]
@@ -453,6 +592,19 @@ final class dev.composescene3d.core/Transform { // dev.composescene3d.core/Trans
     final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/Transform.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // dev.composescene3d.core/Transform.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // dev.composescene3d.core/Transform.toString|toString(){}[0]
+}
+
+final class dev.composescene3d.core/UnlitMaterial : dev.composescene3d.core/Material3D { // dev.composescene3d.core/UnlitMaterial|null[0]
+    constructor <init>(dev.composescene3d.core/Color3D = ...) // dev.composescene3d.core/UnlitMaterial.<init>|<init>(dev.composescene3d.core.Color3D){}[0]
+
+    final val color // dev.composescene3d.core/UnlitMaterial.color|{}color[0]
+        final fun <get-color>(): dev.composescene3d.core/Color3D // dev.composescene3d.core/UnlitMaterial.color.<get-color>|<get-color>(){}[0]
+
+    final fun component1(): dev.composescene3d.core/Color3D // dev.composescene3d.core/UnlitMaterial.component1|component1(){}[0]
+    final fun copy(dev.composescene3d.core/Color3D = ...): dev.composescene3d.core/UnlitMaterial // dev.composescene3d.core/UnlitMaterial.copy|copy(dev.composescene3d.core.Color3D){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/UnlitMaterial.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/UnlitMaterial.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.composescene3d.core/UnlitMaterial.toString|toString(){}[0]
 }
 
 final class dev.composescene3d.core/Vec3 { // dev.composescene3d.core/Vec3|null[0]

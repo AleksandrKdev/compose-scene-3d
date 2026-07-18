@@ -19,19 +19,25 @@ import dev.composescene3d.compose.sceneCameraGestures
 import dev.composescene3d.core.CameraProjection
 import dev.composescene3d.core.BoxNode
 import dev.composescene3d.core.CylinderNode
+import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.DirectionalLightNode
 import dev.composescene3d.core.GroupNode
 import dev.composescene3d.core.ModelNode
 import dev.composescene3d.core.ModelAssetKey
 import dev.composescene3d.core.ModelSource
+import dev.composescene3d.core.Material3D
 import dev.composescene3d.core.NodeKey
 import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.core.PlaneNode
+import dev.composescene3d.core.PointLightNode
 import dev.composescene3d.core.RendererCapabilities
 import dev.composescene3d.core.SceneCommand
 import dev.composescene3d.core.SceneNode
 import dev.composescene3d.core.SceneRenderer
 import dev.composescene3d.core.SphereNode
+import dev.composescene3d.core.SpotLightNode
+import dev.composescene3d.core.EmissiveMaterial
+import dev.composescene3d.core.UnlitMaterial
 import dev.composescene3d.core.assetKey
 import dev.composescene3d.core.Vec3
 import io.github.erkko68.filament.compose.FilamentSceneView
@@ -41,6 +47,7 @@ import io.github.erkko68.filament.compose.pickOnTap
 import io.github.erkko68.filament.compose.scene.Color
 import io.github.erkko68.filament.compose.scene.Direction
 import io.github.erkko68.filament.compose.scene.DirectionalLight
+import io.github.erkko68.filament.compose.scene.PointLight
 import io.github.erkko68.filament.compose.scene.Position
 import io.github.erkko68.filament.compose.scene.Scale
 import io.github.erkko68.filament.compose.scene.GltfInstance
@@ -54,6 +61,10 @@ import io.github.erkko68.filament.compose.scene.primitives.Cylinder
 import io.github.erkko68.filament.compose.scene.primitives.Plane
 import io.github.erkko68.filament.compose.scene.primitives.Sphere
 import io.github.erkko68.filament.compose.scene.rememberColorMaterialInstance
+import io.github.erkko68.filament.compose.scene.rememberEmissiveMaterialInstance
+import io.github.erkko68.filament.compose.scene.rememberUnlitColorMaterialInstance
+import io.github.erkko68.filament.compose.scene.SpotCone
+import io.github.erkko68.filament.compose.scene.SpotLight
 import io.github.erkko68.filament.utils.Quaternion
 import io.github.erkko68.filament.Renderer
 import kotlinx.coroutines.flow.collectLatest
@@ -255,6 +266,8 @@ fun FilamentViewport(
                         is PlaneNode -> FilamentPlane(renderer, node)
                         is CylinderNode -> FilamentCylinder(renderer, node)
                         is DirectionalLightNode -> FilamentLight(node)
+                        is PointLightNode -> FilamentLight(node)
+                        is SpotLightNode -> FilamentLight(node)
                         is GroupNode -> Unit
                         is ModelNode -> error("Model nodes are rendered in shared asset groups")
                     }
@@ -311,7 +324,9 @@ private fun FilamentSceneScope.FilamentModels(
 
 @Composable
 private fun FilamentSceneScope.FilamentBox(renderer: FilamentRenderer, node: BoxNode) {
-    val material = rememberPbrMaterial(PbrMaterial(baseColor = node.color))
+    val material = rememberSceneMaterial(
+        PbrMaterial(baseColor = Color3D(node.color.x, node.color.y, node.color.z))
+    )
     Cube(
         material = material,
         position = Position(
@@ -338,7 +353,7 @@ private fun FilamentSceneScope.FilamentBox(renderer: FilamentRenderer, node: Box
 @Composable
 private fun FilamentSceneScope.FilamentSphere(renderer: FilamentRenderer, node: SphereNode) {
     Sphere(
-        material = rememberPbrMaterial(node.material),
+        material = rememberSceneMaterial(node.material),
         position = node.transform.translation.toFilamentPosition(),
         rotation = node.transform.rotation.toFilamentQuaternion(),
         scale = node.transform.scale.toFilamentScale(),
@@ -352,7 +367,7 @@ private fun FilamentSceneScope.FilamentSphere(renderer: FilamentRenderer, node: 
 @Composable
 private fun FilamentSceneScope.FilamentPlane(renderer: FilamentRenderer, node: PlaneNode) {
     Plane(
-        material = rememberPbrMaterial(node.material),
+        material = rememberSceneMaterial(node.material),
         position = node.transform.translation.toFilamentPosition(),
         rotation = node.transform.rotation.toFilamentQuaternion(),
         scale = node.transform.scale.toFilamentScale(),
@@ -366,7 +381,7 @@ private fun FilamentSceneScope.FilamentPlane(renderer: FilamentRenderer, node: P
 @Composable
 private fun FilamentSceneScope.FilamentCylinder(renderer: FilamentRenderer, node: CylinderNode) {
     Cylinder(
-        material = rememberPbrMaterial(node.material),
+        material = rememberSceneMaterial(node.material),
         position = node.transform.translation.toFilamentPosition(),
         rotation = node.transform.rotation.toFilamentQuaternion(),
         scale = node.transform.scale.toFilamentScale(),
@@ -378,12 +393,24 @@ private fun FilamentSceneScope.FilamentCylinder(renderer: FilamentRenderer, node
 }
 
 @Composable
-private fun rememberPbrMaterial(material: PbrMaterial) = rememberColorMaterialInstance(
-    color = Color(material.baseColor.x, material.baseColor.y, material.baseColor.z),
-    metallic = material.metallic,
-    roughness = material.roughness,
-    reflectance = material.reflectance,
-)
+private fun rememberSceneMaterial(material: Material3D) = when (material) {
+    is PbrMaterial -> rememberColorMaterialInstance(
+        color = material.baseColor.toFilamentColor(),
+        metallic = material.metallic,
+        roughness = material.roughness,
+        reflectance = material.reflectance,
+    )
+    is UnlitMaterial -> rememberUnlitColorMaterialInstance(material.color.toFilamentColor())
+    is EmissiveMaterial -> rememberEmissiveMaterialInstance(
+        color = material.color.toFilamentColor(),
+        intensity = material.intensity,
+    )
+}
+
+private fun Color3D.toFilamentColor(): Color {
+    val linear = toLinearSrgb()
+    return Color(linear.red, linear.green, linear.blue)
+}
 
 private fun Vec3.toFilamentPosition() = Position(x, y, z)
 
@@ -421,5 +448,27 @@ private fun FilamentSceneScope.FilamentLight(node: DirectionalLightNode) {
         direction = Direction(0.3f, -1f, -0.5f),
         color = Color(node.color.x, node.color.y, node.color.z),
         intensity = node.intensity,
+    )
+}
+
+@Composable
+private fun FilamentSceneScope.FilamentLight(node: PointLightNode) {
+    PointLight(
+        position = node.transform.translation.toFilamentPosition(),
+        color = node.color.toFilamentColor(),
+        intensity = node.intensity,
+        falloff = node.falloff,
+    )
+}
+
+@Composable
+private fun FilamentSceneScope.FilamentLight(node: SpotLightNode) {
+    SpotLight(
+        position = node.transform.translation.toFilamentPosition(),
+        direction = Direction(node.direction.x, node.direction.y, node.direction.z),
+        color = node.color.toFilamentColor(),
+        intensity = node.intensity,
+        falloff = node.falloff,
+        cone = SpotCone(node.innerConeRadians, node.outerConeRadians),
     )
 }

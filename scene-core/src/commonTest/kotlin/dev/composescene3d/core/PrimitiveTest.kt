@@ -19,6 +19,32 @@ class PrimitiveTest {
     }
 
     @Test
+    fun convertsSrgbColorsToLinearSpace() {
+        val linear = Color3D.rgb(255, 128, 0).toLinearSrgb()
+
+        assertEquals(ColorSpace3D.LinearSrgb, linear.colorSpace)
+        assertEquals(1f, linear.red)
+        assertEquals(0f, linear.blue)
+        assertEquals(0.21586f, linear.green, absoluteTolerance = 0.00001f)
+    }
+
+    @Test
+    fun validatesMaterialsAndLights() {
+        assertFailsWith<IllegalArgumentException> { EmissiveMaterial(intensity = -1f) }
+        assertFailsWith<IllegalArgumentException> {
+            PointLightNode(NodeKey("point"), intensity = 1f, falloff = 0f)
+        }
+        assertFailsWith<IllegalArgumentException> {
+            SpotLightNode(
+                NodeKey("spot"),
+                intensity = 1f,
+                innerConeRadians = 0.7f,
+                outerConeRadians = 0.6f,
+            )
+        }
+    }
+
+    @Test
     fun validatesPrimitiveGeometry() {
         assertFailsWith<IllegalArgumentException> { SphereNode(NodeKey("sphere"), radius = 0f) }
         assertFailsWith<IllegalArgumentException> { PlaneNode(NodeKey("plane"), depth = 0f) }

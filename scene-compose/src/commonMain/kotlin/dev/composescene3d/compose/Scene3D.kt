@@ -7,16 +7,20 @@ import androidx.compose.runtime.remember
 import dev.composescene3d.core.DirectionalLightNode
 import dev.composescene3d.core.BoxNode
 import dev.composescene3d.core.CylinderNode
+import dev.composescene3d.core.Color3D
+import dev.composescene3d.core.Material3D
 import dev.composescene3d.core.ModelNode
 import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.NodeKey
 import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.core.PlaneNode
+import dev.composescene3d.core.PointLightNode
 import dev.composescene3d.core.SceneController
 import dev.composescene3d.core.SceneDescription
 import dev.composescene3d.core.SceneNode
 import dev.composescene3d.core.SceneRenderer
 import dev.composescene3d.core.SphereNode
+import dev.composescene3d.core.SpotLightNode
 import dev.composescene3d.core.Transform
 import dev.composescene3d.core.Vec3
 
@@ -46,7 +50,7 @@ class SceneScope internal constructor() {
         radius: Float = 0.5f,
         rings: Int = 16,
         segments: Int = 32,
-        material: PbrMaterial = PbrMaterial(),
+        material: Material3D = PbrMaterial(),
         transform: Transform = Transform(),
     ) {
         nodes += SphereNode(NodeKey(key), radius, rings, segments, material, transform)
@@ -57,7 +61,7 @@ class SceneScope internal constructor() {
         width: Float = 1f,
         depth: Float = 1f,
         doubleSided: Boolean = true,
-        material: PbrMaterial = PbrMaterial(),
+        material: Material3D = PbrMaterial(),
         transform: Transform = Transform(),
     ) {
         nodes += PlaneNode(NodeKey(key), width, depth, doubleSided, material, transform)
@@ -68,7 +72,7 @@ class SceneScope internal constructor() {
         radius: Float = 0.5f,
         height: Float = 1f,
         segments: Int = 32,
-        material: PbrMaterial = PbrMaterial(),
+        material: Material3D = PbrMaterial(),
         transform: Transform = Transform(),
     ) {
         nodes += CylinderNode(NodeKey(key), radius, height, segments, material, transform)
@@ -81,6 +85,32 @@ class SceneScope internal constructor() {
         transform: Transform = Transform(),
     ) {
         nodes += DirectionalLightNode(NodeKey(key), intensity, color, transform)
+    }
+
+    fun pointLight(
+        key: String,
+        intensity: Float,
+        color: Color3D = Color3D.White,
+        falloff: Float = 10f,
+        transform: Transform = Transform(),
+    ) {
+        nodes += PointLightNode(NodeKey(key), intensity, color, falloff, transform)
+    }
+
+    fun spotLight(
+        key: String,
+        intensity: Float,
+        direction: Vec3 = Vec3(0f, -1f, 0f),
+        color: Color3D = Color3D.White,
+        falloff: Float = 10f,
+        innerConeRadians: Float = 0.5f,
+        outerConeRadians: Float = 0.6f,
+        transform: Transform = Transform(),
+    ) {
+        nodes += SpotLightNode(
+            NodeKey(key), intensity, direction, color, falloff,
+            innerConeRadians, outerConeRadians, transform,
+        )
     }
 
     internal fun build(): SceneDescription = SceneDescription(nodes.toList())
