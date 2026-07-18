@@ -1,5 +1,6 @@
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.plugins.signing.SigningExtension
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform) apply false
@@ -15,10 +16,12 @@ allprojects {
 }
 
 val publishedModules = setOf("scene-core", "scene-compose", "renderer-filament")
+val projectUrl = "https://github.com/AleksandrKdev/compose-scene-3d"
 
 subprojects {
     if (name in publishedModules) {
         pluginManager.apply("maven-publish")
+        pluginManager.apply("signing")
 
         extensions.configure<PublishingExtension> {
             repositories {
@@ -28,6 +31,14 @@ subprojects {
                         rootProject.layout.buildDirectory.dir("maven-alpha").get().asFile
                     )
                 }
+                maven {
+                    name = "GitHubPackages"
+                    url = uri("https://maven.pkg.github.com/AleksandrKdev/compose-scene-3d")
+                    credentials {
+                        username = providers.environmentVariable("GITHUB_ACTOR").orNull
+                        password = providers.environmentVariable("GITHUB_TOKEN").orNull
+                    }
+                }
             }
             publications.withType<MavenPublication>().configureEach {
                 pom {
@@ -35,6 +46,19 @@ subprojects {
                     description.set(
                         "Retained-mode 3D scene APIs for Kotlin and Compose Multiplatform"
                     )
+                    url.set(projectUrl)
+                    developers {
+                        developer {
+                            id.set("AleksandrKdev")
+                            name.set("AleksandrKdev")
+                            url.set("https://github.com/AleksandrKdev")
+                        }
+                    }
+                    scm {
+                        url.set(projectUrl)
+                        connection.set("scm:git:$projectUrl.git")
+                        developerConnection.set("scm:git:ssh://git@github.com/AleksandrKdev/compose-scene-3d.git")
+                    }
                     licenses {
                         license {
                             name.set("The Apache License, Version 2.0")
@@ -43,6 +67,15 @@ subprojects {
                         }
                     }
                 }
+            }
+        }
+
+        extensions.configure<SigningExtension> {
+            val signingKey = providers.environmentVariable("SIGNING_KEY").orNull
+            val signingPassword = providers.environmentVariable("SIGNING_PASSWORD").orNull
+            if (!signingKey.isNullOrBlank()) {
+                useInMemoryPgpKeys(signingKey, signingPassword)
+                sign(extensions.getByType<PublishingExtension>().publications)
             }
         }
     }

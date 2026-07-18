@@ -245,6 +245,24 @@ Before publishing outside the local machine:
 - `checkKotlinAbi` succeeds against the initial `0.1.0-alpha01` surface and runs in CI.
 - `CONTRIBUTING.md` documents when and how `updateKotlinAbi` may be used.
 
+## GitHub repository and package publication
+
+- Permanent repository: `https://github.com/AleksandrKdev/compose-scene-3d`.
+- POM metadata now includes the project URL, Apache-2.0 license, developer `AleksandrKdev`, and
+  HTTPS/SSH SCM coordinates.
+- Every published module has a `GitHubPackages` Maven repository pointing at the GitHub project.
+- `.github/workflows/publish-alpha.yml` publishes on manual dispatch or a `v*` tag with the
+  workflow-provided `GITHUB_TOKEN` and `packages: write` permission.
+- Optional repository secrets `SIGNING_KEY` (armored private PGP key) and `SIGNING_PASSWORD` enable
+  in-memory signing; GitHub Packages publication works without them.
+- Gradle configuration, generated POM content, workflow YAML, and the aggregate
+  `publishAllPublicationsToGitHubPackagesRepository` task were verified locally. No remote package
+  was pushed from the local machine.
+
+Next action: commit and push the current changes, then run the `Publish alpha` workflow manually or
+create/push tag `v0.1.0-alpha01`. Do not reuse that version after a successful remote publication;
+subsequent changes should use `0.1.0-alpha02`.
+
 Do not add physics, AR or a broad materials API during this milestone.
 
 ## Useful files

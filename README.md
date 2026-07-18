@@ -13,6 +13,8 @@ Desktop and iOS/Metal. A stable public release is not available yet.
 
 Current development coordinates: `dev.composescene3d:*:0.1.0-alpha01`.
 
+Source repository: [AleksandrKdev/compose-scene-3d](https://github.com/AleksandrKdev/compose-scene-3d).
+
 ## Modules
 
 - `scene-core`: immutable scene descriptions, retained scene reconciliation and renderer commands.
@@ -104,6 +106,12 @@ dependencies {
 The three published modules keep JVM and KLIB ABI baselines under their `api/` directories.
 `./gradlew checkKotlinAbi` detects accidental public API changes; intentionally accepted changes
 are recorded with `./gradlew updateKotlinAbi` after reviewing the diff.
+
+## GitHub Packages
+
+The `Publish alpha` workflow publishes every KMP variant to this repository's GitHub Packages
+registry on manual dispatch or a `v*` tag. It uses the workflow `GITHUB_TOKEN`; optional armored PGP
+secrets `SIGNING_KEY` and `SIGNING_PASSWORD` enable artifact signing.
 
 For Android-only development Android Studio may use its bundled JDK 21. Do not configure a
 project-wide Gradle daemon JVM criterion for Java 22: that can prevent initial sync before Gradle's
