@@ -33,6 +33,7 @@ jobs:
           :scene-core:jvmTest
           :scene-compose:jvmTest
           :renderer-filament:jvmTest
+          :renderer-testkit:compileKotlinJvm
           :samples:android-app:assembleDebug
           :samples:desktop-app:compileKotlinJvm
 

@@ -5,13 +5,41 @@ import dev.composescene3d.core.NodeKey
 import dev.composescene3d.core.ModelNode
 import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.SceneCommand
+import dev.composescene3d.core.RendererCapabilities
 import dev.composescene3d.core.Transform
 import dev.composescene3d.core.Vec3
+import dev.composescene3d.testkit.RendererConformanceSuite
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class FilamentRendererTest {
+    private val conformance = RendererConformanceSuite(
+        createRenderer = ::FilamentRenderer,
+        retainedNodes = { it.nodes.toList() },
+        expectedCapabilities = RendererCapabilities(
+            primitiveGeometry = true,
+            physicallyBasedRendering = true,
+            skeletalAnimation = true,
+        ),
+    )
+
+    @Test
+    fun conformsToRetainedCreateUpdateRemoveContract() =
+        conformance.createUpdateAndRemoveRetainStableIdentity()
+
+    @Test
+    fun conformsToInvalidCommandContract() =
+        conformance.invalidCommandSequencesAreRejected()
+
+    @Test
+    fun conformsToLifecycleContract() =
+        conformance.closeIsIdempotentClearsStateAndRejectsCommands()
+
+    @Test
+    fun conformsToCapabilityDeclaration() =
+        conformance.capabilitiesMatchBackendDeclaration()
+
     @Test
     fun updateRetainsNodeIdentityAndChangesValue() {
         val renderer = FilamentRenderer()

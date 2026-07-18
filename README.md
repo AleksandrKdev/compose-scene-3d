@@ -11,7 +11,7 @@ owned by a renderer implementation rather than by recomposition.
 Early architecture prototype with working Filament primitive and GLB rendering on Android,
 Desktop and iOS/Metal. A stable public release is not available yet.
 
-Next release coordinates: `io.github.aleksandrkdev:*:0.1.0-alpha02`.
+Current release coordinates: `io.github.aleksandrkdev:*:0.1.0-alpha02`.
 
 Source repository: [AleksandrKdev/compose-scene-3d](https://github.com/AleksandrKdev/compose-scene-3d).
 
@@ -24,6 +24,8 @@ Source repository: [AleksandrKdev/compose-scene-3d](https://github.com/Aleksandr
   backend implementation. Models with the same cache key share one imported GPU asset while
   retaining independent instances and transforms. It provides orbit/pan/zoom interaction and maps
   Filament picking results back to stable `NodeKey` values.
+- `renderer-testkit`: an internal backend-neutral conformance harness for retained commands,
+  lifecycle behavior and capability declarations. New renderers must pass the same contract.
 - `samples/android-app`, `samples/desktop-app` and `samples/ios-app`: interactive GLB samples.
 
 ## Design principles
@@ -110,10 +112,9 @@ are recorded with `./gradlew updateKotlinAbi` after reviewing the diff.
 ## GitHub Packages
 
 The `Publish alpha` workflow publishes every KMP variant to this repository's GitHub Packages
-registry on manual dispatch or a `v*` tag. It uses the workflow `GITHUB_TOKEN`; optional armored PGP
-secrets `SIGNING_KEY` and `SIGNING_PASSWORD` enable artifact signing. After publication, the
-workflow compiles an independent consumer project from `verification/published-consumer`, resolving
-the modules back from GitHub Packages rather than from this build.
+registry on manual dispatch or a `v*` tag. It uses the workflow `GITHUB_TOKEN`. After publication,
+the workflow compiles an independent consumer project from `verification/published-consumer`,
+resolving the modules back from GitHub Packages rather than from this build.
 
 GitHub Packages requires authentication when consuming Maven packages. Add the repository and use
 a GitHub personal access token with `read:packages` permission:
@@ -148,9 +149,8 @@ gpr.key=YOUR_PERSONAL_ACCESS_TOKEN
 
 ## Maven Central
 
-The planned `0.1.0-alpha02` release uses Maven Central as the primary public repository. Once the
-Central deployment is published, consumers only need `mavenCentral()` and do not need GitHub
-credentials:
+Version `0.1.0-alpha02` is available from Maven Central, the primary public repository. Consumers
+only need `mavenCentral()` and do not need GitHub credentials:
 
 ```kotlin
 repositories {
@@ -165,8 +165,7 @@ dependencies {
 
 Maintainers publish tags through the `Publish Maven Central` workflow. It expects Central Portal
 user-token secrets `MAVEN_CENTRAL_USERNAME` and `MAVEN_CENTRAL_PASSWORD`, plus the armored private
-key `SIGNING_KEY` and its `SIGNING_PASSWORD`. The namespace `io.github.aleksandrkdev` must be
-verified in Central Portal before the first release.
+key `SIGNING_KEY` and its `SIGNING_PASSWORD`.
 
 For Android-only development Android Studio may use its bundled JDK 21. Do not configure a
 project-wide Gradle daemon JVM criterion for Java 22: that can prevent initial sync before Gradle's

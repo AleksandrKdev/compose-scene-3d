@@ -22,6 +22,7 @@ rootProject.name = "compose-scene-3d"
 include(":scene-core")
 include(":scene-compose")
 include(":renderer-filament")
+include(":renderer-testkit")
 include(":samples:android-app")
 include(":samples:desktop-app")
 include(":samples:ios-shared")

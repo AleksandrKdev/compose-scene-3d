@@ -230,6 +230,18 @@ State: unavailable/offline
 - GitHub macOS jobs use `macos-15` with Xcode 26.3 selected explicitly. The current Compose and
   Filament native binaries reference SDK 26 UIKit symbols (`UIViewLayoutRegion`/`UIUtilities`), so
   Xcode 16.4 can read the project but cannot link the complete SwiftUI host.
+- `v0.1.0-alpha02` is publicly available from Maven Central under `io.github.aleksandrkdev` and was
+  independently resolved and compiled without credentials.
+
+## Backend conformance milestone
+
+- Added the internal `renderer-testkit` KMP module.
+- `RendererConformanceSuite` defines shared retained create/update/remove, invalid command,
+  idempotent close and capability declaration contracts.
+- `renderer-filament` is the first backend wired to the shared suite and passes all contract tests.
+- The current Filament KMP dependency has Android, JVM and iOS variants but no Web/Wasm variant;
+  the Web renderer therefore needs to be an independent backend behind the same `SceneRenderer`
+  contract.
 
 ## Completed local Maven alpha milestone
 
