@@ -36,6 +36,8 @@ import dev.composescene3d.core.SceneNode
 import dev.composescene3d.core.SceneRenderer
 import dev.composescene3d.core.SphereNode
 import dev.composescene3d.core.SpotLightNode
+import dev.composescene3d.core.TextureSource
+import dev.composescene3d.core.TexturedMaterial
 import dev.composescene3d.core.EmissiveMaterial
 import dev.composescene3d.core.UnlitMaterial
 import dev.composescene3d.core.assetKey
@@ -63,6 +65,8 @@ import io.github.erkko68.filament.compose.scene.primitives.Sphere
 import io.github.erkko68.filament.compose.scene.rememberColorMaterialInstance
 import io.github.erkko68.filament.compose.scene.rememberEmissiveMaterialInstance
 import io.github.erkko68.filament.compose.scene.rememberUnlitColorMaterialInstance
+import io.github.erkko68.filament.compose.scene.rememberTexture
+import io.github.erkko68.filament.compose.scene.rememberTexturedMaterialInstance
 import io.github.erkko68.filament.compose.scene.SpotCone
 import io.github.erkko68.filament.compose.scene.SpotLight
 import io.github.erkko68.filament.utils.Quaternion
@@ -74,6 +78,10 @@ fun interface ModelByteLoader {
     suspend fun load(source: ModelSource): ByteArray
 }
 
+fun interface TextureByteLoader {
+    suspend fun load(source: TextureSource): ByteArray
+}
+
 private val bytesOnlyModelLoader = ModelByteLoader { source ->
     when (source) {
         is ModelSource.Bytes -> source.value
@@ -82,6 +90,18 @@ private val bytesOnlyModelLoader = ModelByteLoader { source ->
         )
         is ModelSource.Url -> error(
             "URL model '${source.value}' needs an application-provided ModelByteLoader"
+        )
+    }
+}
+
+private val bytesOnlyTextureLoader = TextureByteLoader { source ->
+    when (source) {
+        is TextureSource.Bytes -> source.value
+        is TextureSource.Resource -> error(
+            "Resource texture '${source.path}' needs an application-provided TextureByteLoader"
+        )
+        is TextureSource.Url -> error(
+            "URL texture '${source.value}' needs an application-provided TextureByteLoader"
         )
     }
 }
@@ -97,6 +117,20 @@ class FilamentRenderer(
     internal val modelByteLoader: ModelByteLoader = bytesOnlyModelLoader,
     internal val onModelError: (ModelAssetKey, Throwable) -> Unit = { _, _ -> },
 ) : SceneRenderer {
+    internal var textureByteLoader: TextureByteLoader = bytesOnlyTextureLoader
+        private set
+    internal var onTextureError: (TextureSource, Throwable) -> Unit = { _, _ -> }
+        private set
+
+    constructor(
+        textureByteLoader: TextureByteLoader,
+        modelByteLoader: ModelByteLoader = bytesOnlyModelLoader,
+        onModelError: (ModelAssetKey, Throwable) -> Unit = { _, _ -> },
+        onTextureError: (TextureSource, Throwable) -> Unit = { _, _ -> },
+    ) : this(modelByteLoader, onModelError) {
+        this.textureByteLoader = textureByteLoader
+        this.onTextureError = onTextureError
+    }
     override val capabilities = RendererCapabilities(
         primitiveGeometry = true,
         physicallyBasedRendering = true,
@@ -325,6 +359,7 @@ private fun FilamentSceneScope.FilamentModels(
 @Composable
 private fun FilamentSceneScope.FilamentBox(renderer: FilamentRenderer, node: BoxNode) {
     val material = rememberSceneMaterial(
+        renderer,
         PbrMaterial(baseColor = Color3D(node.color.x, node.color.y, node.color.z))
     )
     Cube(
@@ -353,7 +388,7 @@ private fun FilamentSceneScope.FilamentBox(renderer: FilamentRenderer, node: Box
 @Composable
 private fun FilamentSceneScope.FilamentSphere(renderer: FilamentRenderer, node: SphereNode) {
     Sphere(
-        material = rememberSceneMaterial(node.material),
+        material = rememberSceneMaterial(renderer, node.material),
         position = node.transform.translation.toFilamentPosition(),
         rotation = node.transform.rotation.toFilamentQuaternion(),
         scale = node.transform.scale.toFilamentScale(),
@@ -367,7 +402,7 @@ private fun FilamentSceneScope.FilamentSphere(renderer: FilamentRenderer, node: 
 @Composable
 private fun FilamentSceneScope.FilamentPlane(renderer: FilamentRenderer, node: PlaneNode) {
     Plane(
-        material = rememberSceneMaterial(node.material),
+        material = rememberSceneMaterial(renderer, node.material),
         position = node.transform.translation.toFilamentPosition(),
         rotation = node.transform.rotation.toFilamentQuaternion(),
         scale = node.transform.scale.toFilamentScale(),
@@ -381,7 +416,7 @@ private fun FilamentSceneScope.FilamentPlane(renderer: FilamentRenderer, node: P
 @Composable
 private fun FilamentSceneScope.FilamentCylinder(renderer: FilamentRenderer, node: CylinderNode) {
     Cylinder(
-        material = rememberSceneMaterial(node.material),
+        material = rememberSceneMaterial(renderer, node.material),
         position = node.transform.translation.toFilamentPosition(),
         rotation = node.transform.rotation.toFilamentQuaternion(),
         scale = node.transform.scale.toFilamentScale(),
@@ -393,7 +428,7 @@ private fun FilamentSceneScope.FilamentCylinder(renderer: FilamentRenderer, node
 }
 
 @Composable
-private fun rememberSceneMaterial(material: Material3D) = when (material) {
+private fun rememberSceneMaterial(renderer: FilamentRenderer, material: Material3D) = when (material) {
     is PbrMaterial -> rememberColorMaterialInstance(
         color = material.baseColor.toFilamentColor(),
         metallic = material.metallic,
@@ -405,6 +440,27 @@ private fun rememberSceneMaterial(material: Material3D) = when (material) {
         color = material.color.toFilamentColor(),
         intensity = material.intensity,
     )
+    is TexturedMaterial -> {
+        val texture = rememberTexture(
+            key = material.baseColorTexture.assetKey(),
+            onError = { renderer.onTextureError(material.baseColorTexture, it) },
+        ) {
+            renderer.textureByteLoader.load(material.baseColorTexture)
+        }
+        if (texture == null) {
+            rememberColorMaterialInstance(
+                color = Color(0.7f, 0.7f, 0.7f),
+                metallic = material.metallic,
+                roughness = material.roughness,
+            )
+        } else {
+            rememberTexturedMaterialInstance(
+                texture = texture,
+                metallic = material.metallic,
+                roughness = material.roughness,
+            )
+        }
+    }
 }
 
 private fun Color3D.toFilamentColor(): Color {

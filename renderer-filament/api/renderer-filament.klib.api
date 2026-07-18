@@ -10,8 +10,13 @@ abstract fun interface dev.composescene3d.filament/ModelByteLoader { // dev.comp
     abstract suspend fun load(dev.composescene3d.core/ModelSource): kotlin/ByteArray // dev.composescene3d.filament/ModelByteLoader.load|load(dev.composescene3d.core.ModelSource){}[0]
 }
 
+abstract fun interface dev.composescene3d.filament/TextureByteLoader { // dev.composescene3d.filament/TextureByteLoader|null[0]
+    abstract suspend fun load(dev.composescene3d.core/TextureSource): kotlin/ByteArray // dev.composescene3d.filament/TextureByteLoader.load|load(dev.composescene3d.core.TextureSource){}[0]
+}
+
 final class dev.composescene3d.filament/FilamentRenderer : dev.composescene3d.core/SceneRenderer { // dev.composescene3d.filament/FilamentRenderer|null[0]
     constructor <init>(dev.composescene3d.filament/ModelByteLoader = ..., kotlin/Function2<dev.composescene3d.core/ModelAssetKey, kotlin/Throwable, kotlin/Unit> = ...) // dev.composescene3d.filament/FilamentRenderer.<init>|<init>(dev.composescene3d.filament.ModelByteLoader;kotlin.Function2<dev.composescene3d.core.ModelAssetKey,kotlin.Throwable,kotlin.Unit>){}[0]
+    constructor <init>(dev.composescene3d.filament/TextureByteLoader, dev.composescene3d.filament/ModelByteLoader = ..., kotlin/Function2<dev.composescene3d.core/ModelAssetKey, kotlin/Throwable, kotlin/Unit> = ..., kotlin/Function2<dev.composescene3d.core/TextureSource, kotlin/Throwable, kotlin/Unit> = ...) // dev.composescene3d.filament/FilamentRenderer.<init>|<init>(dev.composescene3d.filament.TextureByteLoader;dev.composescene3d.filament.ModelByteLoader;kotlin.Function2<dev.composescene3d.core.ModelAssetKey,kotlin.Throwable,kotlin.Unit>;kotlin.Function2<dev.composescene3d.core.TextureSource,kotlin.Throwable,kotlin.Unit>){}[0]
 
     final val capabilities // dev.composescene3d.filament/FilamentRenderer.capabilities|{}capabilities[0]
         final fun <get-capabilities>(): dev.composescene3d.core/RendererCapabilities // dev.composescene3d.filament/FilamentRenderer.capabilities.<get-capabilities>|<get-capabilities>(){}[0]

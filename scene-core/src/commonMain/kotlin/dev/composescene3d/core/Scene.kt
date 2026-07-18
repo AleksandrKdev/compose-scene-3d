@@ -20,6 +20,26 @@ sealed interface ModelSource {
     }
 }
 
+sealed interface TextureSource {
+    data class Resource(val path: String) : TextureSource
+    data class Url(val value: String) : TextureSource
+    data class Bytes(val value: ByteArray, val cacheKey: String) : TextureSource {
+        override fun equals(other: Any?): Boolean =
+            other is Bytes && cacheKey == other.cacheKey && value.contentEquals(other.value)
+
+        override fun hashCode(): Int = 31 * cacheKey.hashCode() + value.contentHashCode()
+    }
+}
+
+@JvmInline
+value class TextureAssetKey(val value: String)
+
+fun TextureSource.assetKey(): TextureAssetKey = when (this) {
+    is TextureSource.Resource -> TextureAssetKey("resource:$path")
+    is TextureSource.Url -> TextureAssetKey("url:$value")
+    is TextureSource.Bytes -> TextureAssetKey("bytes:$cacheKey")
+}
+
 @JvmInline
 value class ModelAssetKey(val value: String)
 
@@ -73,6 +93,17 @@ data class EmissiveMaterial(
         require(intensity >= 0f && intensity.isFinite()) {
             "Emissive intensity must be finite and non-negative"
         }
+    }
+}
+
+data class TexturedMaterial(
+    val baseColorTexture: TextureSource,
+    val metallic: Float = 0f,
+    val roughness: Float = 0.5f,
+) : Material3D {
+    init {
+        require(metallic in 0f..1f) { "Metallic must be between 0 and 1" }
+        require(roughness in 0f..1f) { "Roughness must be between 0 and 1" }
     }
 }
 

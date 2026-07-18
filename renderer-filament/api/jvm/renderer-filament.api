@@ -3,6 +3,8 @@ public final class dev/composescene3d/filament/FilamentRenderer : dev/composesce
 	public fun <init> ()V
 	public fun <init> (Ldev/composescene3d/filament/ModelByteLoader;Lkotlin/jvm/functions/Function2;)V
 	public synthetic fun <init> (Ldev/composescene3d/filament/ModelByteLoader;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ldev/composescene3d/filament/TextureByteLoader;Ldev/composescene3d/filament/ModelByteLoader;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
+	public synthetic fun <init> (Ldev/composescene3d/filament/TextureByteLoader;Ldev/composescene3d/filament/ModelByteLoader;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun apply (Ljava/util/List;)V
 	public fun close ()V
 	public fun getCapabilities ()Ldev/composescene3d/core/RendererCapabilities;
@@ -14,5 +16,9 @@ public final class dev/composescene3d/filament/FilamentRendererKt {
 
 public abstract interface class dev/composescene3d/filament/ModelByteLoader {
 	public abstract fun load (Ldev/composescene3d/core/ModelSource;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class dev/composescene3d/filament/TextureByteLoader {
+	public abstract fun load (Ldev/composescene3d/core/TextureSource;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 

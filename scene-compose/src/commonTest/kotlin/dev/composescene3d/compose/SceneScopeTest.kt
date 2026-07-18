@@ -8,6 +8,8 @@ import dev.composescene3d.core.PlaneNode
 import dev.composescene3d.core.PointLightNode
 import dev.composescene3d.core.SphereNode
 import dev.composescene3d.core.SpotLightNode
+import dev.composescene3d.core.TextureSource
+import dev.composescene3d.core.TexturedMaterial
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -39,5 +41,18 @@ class SceneScopeTest {
         assertIs<EmissiveMaterial>(assertIs<SphereNode>(scene.nodes[0]).material)
         assertIs<PointLightNode>(scene.nodes[1])
         assertIs<SpotLightNode>(scene.nodes[2])
+    }
+
+    @Test
+    fun attachesTextureSourcesWithoutBackendTypes() {
+        val textured = TexturedMaterial(
+            baseColorTexture = TextureSource.Resource("files/checker.png"),
+            roughness = 0.8f,
+        )
+        val scene = SceneScope().apply {
+            plane("textured-plane", material = textured)
+        }.build()
+
+        assertEquals(textured, assertIs<PlaneNode>(scene.nodes.single()).material)
     }
 }

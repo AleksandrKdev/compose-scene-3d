@@ -443,6 +443,7 @@ public final class dev/composescene3d/core/SceneDescription$Companion {
 
 public final class dev/composescene3d/core/SceneKt {
 	public static final fun assetKey (Ldev/composescene3d/core/ModelSource;)Ljava/lang/String;
+	public static final fun assetKey (Ldev/composescene3d/core/TextureSource;)Ljava/lang/String;
 }
 
 public abstract interface class dev/composescene3d/core/SceneNode {
@@ -500,6 +501,74 @@ public final class dev/composescene3d/core/SpotLightNode : dev/composescene3d/co
 	public fun getKey-V7PxYp4 ()Ljava/lang/String;
 	public final fun getOuterConeRadians ()F
 	public fun getTransform ()Ldev/composescene3d/core/Transform;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/composescene3d/core/TextureAssetKey {
+	public static final synthetic fun box-impl (Ljava/lang/String;)Ldev/composescene3d/core/TextureAssetKey;
+	public static fun constructor-impl (Ljava/lang/String;)Ljava/lang/String;
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (Ljava/lang/String;Ljava/lang/Object;)Z
+	public static final fun equals-impl0 (Ljava/lang/String;Ljava/lang/String;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public static fun hashCode-impl (Ljava/lang/String;)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (Ljava/lang/String;)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()Ljava/lang/String;
+}
+
+public abstract interface class dev/composescene3d/core/TextureSource {
+}
+
+public final class dev/composescene3d/core/TextureSource$Bytes : dev/composescene3d/core/TextureSource {
+	public fun <init> ([BLjava/lang/String;)V
+	public final fun component1 ()[B
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy ([BLjava/lang/String;)Ldev/composescene3d/core/TextureSource$Bytes;
+	public static synthetic fun copy$default (Ldev/composescene3d/core/TextureSource$Bytes;[BLjava/lang/String;ILjava/lang/Object;)Ldev/composescene3d/core/TextureSource$Bytes;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCacheKey ()Ljava/lang/String;
+	public final fun getValue ()[B
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/composescene3d/core/TextureSource$Resource : dev/composescene3d/core/TextureSource {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ldev/composescene3d/core/TextureSource$Resource;
+	public static synthetic fun copy$default (Ldev/composescene3d/core/TextureSource$Resource;Ljava/lang/String;ILjava/lang/Object;)Ldev/composescene3d/core/TextureSource$Resource;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPath ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/composescene3d/core/TextureSource$Url : dev/composescene3d/core/TextureSource {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ldev/composescene3d/core/TextureSource$Url;
+	public static synthetic fun copy$default (Ldev/composescene3d/core/TextureSource$Url;Ljava/lang/String;ILjava/lang/Object;)Ldev/composescene3d/core/TextureSource$Url;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/composescene3d/core/TexturedMaterial : dev/composescene3d/core/Material3D {
+	public fun <init> (Ldev/composescene3d/core/TextureSource;FF)V
+	public synthetic fun <init> (Ldev/composescene3d/core/TextureSource;FFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ldev/composescene3d/core/TextureSource;
+	public final fun component2 ()F
+	public final fun component3 ()F
+	public final fun copy (Ldev/composescene3d/core/TextureSource;FF)Ldev/composescene3d/core/TexturedMaterial;
+	public static synthetic fun copy$default (Ldev/composescene3d/core/TexturedMaterial;Ldev/composescene3d/core/TextureSource;FFILjava/lang/Object;)Ldev/composescene3d/core/TexturedMaterial;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBaseColorTexture ()Ldev/composescene3d/core/TextureSource;
+	public final fun getMetallic ()F
+	public final fun getRoughness ()F
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

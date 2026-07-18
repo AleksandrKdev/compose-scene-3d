@@ -42,6 +42,22 @@ class PrimitiveTest {
                 outerConeRadians = 0.6f,
             )
         }
+        assertFailsWith<IllegalArgumentException> {
+            TexturedMaterial(TextureSource.Resource("grid.png"), roughness = 1.1f)
+        }
+    }
+
+    @Test
+    fun textureBytesUseContentEqualityAndStableAssetKeys() {
+        val first = TextureSource.Bytes(byteArrayOf(1, 2, 3), cacheKey = "grid")
+        val same = TextureSource.Bytes(byteArrayOf(1, 2, 3), cacheKey = "grid")
+
+        assertEquals(first, same)
+        assertEquals(TextureAssetKey("bytes:grid"), first.assetKey())
+        assertEquals(
+            TextureAssetKey("resource:files/grid.png"),
+            TextureSource.Resource("files/grid.png").assetKey(),
+        )
     }
 
     @Test

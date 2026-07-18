@@ -69,13 +69,29 @@ Scene3D(controller) {
 ```
 
 `Color3D` distinguishes sRGB input from linear-sRGB values and supports RGB/RGBA/ARGB factories
-and named colors. Primitive materials can be `PbrMaterial`, `UnlitMaterial` or
-`EmissiveMaterial`. The current standard shaders are opaque; alpha is retained in the shared color
-model for the upcoming transparent and textured material API.
+and named colors. Primitive materials can be `PbrMaterial`, `UnlitMaterial`, `EmissiveMaterial` or
+`TexturedMaterial`. The current standard shaders are opaque; alpha is retained in the shared color
+model for the upcoming transparent material API.
+
+Texture data can come from common resources, URLs or in-memory bytes without exposing a Filament
+type to shared code:
+
+```kotlin
+plane(
+    key = "floor",
+    material = TexturedMaterial(
+        baseColorTexture = TextureSource.Resource("files/floor.png"),
+        roughness = 0.9f,
+    ),
+)
+```
+
+`TextureSource.Bytes` works with the default renderer. Resource and URL sources use an
+application-provided `TextureByteLoader`, following the same pattern as `ModelByteLoader`.
 
 ## Roadmap
 
-1. Expand primitive and PBR material coverage across Android, Desktop and iOS.
+1. Add transparent shaders and preprocessed cubemap environment lighting.
 2. Implement an independent Web/Wasm renderer behind the same scene contract.
 3. Stabilize the public API based on cross-backend experience.
 

@@ -265,6 +265,17 @@ State: unavailable/offline
 - The standard shaders in this stage remain opaque. Textures, transparent blending and HDR
   environment/IBL loading belong to the following material-resource milestone.
 
+## Texture material milestone
+
+- Added `TextureSource.Resource`, `TextureSource.Url` and content-aware `TextureSource.Bytes` plus
+  stable `TextureAssetKey` values.
+- Added validated `TexturedMaterial` for base-color textures with metallic and roughness controls.
+- Added `TextureByteLoader` to the Filament adapter while preserving its existing constructor.
+- Texture loading is asynchronous; primitives use a neutral PBR fallback while bytes decode, then
+  switch to Filament's shared textured material.
+- Android, Desktop and iOS compilation and linkage pass. HDR environment maps still require a
+  portable preprocessed cubemap format; transparency requires a separate blended shader.
+
 ## Completed local Maven alpha milestone
 
 - Fixed project coordinates: `dev.composescene3d:*:0.1.0-alpha01`.
