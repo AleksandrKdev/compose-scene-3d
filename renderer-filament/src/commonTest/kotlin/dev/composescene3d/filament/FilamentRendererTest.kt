@@ -41,6 +41,10 @@ class FilamentRendererTest {
         conformance.capabilitiesMatchBackendDeclaration()
 
     @Test
+    fun conformsToPrimitiveGeometryContract() =
+        conformance.primitiveGeometryNodesAreRetained()
+
+    @Test
     fun updateRetainsNodeIdentityAndChangesValue() {
         val renderer = FilamentRenderer()
         val first = BoxNode(NodeKey("box"))

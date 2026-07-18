@@ -217,8 +217,7 @@ State: unavailable/offline
 
 - `0.1.0-alpha01` was published to GitHub Packages under the legacy
   `dev.composescene3d` group.
-- The next version is `0.1.0-alpha02` with Maven Central-compatible coordinates under
-  `io.github.aleksandrkdev`.
+- `0.1.0-alpha02` uses Maven Central-compatible coordinates under `io.github.aleksandrkdev`.
 - The Vanniktech Maven Publish plugin `0.37.0` generates Central-compatible KMP publications,
   including sources and javadoc JARs for Android, JVM and both iOS targets.
 - `.github/workflows/publish-central.yml` validates tests and ABI, signs every publication, uploads
@@ -242,6 +241,17 @@ State: unavailable/offline
 - The current Filament KMP dependency has Android, JVM and iOS variants but no Web/Wasm variant;
   the Web renderer therefore needs to be an independent backend behind the same `SceneRenderer`
   contract.
+
+## Primitive and material milestone
+
+- Development version advanced to `0.1.0-alpha03-SNAPSHOT`; released Central coordinates remain
+  `0.1.0-alpha02`.
+- Added backend-neutral `PbrMaterial` with base color, metallic, roughness and reflectance.
+- Added validated `SphereNode`, `PlaneNode` and `CylinderNode` plus matching Compose DSL functions.
+- Filament maps the new primitives to its shared standard lit material on Android, Desktop and iOS.
+- Primitive transforms include translation, scale and quaternion rotation; Box rotation now also
+  reaches the Filament primitive instead of being ignored.
+- Android, Desktop and iOS samples show a metallic sphere, rough cylinder and ground plane.
 
 ## Completed local Maven alpha milestone
 
@@ -289,11 +299,8 @@ Before publishing outside the local machine:
   `publishAllPublicationsToGitHubPackagesRepository` task were verified locally. No remote package
   was pushed from the local machine.
 
-Next action: commit and push the current changes, then run the `Publish alpha` workflow manually or
-create/push tag `v0.1.0-alpha01`. Do not reuse that version after a successful remote publication;
-subsequent changes should use `0.1.0-alpha02`.
-
-Do not add physics, AR or a broad materials API during this milestone.
+The original GitHub Packages alpha milestone is complete. Maven Central `0.1.0-alpha02` is the
+current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 
 ## Useful files
 

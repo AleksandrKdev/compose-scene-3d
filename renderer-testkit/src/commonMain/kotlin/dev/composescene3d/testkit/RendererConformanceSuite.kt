@@ -1,11 +1,14 @@
 package dev.composescene3d.testkit
 
 import dev.composescene3d.core.BoxNode
+import dev.composescene3d.core.CylinderNode
 import dev.composescene3d.core.NodeKey
+import dev.composescene3d.core.PlaneNode
 import dev.composescene3d.core.RendererCapabilities
 import dev.composescene3d.core.SceneCommand
 import dev.composescene3d.core.SceneNode
 import dev.composescene3d.core.SceneRenderer
+import dev.composescene3d.core.SphereNode
 import dev.composescene3d.core.Transform
 import dev.composescene3d.core.Vec3
 import kotlin.test.assertEquals
@@ -75,6 +78,23 @@ class RendererConformanceSuite<R : SceneRenderer>(
     fun capabilitiesMatchBackendDeclaration() {
         createRenderer().useForTest { renderer ->
             assertEquals(expectedCapabilities, renderer.capabilities)
+        }
+    }
+
+    fun primitiveGeometryNodesAreRetained() {
+        val primitives = listOf(
+            BoxNode(NodeKey("box")),
+            SphereNode(NodeKey("sphere")),
+            PlaneNode(NodeKey("plane")),
+            CylinderNode(NodeKey("cylinder")),
+        )
+
+        createRenderer().useForTest { renderer ->
+            renderer.apply(primitives.map(SceneCommand::Create))
+            assertEquals(
+                primitives.associateBy(SceneNode::key),
+                retainedNodes(renderer).associateBy(SceneNode::key),
+            )
         }
     }
 

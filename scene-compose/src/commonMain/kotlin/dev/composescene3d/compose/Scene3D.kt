@@ -6,13 +6,17 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import dev.composescene3d.core.DirectionalLightNode
 import dev.composescene3d.core.BoxNode
+import dev.composescene3d.core.CylinderNode
 import dev.composescene3d.core.ModelNode
 import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.NodeKey
+import dev.composescene3d.core.PbrMaterial
+import dev.composescene3d.core.PlaneNode
 import dev.composescene3d.core.SceneController
 import dev.composescene3d.core.SceneDescription
 import dev.composescene3d.core.SceneNode
 import dev.composescene3d.core.SceneRenderer
+import dev.composescene3d.core.SphereNode
 import dev.composescene3d.core.Transform
 import dev.composescene3d.core.Vec3
 
@@ -35,6 +39,39 @@ class SceneScope internal constructor() {
         transform: Transform = Transform(),
     ) {
         nodes += BoxNode(NodeKey(key), size, color, transform)
+    }
+
+    fun sphere(
+        key: String,
+        radius: Float = 0.5f,
+        rings: Int = 16,
+        segments: Int = 32,
+        material: PbrMaterial = PbrMaterial(),
+        transform: Transform = Transform(),
+    ) {
+        nodes += SphereNode(NodeKey(key), radius, rings, segments, material, transform)
+    }
+
+    fun plane(
+        key: String,
+        width: Float = 1f,
+        depth: Float = 1f,
+        doubleSided: Boolean = true,
+        material: PbrMaterial = PbrMaterial(),
+        transform: Transform = Transform(),
+    ) {
+        nodes += PlaneNode(NodeKey(key), width, depth, doubleSided, material, transform)
+    }
+
+    fun cylinder(
+        key: String,
+        radius: Float = 0.5f,
+        height: Float = 1f,
+        segments: Int = 32,
+        material: PbrMaterial = PbrMaterial(),
+        transform: Transform = Transform(),
+    ) {
+        nodes += CylinderNode(NodeKey(key), radius, height, segments, material, transform)
     }
 
     fun directionalLight(

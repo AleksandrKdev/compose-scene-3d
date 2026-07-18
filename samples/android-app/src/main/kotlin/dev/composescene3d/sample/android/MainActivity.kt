@@ -23,6 +23,7 @@ import dev.composescene3d.core.CameraDescription
 import dev.composescene3d.core.Transform
 import dev.composescene3d.core.Vec3
 import dev.composescene3d.core.ModelSource
+import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.filament.FilamentRenderer
 import dev.composescene3d.filament.FilamentViewport
 
@@ -66,6 +67,30 @@ private fun Sample() {
                     translation = Vec3(0f, -1f, 0f),
                     scale = Vec3.One,
                 ),
+            )
+            sphere(
+                key = "metal-sphere",
+                material = PbrMaterial(
+                    baseColor = Vec3(0.9f, 0.55f, 0.12f),
+                    metallic = 1f,
+                    roughness = 0.18f,
+                ),
+                transform = Transform(translation = Vec3(-2f, 0f, 0f)),
+            )
+            cylinder(
+                key = "rough-cylinder",
+                material = PbrMaterial(
+                    baseColor = Vec3(0.25f, 0.85f, 0.4f),
+                    roughness = 0.85f,
+                ),
+                transform = Transform(translation = Vec3(2f, 0f, 0f)),
+            )
+            plane(
+                key = "ground",
+                width = 6f,
+                depth = 5f,
+                material = PbrMaterial(baseColor = Vec3(0.22f, 0.24f, 0.28f), roughness = 1f),
+                transform = Transform(translation = Vec3(0f, -1.05f, 0f)),
             )
             directionalLight(key = "sun", intensity = 100_000f)
         }

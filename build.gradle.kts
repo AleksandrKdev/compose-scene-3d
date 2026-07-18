@@ -13,7 +13,7 @@ plugins {
 
 allprojects {
     group = "io.github.aleksandrkdev"
-    version = "0.1.0-alpha02"
+    version = "0.1.0-alpha03-SNAPSHOT"
 }
 
 val publishedModules = setOf("scene-core", "scene-compose", "renderer-filament")

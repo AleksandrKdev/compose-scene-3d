@@ -18,16 +18,20 @@ import dev.composescene3d.compose.rememberSceneCameraState
 import dev.composescene3d.compose.sceneCameraGestures
 import dev.composescene3d.core.CameraProjection
 import dev.composescene3d.core.BoxNode
+import dev.composescene3d.core.CylinderNode
 import dev.composescene3d.core.DirectionalLightNode
 import dev.composescene3d.core.GroupNode
 import dev.composescene3d.core.ModelNode
 import dev.composescene3d.core.ModelAssetKey
 import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.NodeKey
+import dev.composescene3d.core.PbrMaterial
+import dev.composescene3d.core.PlaneNode
 import dev.composescene3d.core.RendererCapabilities
 import dev.composescene3d.core.SceneCommand
 import dev.composescene3d.core.SceneNode
 import dev.composescene3d.core.SceneRenderer
+import dev.composescene3d.core.SphereNode
 import dev.composescene3d.core.assetKey
 import dev.composescene3d.core.Vec3
 import io.github.erkko68.filament.compose.FilamentSceneView
@@ -46,6 +50,9 @@ import io.github.erkko68.filament.compose.scene.rememberSkyboxState
 import io.github.erkko68.filament.compose.scene.rememberCameraState
 import io.github.erkko68.filament.compose.scene.Projection
 import io.github.erkko68.filament.compose.scene.primitives.Cube
+import io.github.erkko68.filament.compose.scene.primitives.Cylinder
+import io.github.erkko68.filament.compose.scene.primitives.Plane
+import io.github.erkko68.filament.compose.scene.primitives.Sphere
 import io.github.erkko68.filament.compose.scene.rememberColorMaterialInstance
 import io.github.erkko68.filament.utils.Quaternion
 import io.github.erkko68.filament.Renderer
@@ -244,6 +251,9 @@ fun FilamentViewport(
                 key(node.key.value) {
                     when (node) {
                         is BoxNode -> FilamentBox(renderer, node)
+                        is SphereNode -> FilamentSphere(renderer, node)
+                        is PlaneNode -> FilamentPlane(renderer, node)
+                        is CylinderNode -> FilamentCylinder(renderer, node)
                         is DirectionalLightNode -> FilamentLight(node)
                         is GroupNode -> Unit
                         is ModelNode -> error("Model nodes are rendered in shared asset groups")
@@ -301,9 +311,7 @@ private fun FilamentSceneScope.FilamentModels(
 
 @Composable
 private fun FilamentSceneScope.FilamentBox(renderer: FilamentRenderer, node: BoxNode) {
-    val material = rememberColorMaterialInstance(
-        Color(node.color.x, node.color.y, node.color.z)
-    )
+    val material = rememberPbrMaterial(PbrMaterial(baseColor = node.color))
     Cube(
         material = material,
         position = Position(
@@ -311,6 +319,7 @@ private fun FilamentSceneScope.FilamentBox(renderer: FilamentRenderer, node: Box
             node.transform.translation.y,
             node.transform.translation.z,
         ),
+        rotation = node.transform.rotation.toFilamentQuaternion(),
         scale = Scale(
             node.transform.scale.x * node.size.x,
             node.transform.scale.y * node.size.y,
@@ -325,6 +334,63 @@ private fun FilamentSceneScope.FilamentBox(renderer: FilamentRenderer, node: Box
         },
     )
 }
+
+@Composable
+private fun FilamentSceneScope.FilamentSphere(renderer: FilamentRenderer, node: SphereNode) {
+    Sphere(
+        material = rememberPbrMaterial(node.material),
+        position = node.transform.translation.toFilamentPosition(),
+        rotation = node.transform.rotation.toFilamentQuaternion(),
+        scale = node.transform.scale.toFilamentScale(),
+        radius = node.radius,
+        rings = node.rings,
+        segments = node.segments,
+        onCreate = { renderer.registerEntities(node.key, listOf(it)) },
+    )
+}
+
+@Composable
+private fun FilamentSceneScope.FilamentPlane(renderer: FilamentRenderer, node: PlaneNode) {
+    Plane(
+        material = rememberPbrMaterial(node.material),
+        position = node.transform.translation.toFilamentPosition(),
+        rotation = node.transform.rotation.toFilamentQuaternion(),
+        scale = node.transform.scale.toFilamentScale(),
+        width = node.width,
+        depth = node.depth,
+        doubleSided = node.doubleSided,
+        onCreate = { renderer.registerEntities(node.key, listOf(it)) },
+    )
+}
+
+@Composable
+private fun FilamentSceneScope.FilamentCylinder(renderer: FilamentRenderer, node: CylinderNode) {
+    Cylinder(
+        material = rememberPbrMaterial(node.material),
+        position = node.transform.translation.toFilamentPosition(),
+        rotation = node.transform.rotation.toFilamentQuaternion(),
+        scale = node.transform.scale.toFilamentScale(),
+        radius = node.radius,
+        height = node.height,
+        segments = node.segments,
+        onCreate = { renderer.registerEntities(node.key, listOf(it)) },
+    )
+}
+
+@Composable
+private fun rememberPbrMaterial(material: PbrMaterial) = rememberColorMaterialInstance(
+    color = Color(material.baseColor.x, material.baseColor.y, material.baseColor.z),
+    metallic = material.metallic,
+    roughness = material.roughness,
+    reflectance = material.reflectance,
+)
+
+private fun Vec3.toFilamentPosition() = Position(x, y, z)
+
+private fun Vec3.toFilamentScale() = Scale(x, y, z)
+
+private fun dev.composescene3d.core.Quaternion.toFilamentQuaternion() =
+    Quaternion(x, y, z, w)
 
 private data class CameraSyncSnapshot(
     val eye: Vec3,

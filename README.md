@@ -23,7 +23,8 @@ Source repository: [AleksandrKdev/compose-scene-3d](https://github.com/Aleksandr
 - `renderer-filament`: a retained adapter over Filament KMP; Filament types stay private to the
   backend implementation. Models with the same cache key share one imported GPU asset while
   retaining independent instances and transforms. It provides orbit/pan/zoom interaction and maps
-  Filament picking results back to stable `NodeKey` values.
+  Filament picking results back to stable `NodeKey` values. Box, sphere, plane and cylinder
+  primitives use backend-neutral PBR material parameters.
 - `renderer-testkit`: an internal backend-neutral conformance harness for retained commands,
   lifecycle behavior and capability declarations. New renderers must pass the same contract.
 - `samples/android-app`, `samples/desktop-app` and `samples/ios-app`: interactive GLB samples.
@@ -43,6 +44,15 @@ Source repository: [AleksandrKdev/compose-scene-3d](https://github.com/Aleksandr
 val controller = rememberSceneController(renderer)
 
 Scene3D(controller) {
+    sphere(
+        key = "accent",
+        material = PbrMaterial(
+            baseColor = Vec3(0.9f, 0.55f, 0.12f),
+            metallic = 1f,
+            roughness = 0.2f,
+        ),
+        transform = Transform(translation = Vec3(-1.5f, 0f, 0f)),
+    )
     model(
         key = "product",
         source = ModelSource.Resource("files/product.glb"),
@@ -54,9 +64,9 @@ Scene3D(controller) {
 
 ## Roadmap
 
-1. iOS lifecycle hardening and CI.
-2. API stabilization and the first Maven alpha publication.
-3. Web backend and backend capability conformance tests.
+1. Expand primitive and PBR material coverage across Android, Desktop and iOS.
+2. Implement an independent Web/Wasm renderer behind the same scene contract.
+3. Stabilize the public API based on cross-backend experience.
 
 ## Running the samples
 
@@ -98,8 +108,8 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.aleksandrkdev:scene-compose:0.1.0-alpha02")
-    implementation("io.github.aleksandrkdev:renderer-filament:0.1.0-alpha02")
+    implementation("io.github.aleksandrkdev:scene-compose:0.1.0-alpha03-SNAPSHOT")
+    implementation("io.github.aleksandrkdev:renderer-filament:0.1.0-alpha03-SNAPSHOT")
 }
 ```
 

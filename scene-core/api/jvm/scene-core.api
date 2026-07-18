@@ -72,6 +72,28 @@ public final class dev/composescene3d/core/CameraProjection$Perspective : dev/co
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class dev/composescene3d/core/CylinderNode : dev/composescene3d/core/SceneNode {
+	public synthetic fun <init> (Ljava/lang/String;FFILdev/composescene3d/core/PbrMaterial;Ldev/composescene3d/core/Transform;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;FFILdev/composescene3d/core/PbrMaterial;Ldev/composescene3d/core/Transform;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-V7PxYp4 ()Ljava/lang/String;
+	public final fun component2 ()F
+	public final fun component3 ()F
+	public final fun component4 ()I
+	public final fun component5 ()Ldev/composescene3d/core/PbrMaterial;
+	public final fun component6 ()Ldev/composescene3d/core/Transform;
+	public final fun copy-qet8Xuo (Ljava/lang/String;FFILdev/composescene3d/core/PbrMaterial;Ldev/composescene3d/core/Transform;)Ldev/composescene3d/core/CylinderNode;
+	public static synthetic fun copy-qet8Xuo$default (Ldev/composescene3d/core/CylinderNode;Ljava/lang/String;FFILdev/composescene3d/core/PbrMaterial;Ldev/composescene3d/core/Transform;ILjava/lang/Object;)Ldev/composescene3d/core/CylinderNode;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHeight ()F
+	public fun getKey-V7PxYp4 ()Ljava/lang/String;
+	public final fun getMaterial ()Ldev/composescene3d/core/PbrMaterial;
+	public final fun getRadius ()F
+	public final fun getSegments ()I
+	public fun getTransform ()Ldev/composescene3d/core/Transform;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class dev/composescene3d/core/DirectionalLightNode : dev/composescene3d/core/SceneNode {
 	public synthetic fun <init> (Ljava/lang/String;FLdev/composescene3d/core/Vec3;Ldev/composescene3d/core/Transform;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (Ljava/lang/String;FLdev/composescene3d/core/Vec3;Ldev/composescene3d/core/Transform;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -186,6 +208,47 @@ public final class dev/composescene3d/core/NodeKey {
 	public fun toString ()Ljava/lang/String;
 	public static fun toString-impl (Ljava/lang/String;)Ljava/lang/String;
 	public final synthetic fun unbox-impl ()Ljava/lang/String;
+}
+
+public final class dev/composescene3d/core/PbrMaterial {
+	public fun <init> ()V
+	public fun <init> (Ldev/composescene3d/core/Vec3;FFF)V
+	public synthetic fun <init> (Ldev/composescene3d/core/Vec3;FFFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ldev/composescene3d/core/Vec3;
+	public final fun component2 ()F
+	public final fun component3 ()F
+	public final fun component4 ()F
+	public final fun copy (Ldev/composescene3d/core/Vec3;FFF)Ldev/composescene3d/core/PbrMaterial;
+	public static synthetic fun copy$default (Ldev/composescene3d/core/PbrMaterial;Ldev/composescene3d/core/Vec3;FFFILjava/lang/Object;)Ldev/composescene3d/core/PbrMaterial;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBaseColor ()Ldev/composescene3d/core/Vec3;
+	public final fun getMetallic ()F
+	public final fun getReflectance ()F
+	public final fun getRoughness ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/composescene3d/core/PlaneNode : dev/composescene3d/core/SceneNode {
+	public synthetic fun <init> (Ljava/lang/String;FFZLdev/composescene3d/core/PbrMaterial;Ldev/composescene3d/core/Transform;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;FFZLdev/composescene3d/core/PbrMaterial;Ldev/composescene3d/core/Transform;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-V7PxYp4 ()Ljava/lang/String;
+	public final fun component2 ()F
+	public final fun component3 ()F
+	public final fun component4 ()Z
+	public final fun component5 ()Ldev/composescene3d/core/PbrMaterial;
+	public final fun component6 ()Ldev/composescene3d/core/Transform;
+	public final fun copy-qet8Xuo (Ljava/lang/String;FFZLdev/composescene3d/core/PbrMaterial;Ldev/composescene3d/core/Transform;)Ldev/composescene3d/core/PlaneNode;
+	public static synthetic fun copy-qet8Xuo$default (Ldev/composescene3d/core/PlaneNode;Ljava/lang/String;FFZLdev/composescene3d/core/PbrMaterial;Ldev/composescene3d/core/Transform;ILjava/lang/Object;)Ldev/composescene3d/core/PlaneNode;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDepth ()F
+	public final fun getDoubleSided ()Z
+	public fun getKey-V7PxYp4 ()Ljava/lang/String;
+	public final fun getMaterial ()Ldev/composescene3d/core/PbrMaterial;
+	public fun getTransform ()Ldev/composescene3d/core/Transform;
+	public final fun getWidth ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class dev/composescene3d/core/Quaternion {
@@ -308,6 +371,28 @@ public abstract interface class dev/composescene3d/core/SceneRenderer {
 	public abstract fun apply (Ljava/util/List;)V
 	public abstract fun close ()V
 	public abstract fun getCapabilities ()Ldev/composescene3d/core/RendererCapabilities;
+}
+
+public final class dev/composescene3d/core/SphereNode : dev/composescene3d/core/SceneNode {
+	public synthetic fun <init> (Ljava/lang/String;FIILdev/composescene3d/core/PbrMaterial;Ldev/composescene3d/core/Transform;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;FIILdev/composescene3d/core/PbrMaterial;Ldev/composescene3d/core/Transform;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-V7PxYp4 ()Ljava/lang/String;
+	public final fun component2 ()F
+	public final fun component3 ()I
+	public final fun component4 ()I
+	public final fun component5 ()Ldev/composescene3d/core/PbrMaterial;
+	public final fun component6 ()Ldev/composescene3d/core/Transform;
+	public final fun copy-qet8Xuo (Ljava/lang/String;FIILdev/composescene3d/core/PbrMaterial;Ldev/composescene3d/core/Transform;)Ldev/composescene3d/core/SphereNode;
+	public static synthetic fun copy-qet8Xuo$default (Ldev/composescene3d/core/SphereNode;Ljava/lang/String;FIILdev/composescene3d/core/PbrMaterial;Ldev/composescene3d/core/Transform;ILjava/lang/Object;)Ldev/composescene3d/core/SphereNode;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getKey-V7PxYp4 ()Ljava/lang/String;
+	public final fun getMaterial ()Ldev/composescene3d/core/PbrMaterial;
+	public final fun getRadius ()F
+	public final fun getRings ()I
+	public final fun getSegments ()I
+	public fun getTransform ()Ldev/composescene3d/core/Transform;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class dev/composescene3d/core/Transform {

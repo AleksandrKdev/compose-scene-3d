@@ -46,6 +46,19 @@ data class ModelNode(
     val visible: Boolean = true,
 ) : SceneNode
 
+data class PbrMaterial(
+    val baseColor: Vec3 = Vec3(0.7f, 0.7f, 0.7f),
+    val metallic: Float = 0f,
+    val roughness: Float = 0.5f,
+    val reflectance: Float = 0.5f,
+) {
+    init {
+        require(metallic in 0f..1f) { "Metallic must be between 0 and 1" }
+        require(roughness in 0f..1f) { "Roughness must be between 0 and 1" }
+        require(reflectance in 0f..1f) { "Reflectance must be between 0 and 1" }
+    }
+}
+
 data class BoxNode(
     override val key: NodeKey,
     val size: Vec3 = Vec3.One,
@@ -54,6 +67,50 @@ data class BoxNode(
 ) : SceneNode {
     init {
         require(size.x > 0f && size.y > 0f && size.z > 0f) { "Box dimensions must be positive" }
+    }
+}
+
+data class SphereNode(
+    override val key: NodeKey,
+    val radius: Float = 0.5f,
+    val rings: Int = 16,
+    val segments: Int = 32,
+    val material: PbrMaterial = PbrMaterial(),
+    override val transform: Transform = Transform(),
+) : SceneNode {
+    init {
+        require(radius > 0f) { "Sphere radius must be positive" }
+        require(rings >= 2) { "Sphere rings must be at least 2" }
+        require(segments >= 3) { "Sphere segments must be at least 3" }
+    }
+}
+
+data class PlaneNode(
+    override val key: NodeKey,
+    val width: Float = 1f,
+    val depth: Float = 1f,
+    val doubleSided: Boolean = true,
+    val material: PbrMaterial = PbrMaterial(),
+    override val transform: Transform = Transform(),
+) : SceneNode {
+    init {
+        require(width > 0f) { "Plane width must be positive" }
+        require(depth > 0f) { "Plane depth must be positive" }
+    }
+}
+
+data class CylinderNode(
+    override val key: NodeKey,
+    val radius: Float = 0.5f,
+    val height: Float = 1f,
+    val segments: Int = 32,
+    val material: PbrMaterial = PbrMaterial(),
+    override val transform: Transform = Transform(),
+) : SceneNode {
+    init {
+        require(radius > 0f) { "Cylinder radius must be positive" }
+        require(height > 0f) { "Cylinder height must be positive" }
+        require(segments >= 3) { "Cylinder segments must be at least 3" }
     }
 }
 
