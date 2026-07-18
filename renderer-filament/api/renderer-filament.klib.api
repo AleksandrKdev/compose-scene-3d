@@ -5,7 +5,7 @@
 // - Show manifest properties: true
 // - Show declarations: true
 
-// Library unique name: <dev.composescene3d:renderer-filament>
+// Library unique name: <io.github.aleksandrkdev:renderer-filament>
 abstract fun interface dev.composescene3d.filament/ModelByteLoader { // dev.composescene3d.filament/ModelByteLoader|null[0]
     abstract suspend fun load(dev.composescene3d.core/ModelSource): kotlin/ByteArray // dev.composescene3d.filament/ModelByteLoader.load|load(dev.composescene3d.core.ModelSource){}[0]
 }

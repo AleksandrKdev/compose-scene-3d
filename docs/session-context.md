@@ -1,6 +1,6 @@
 # Session context
 
-Updated: 2026-07-17
+Updated: 2026-07-18
 
 ## Goal
 
@@ -212,6 +212,21 @@ UDID: 00008130-000A419A0C51001C
 CoreDevice ID: FDD4E83D-7498-5C4D-9209-B8DDF887E224
 State: unavailable/offline
 ```
+
+## Maven publication status
+
+- `0.1.0-alpha01` was published to GitHub Packages under the legacy
+  `dev.composescene3d` group.
+- The next version is `0.1.0-alpha02` with Maven Central-compatible coordinates under
+  `io.github.aleksandrkdev`.
+- The Vanniktech Maven Publish plugin `0.37.0` generates Central-compatible KMP publications,
+  including sources and javadoc JARs for Android, JVM and both iOS targets.
+- `.github/workflows/publish-central.yml` validates tests and ABI, signs every publication, uploads
+  it through Central Portal and enables automatic release.
+- Local Maven publication and an independent external consumer compile both pass for the new
+  coordinates.
+- Before the first Central release, verify namespace `io.github.aleksandrkdev`, generate a Central
+  Portal user token, distribute a public GPG key, and add the four documented repository secrets.
 
 ## Completed local Maven alpha milestone
 

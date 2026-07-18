@@ -5,7 +5,7 @@
 // - Show manifest properties: true
 // - Show declarations: true
 
-// Library unique name: <dev.composescene3d:scene-compose>
+// Library unique name: <io.github.aleksandrkdev:scene-compose>
 final class dev.composescene3d.compose/SceneCameraGestureController { // dev.composescene3d.compose/SceneCameraGestureController|null[0]
     constructor <init>(dev.composescene3d.compose/SceneCameraState, kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ...) // dev.composescene3d.compose/SceneCameraGestureController.<init>|<init>(dev.composescene3d.compose.SceneCameraState;kotlin.Float;kotlin.Float;kotlin.Float;kotlin.Float){}[0]
 

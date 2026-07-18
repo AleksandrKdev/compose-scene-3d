@@ -5,7 +5,7 @@
 // - Show manifest properties: true
 // - Show declarations: true
 
-// Library unique name: <dev.composescene3d:scene-core>
+// Library unique name: <io.github.aleksandrkdev:scene-core>
 abstract interface dev.composescene3d.core/SceneRenderer { // dev.composescene3d.core/SceneRenderer|null[0]
     abstract val capabilities // dev.composescene3d.core/SceneRenderer.capabilities|{}capabilities[0]
         abstract fun <get-capabilities>(): dev.composescene3d.core/RendererCapabilities // dev.composescene3d.core/SceneRenderer.capabilities.<get-capabilities>|<get-capabilities>(){}[0]

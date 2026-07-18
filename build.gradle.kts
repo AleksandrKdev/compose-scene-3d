@@ -1,6 +1,6 @@
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.plugins.signing.SigningExtension
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform) apply false
@@ -8,11 +8,12 @@ plugins {
     alias(libs.plugins.compose.compiler) apply false
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.android.kmp.library) apply false
+    id("com.vanniktech.maven.publish") version "0.37.0" apply false
 }
 
 allprojects {
-    group = "dev.composescene3d"
-    version = "0.1.0-alpha01"
+    group = "io.github.aleksandrkdev"
+    version = "0.1.0-alpha02"
 }
 
 val publishedModules = setOf("scene-core", "scene-compose", "renderer-filament")
@@ -21,7 +22,15 @@ val projectUrl = "https://github.com/AleksandrKdev/compose-scene-3d"
 subprojects {
     if (name in publishedModules) {
         pluginManager.apply("maven-publish")
-        pluginManager.apply("signing")
+
+        pluginManager.withPlugin("com.vanniktech.maven.publish") {
+            extensions.configure<MavenPublishBaseExtension> {
+                publishToMavenCentral(automaticRelease = true)
+                if (providers.gradleProperty("signingInMemoryKey").isPresent) {
+                    signAllPublications()
+                }
+            }
+        }
 
         extensions.configure<PublishingExtension> {
             repositories {
@@ -70,13 +79,5 @@ subprojects {
             }
         }
 
-        extensions.configure<SigningExtension> {
-            val signingKey = providers.environmentVariable("SIGNING_KEY").orNull
-            val signingPassword = providers.environmentVariable("SIGNING_PASSWORD").orNull
-            if (!signingKey.isNullOrBlank()) {
-                useInMemoryPgpKeys(signingKey, signingPassword)
-                sign(extensions.getByType<PublishingExtension>().publications)
-            }
-        }
     }
 }

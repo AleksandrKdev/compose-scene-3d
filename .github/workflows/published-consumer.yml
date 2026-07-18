@@ -1,19 +1,22 @@
-name: Publish alpha
+name: Published consumer
 
 on:
   workflow_dispatch:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
+    paths:
+      - '.github/workflows/published-consumer.yml'
+      - 'verification/published-consumer/**'
 
 permissions:
   contents: read
-  packages: write
+  packages: read
 
 jobs:
-  github-packages:
+  compile:
     runs-on: macos-14
-    timeout-minutes: 45
+    timeout-minutes: 15
 
     steps:
       - name: Check out sources
@@ -28,17 +31,10 @@ jobs:
       - name: Set up Gradle cache
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Verify tests and binary API
-        run: ./gradlew :scene-core:jvmTest :scene-compose:jvmTest :renderer-filament:jvmTest checkKotlinAbi
-
-      - name: Publish to GitHub Packages
-        run: ./gradlew publishAllPublicationsToGitHubPackagesRepository
-        env:
-          GITHUB_ACTOR: ${{ github.actor }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Verify published artifacts as an external consumer
+      - name: Resolve and compile published artifacts
         run: ./gradlew -p verification/published-consumer compileKotlin
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMPOSE_SCENE_3D_GROUP: dev.composescene3d
+          COMPOSE_SCENE_3D_VERSION: 0.1.0-alpha01
