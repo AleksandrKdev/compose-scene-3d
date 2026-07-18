@@ -227,8 +227,9 @@ State: unavailable/offline
   coordinates.
 - Before the first Central release, verify namespace `io.github.aleksandrkdev`, generate a Central
   Portal user token, distribute a public GPG key, and add the four documented repository secrets.
-- GitHub macOS jobs use `macos-15`, whose default Xcode 16.4 supports project format 77 and includes
-  the iOS 18.5 SDK required by the current Filament KMP native artifacts.
+- GitHub macOS jobs use `macos-15` with Xcode 26.3 selected explicitly. The current Compose and
+  Filament native binaries reference SDK 26 UIKit symbols (`UIViewLayoutRegion`/`UIUtilities`), so
+  Xcode 16.4 can read the project but cannot link the complete SwiftUI host.
 
 ## Completed local Maven alpha milestone
 
