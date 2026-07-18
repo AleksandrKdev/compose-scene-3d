@@ -1,0 +1,18 @@
+public final class dev/composescene3d/filament/FilamentRenderer : dev/composescene3d/core/SceneRenderer {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (Ldev/composescene3d/filament/ModelByteLoader;Lkotlin/jvm/functions/Function2;)V
+	public synthetic fun <init> (Ldev/composescene3d/filament/ModelByteLoader;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun apply (Ljava/util/List;)V
+	public fun close ()V
+	public fun getCapabilities ()Ldev/composescene3d/core/RendererCapabilities;
+}
+
+public final class dev/composescene3d/filament/FilamentRendererKt {
+	public static final fun FilamentViewport (Ldev/composescene3d/filament/FilamentRenderer;Landroidx/compose/ui/Modifier;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/compose/SceneCameraState;ZFZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+}
+
+public abstract interface class dev/composescene3d/filament/ModelByteLoader {
+	public abstract fun load (Ldev/composescene3d/core/ModelSource;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+

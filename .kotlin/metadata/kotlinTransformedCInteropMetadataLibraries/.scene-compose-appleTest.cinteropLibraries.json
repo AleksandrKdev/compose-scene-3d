@@ -1,0 +1,47 @@
+[
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "org.jetbrains.compose.ui",
+        "name": "ui-uikit"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "org.jetbrains.compose.ui",
+        "name": "ui-uikit"
+      }
+    },
+    "file": "/Users/darakucybala/AndroidStudioProjects/ComposeScene3D/.kotlin/metadata/kotlinTransformedCInteropMetadataLibraries/org.jetbrains.compose.ui-ui-uikit-1.11.1-iosMain-cinterop/org.jetbrains.compose.ui_ui-uikit-cinterop-utils-g8M-QQ.klib",
+    "sourceSetName": "iosMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "org.jetbrains.kotlinx",
+        "name": "atomicfu"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "org.jetbrains.kotlinx",
+        "name": "atomicfu"
+      }
+    },
+    "file": "/Users/darakucybala/AndroidStudioProjects/ComposeScene3D/.kotlin/metadata/kotlinTransformedCInteropMetadataLibraries/org.jetbrains.kotlinx-atomicfu-0.28.0-iosMain-cinterop/org.jetbrains.kotlinx_atomicfu-cinterop-interop-U-HXlg.klib",
+    "sourceSetName": "iosMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "org.jetbrains.skiko",
+        "name": "skiko"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "org.jetbrains.skiko",
+        "name": "skiko"
+      }
+    },
+    "file": "/Users/darakucybala/AndroidStudioProjects/ComposeScene3D/.kotlin/metadata/kotlinTransformedCInteropMetadataLibraries/org.jetbrains.skiko-skiko-0.144.6-iosMain-cinterop/org.jetbrains.skiko_skiko-cinterop-uikit-9wZN-w.klib",
+    "sourceSetName": "iosMain"
+  }
+]

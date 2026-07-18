@@ -1,0 +1,359 @@
+package dev.composescene3d.filament
+
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import dev.composescene3d.compose.SceneCameraState
+import dev.composescene3d.compose.rememberSceneCameraState
+import dev.composescene3d.compose.sceneCameraGestures
+import dev.composescene3d.core.CameraProjection
+import dev.composescene3d.core.BoxNode
+import dev.composescene3d.core.DirectionalLightNode
+import dev.composescene3d.core.GroupNode
+import dev.composescene3d.core.ModelNode
+import dev.composescene3d.core.ModelAssetKey
+import dev.composescene3d.core.ModelSource
+import dev.composescene3d.core.NodeKey
+import dev.composescene3d.core.RendererCapabilities
+import dev.composescene3d.core.SceneCommand
+import dev.composescene3d.core.SceneNode
+import dev.composescene3d.core.SceneRenderer
+import dev.composescene3d.core.assetKey
+import dev.composescene3d.core.Vec3
+import io.github.erkko68.filament.compose.FilamentSceneView
+import io.github.erkko68.filament.compose.FilamentSceneScope
+import io.github.erkko68.filament.compose.rememberFilamentViewState
+import io.github.erkko68.filament.compose.pickOnTap
+import io.github.erkko68.filament.compose.scene.Color
+import io.github.erkko68.filament.compose.scene.Direction
+import io.github.erkko68.filament.compose.scene.DirectionalLight
+import io.github.erkko68.filament.compose.scene.Position
+import io.github.erkko68.filament.compose.scene.Scale
+import io.github.erkko68.filament.compose.scene.GltfInstance
+import io.github.erkko68.filament.compose.scene.rememberGltfAsset
+import io.github.erkko68.filament.compose.scene.SkyboxSource
+import io.github.erkko68.filament.compose.scene.rememberSkyboxState
+import io.github.erkko68.filament.compose.scene.rememberCameraState
+import io.github.erkko68.filament.compose.scene.Projection
+import io.github.erkko68.filament.compose.scene.primitives.Cube
+import io.github.erkko68.filament.compose.scene.rememberColorMaterialInstance
+import io.github.erkko68.filament.utils.Quaternion
+import io.github.erkko68.filament.Renderer
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+
+fun interface ModelByteLoader {
+    suspend fun load(source: ModelSource): ByteArray
+}
+
+private val bytesOnlyModelLoader = ModelByteLoader { source ->
+    when (source) {
+        is ModelSource.Bytes -> source.value
+        is ModelSource.Resource -> error(
+            "Resource model '${source.path}' needs an application-provided ModelByteLoader"
+        )
+        is ModelSource.Url -> error(
+            "URL model '${source.value}' needs an application-provided ModelByteLoader"
+        )
+    }
+}
+
+/**
+ * Retained adapter between ComposeScene3D commands and Filament KMP.
+ *
+ * Filament types are deliberately absent from the constructor and public state. The adapter keeps
+ * stable nodes by [NodeKey]; the Filament composables below are also wrapped in Compose [key] so an
+ * update changes parameters without replacing an unchanged native entity.
+ */
+class FilamentRenderer(
+    internal val modelByteLoader: ModelByteLoader = bytesOnlyModelLoader,
+    internal val onModelError: (ModelAssetKey, Throwable) -> Unit = { _, _ -> },
+) : SceneRenderer {
+    override val capabilities = RendererCapabilities(
+        primitiveGeometry = true,
+        physicallyBasedRendering = true,
+        skeletalAnimation = true,
+    )
+
+    private val retainedNodes = mutableStateMapOf<NodeKey, SceneNode>()
+    private val entityToNode = mutableMapOf<Int, NodeKey>()
+    private val nodeToEntities = mutableMapOf<NodeKey, Set<Int>>()
+    private var closed = false
+
+    internal val nodes: Collection<SceneNode> get() = retainedNodes.values
+
+    override fun apply(commands: List<SceneCommand>) {
+        check(!closed) { "FilamentRenderer is closed" }
+        commands.forEach { command ->
+            when (command) {
+                is SceneCommand.Create -> {
+                    check(retainedNodes.put(command.node.key, command.node) == null) {
+                        "Node already exists: ${command.node.key.value}"
+                    }
+                }
+                is SceneCommand.Update -> {
+                    check(retainedNodes.containsKey(command.node.key)) {
+                        "Cannot update missing node: ${command.node.key.value}"
+                    }
+                    retainedNodes[command.node.key] = command.node
+                }
+                is SceneCommand.Remove -> {
+                    unregisterEntities(command.key)
+                    check(retainedNodes.remove(command.key) != null) {
+                        "Cannot remove missing node: ${command.key.value}"
+                    }
+                }
+            }
+        }
+    }
+
+    override fun close() {
+        if (closed) return
+        retainedNodes.clear()
+        entityToNode.clear()
+        nodeToEntities.clear()
+        closed = true
+    }
+
+    internal fun registerEntities(key: NodeKey, entities: Collection<Int>) {
+        unregisterEntities(key)
+        val stableEntities = entities.toSet()
+        nodeToEntities[key] = stableEntities
+        stableEntities.forEach { entityToNode[it] = key }
+    }
+
+    internal fun resolveEntity(entity: Int): NodeKey? = entityToNode[entity]
+
+    private fun unregisterEntities(key: NodeKey) {
+        nodeToEntities.remove(key)?.forEach { entity ->
+            if (entityToNode[entity] == key) entityToNode.remove(entity)
+        }
+    }
+}
+
+@Composable
+fun FilamentViewport(
+    renderer: FilamentRenderer,
+    modifier: Modifier = Modifier.fillMaxSize(),
+    backgroundColor: Vec3 = Vec3(0.04f, 0.05f, 0.07f),
+    cameraState: SceneCameraState = rememberSceneCameraState(),
+    orbitEnabled: Boolean = true,
+    zoomSpeed: Float = 0.12f,
+    pickingEnabled: Boolean = true,
+    onNodePicked: (NodeKey?) -> Unit = {},
+) {
+    val viewState = rememberFilamentViewState()
+    val filamentCameraState = rememberCameraState(
+        eye = Position(cameraState.eye.x, cameraState.eye.y, cameraState.eye.z),
+        target = Position(cameraState.target.x, cameraState.target.y, cameraState.target.z),
+        up = Direction(cameraState.up.x, cameraState.up.y, cameraState.up.z),
+        projection = cameraState.projection.toFilamentProjection(),
+    )
+    val viewportHeight = remember { mutableIntStateOf(0) }
+    val callbackScope = rememberCoroutineScope()
+    val skyboxState = rememberSkyboxState(
+        SkyboxSource.Color(
+            Color(backgroundColor.x, backgroundColor.y, backgroundColor.z)
+        )
+    )
+    val filamentRenderer = viewState.renderer
+
+    LaunchedEffect(cameraState) {
+        snapshotFlow {
+            CameraSyncSnapshot(cameraState.eye, cameraState.target, cameraState.up, cameraState.projection)
+        }.collectLatest { snapshot ->
+            filamentCameraState.eye = Position(snapshot.eye.x, snapshot.eye.y, snapshot.eye.z)
+            filamentCameraState.target = Position(snapshot.target.x, snapshot.target.y, snapshot.target.z)
+            filamentCameraState.up = Direction(snapshot.up.x, snapshot.up.y, snapshot.up.z)
+            filamentCameraState.projection = snapshot.projection.toFilamentProjection()
+        }
+    }
+    LaunchedEffect(filamentCameraState) {
+        snapshotFlow {
+            Triple(filamentCameraState.eye, filamentCameraState.target, filamentCameraState.up)
+        }.collectLatest { (eye, target, up) ->
+            cameraState.eye = Vec3(eye.x, eye.y, eye.z)
+            cameraState.target = Vec3(target.x, target.y, target.z)
+            cameraState.up = Vec3(up.x, up.y, up.z)
+        }
+    }
+
+    // Desktop uses an offscreen swap chain followed by asynchronous GPU -> CPU readback. Filament
+    // defaults to clear=false/discard=true, which leaves background pixels undefined when no
+    // environment has drawn them yet and can appear as rapid flashing. Always begin with a stable,
+    // opaque buffer; the skybox then draws the same visible background on every platform.
+    DisposableEffect(filamentRenderer, backgroundColor) {
+        filamentRenderer?.clearOptions = Renderer.ClearOptions().apply {
+            clearColor = doubleArrayOf(
+                backgroundColor.x.toDouble(),
+                backgroundColor.y.toDouble(),
+                backgroundColor.z.toDouble(),
+                1.0,
+            )
+            clear = true
+            discard = false
+        }
+        onDispose { }
+    }
+
+    var surfaceModifier = Modifier.fillMaxSize().onSizeChanged {
+        viewportHeight.intValue = it.height
+    }
+    if (orbitEnabled) {
+        surfaceModifier = surfaceModifier.sceneCameraGestures(
+            cameraState = cameraState,
+            viewportHeight = { viewportHeight.intValue },
+            zoomSpeed = zoomSpeed,
+        )
+    }
+
+    var containerModifier = modifier
+    if (pickingEnabled) {
+        // Picking lives on the parent, as in Filament KMP's own sample. Keeping its tap detector
+        // off the render-surface modifier prevents it from competing with two-finger pinch events.
+        containerModifier = containerModifier.pickOnTap(viewState) { result ->
+            val key = renderer.resolveEntity(result.renderable)
+            callbackScope.launch { onNodePicked(key) }
+        }
+    }
+
+    Box(containerModifier) {
+        FilamentSceneView(
+            modifier = surfaceModifier,
+            viewState = viewState,
+            skyboxState = skyboxState,
+            cameraState = filamentCameraState,
+        ) {
+            val modelGroups = modelsByAssetKey(renderer.nodes)
+            modelGroups.forEach { (assetKey, models) ->
+                key("asset:${assetKey.value}") {
+                    FilamentModels(renderer, assetKey, models)
+                }
+            }
+            renderer.nodes.filterNot { it is ModelNode }.forEach { node ->
+                key(node.key.value) {
+                    when (node) {
+                        is BoxNode -> FilamentBox(renderer, node)
+                        is DirectionalLightNode -> FilamentLight(node)
+                        is GroupNode -> Unit
+                        is ModelNode -> error("Model nodes are rendered in shared asset groups")
+                    }
+                }
+            }
+        }
+    }
+}
+
+internal fun modelsByAssetKey(nodes: Collection<SceneNode>): Map<ModelAssetKey, List<ModelNode>> =
+    nodes.filterIsInstance<ModelNode>().groupBy { it.source.assetKey() }
+
+@Composable
+private fun FilamentSceneScope.FilamentModels(
+    renderer: FilamentRenderer,
+    assetKey: ModelAssetKey,
+    models: List<ModelNode>,
+) {
+    val source = models.first().source
+    val asset = rememberGltfAsset(
+        key = assetKey,
+        onError = { renderer.onModelError(assetKey, it) },
+    ) {
+        renderer.modelByteLoader.load(source)
+    }
+
+    models.filter(ModelNode::visible).forEach { model ->
+        key(model.key.value) {
+            GltfInstance(
+                asset = asset,
+                position = Position(
+                    model.transform.translation.x,
+                    model.transform.translation.y,
+                    model.transform.translation.z,
+                ),
+                rotation = Quaternion(
+                    model.transform.rotation.x,
+                    model.transform.rotation.y,
+                    model.transform.rotation.z,
+                    model.transform.rotation.w,
+                ),
+                scale = Scale(
+                    model.transform.scale.x,
+                    model.transform.scale.y,
+                    model.transform.scale.z,
+                ),
+                onCreate = {
+                    renderer.registerEntities(model.key, instance.getEntities().toList())
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun FilamentSceneScope.FilamentBox(renderer: FilamentRenderer, node: BoxNode) {
+    val material = rememberColorMaterialInstance(
+        Color(node.color.x, node.color.y, node.color.z)
+    )
+    Cube(
+        material = material,
+        position = Position(
+            node.transform.translation.x,
+            node.transform.translation.y,
+            node.transform.translation.z,
+        ),
+        scale = Scale(
+            node.transform.scale.x * node.size.x,
+            node.transform.scale.y * node.size.y,
+            node.transform.scale.z * node.size.z,
+        ),
+        size = 1f,
+        onCreate = { rendererEntity ->
+            // The primitive owns one renderable entity.
+            // Registration is replaced, not appended, if Compose recreates this node.
+            // This keeps picking deterministic across native resource recreation.
+            renderer.registerEntities(node.key, listOf(rendererEntity))
+        },
+    )
+}
+
+private data class CameraSyncSnapshot(
+    val eye: Vec3,
+    val target: Vec3,
+    val up: Vec3,
+    val projection: CameraProjection,
+)
+
+private fun CameraProjection.toFilamentProjection(): Projection = when (this) {
+    is CameraProjection.Perspective -> Projection.Perspective(
+        fovDegrees = verticalFovDegrees,
+        near = near,
+        far = far,
+    )
+    is CameraProjection.Orthographic -> Projection.Orthographic(
+        left = -verticalSize / 2.0,
+        right = verticalSize / 2.0,
+        bottom = -verticalSize / 2.0,
+        top = verticalSize / 2.0,
+        near = near,
+        far = far,
+    )
+}
+
+@Composable
+private fun FilamentSceneScope.FilamentLight(node: DirectionalLightNode) {
+    DirectionalLight(
+        direction = Direction(0.3f, -1f, -0.5f),
+        color = Color(node.color.x, node.color.y, node.color.z),
+        intensity = node.intensity,
+    )
+}

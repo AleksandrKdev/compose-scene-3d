@@ -1,0 +1,46 @@
+public final class dev/composescene3d/compose/Scene3DKt {
+	public static final fun Scene3D (Ldev/composescene3d/core/SceneController;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
+	public static final fun rememberSceneController (Ldev/composescene3d/core/SceneRenderer;Landroidx/compose/runtime/Composer;I)Ldev/composescene3d/core/SceneController;
+}
+
+public final class dev/composescene3d/compose/SceneCameraGestureController {
+	public static final field $stable I
+	public fun <init> (Ldev/composescene3d/compose/SceneCameraState;FFFF)V
+	public synthetic fun <init> (Ldev/composescene3d/compose/SceneCameraState;FFFFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun orbit (FF)V
+	public final fun pan (FFI)V
+	public final fun zoom (F)V
+}
+
+public final class dev/composescene3d/compose/SceneCameraGesturesKt {
+	public static final fun sceneCameraGestures (Landroidx/compose/ui/Modifier;Ldev/composescene3d/compose/SceneCameraState;Lkotlin/jvm/functions/Function0;FF)Landroidx/compose/ui/Modifier;
+	public static synthetic fun sceneCameraGestures$default (Landroidx/compose/ui/Modifier;Ldev/composescene3d/compose/SceneCameraState;Lkotlin/jvm/functions/Function0;FFILjava/lang/Object;)Landroidx/compose/ui/Modifier;
+}
+
+public final class dev/composescene3d/compose/SceneCameraState {
+	public static final field $stable I
+	public final fun getEye ()Ldev/composescene3d/core/Vec3;
+	public final fun getProjection ()Ldev/composescene3d/core/CameraProjection;
+	public final fun getTarget ()Ldev/composescene3d/core/Vec3;
+	public final fun getUp ()Ldev/composescene3d/core/Vec3;
+	public final fun reset (Ldev/composescene3d/core/CameraDescription;)V
+	public final fun setEye (Ldev/composescene3d/core/Vec3;)V
+	public final fun setProjection (Ldev/composescene3d/core/CameraProjection;)V
+	public final fun setTarget (Ldev/composescene3d/core/Vec3;)V
+	public final fun setUp (Ldev/composescene3d/core/Vec3;)V
+}
+
+public final class dev/composescene3d/compose/SceneCameraStateKt {
+	public static final fun rememberSceneCameraState (Ldev/composescene3d/core/CameraDescription;Landroidx/compose/runtime/Composer;II)Ldev/composescene3d/compose/SceneCameraState;
+}
+
+public final class dev/composescene3d/compose/SceneScope {
+	public static final field $stable I
+	public final fun box (Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Transform;)V
+	public static synthetic fun box$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Transform;ILjava/lang/Object;)V
+	public final fun directionalLight (Ljava/lang/String;FLdev/composescene3d/core/Vec3;Ldev/composescene3d/core/Transform;)V
+	public static synthetic fun directionalLight$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;FLdev/composescene3d/core/Vec3;Ldev/composescene3d/core/Transform;ILjava/lang/Object;)V
+	public final fun model (Ljava/lang/String;Ldev/composescene3d/core/ModelSource;Ldev/composescene3d/core/Transform;Z)V
+	public static synthetic fun model$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;Ldev/composescene3d/core/ModelSource;Ldev/composescene3d/core/Transform;ZILjava/lang/Object;)V
+}
+

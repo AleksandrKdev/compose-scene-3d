@@ -1,0 +1,107 @@
+[
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "org.jetbrains.compose.ui",
+        "name": "ui-uikit"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "org.jetbrains.compose.ui",
+        "name": "ui-uikit"
+      }
+    },
+    "file": "/Users/darakucybala/AndroidStudioProjects/ComposeScene3D/.kotlin/metadata/kotlinTransformedCInteropMetadataLibraries/org.jetbrains.compose.ui-ui-uikit-1.11.1-iosMain-cinterop/org.jetbrains.compose.ui_ui-uikit-cinterop-utils-g8M-QQ.klib",
+    "sourceSetName": "iosMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "org.jetbrains.kotlinx",
+        "name": "atomicfu"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "org.jetbrains.kotlinx",
+        "name": "atomicfu"
+      }
+    },
+    "file": "/Users/darakucybala/AndroidStudioProjects/ComposeScene3D/.kotlin/metadata/kotlinTransformedCInteropMetadataLibraries/org.jetbrains.kotlinx-atomicfu-0.28.0-iosMain-cinterop/org.jetbrains.kotlinx_atomicfu-cinterop-interop-U-HXlg.klib",
+    "sourceSetName": "iosMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "org.jetbrains.skiko",
+        "name": "skiko"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "org.jetbrains.skiko",
+        "name": "skiko"
+      }
+    },
+    "file": "/Users/darakucybala/AndroidStudioProjects/ComposeScene3D/.kotlin/metadata/kotlinTransformedCInteropMetadataLibraries/org.jetbrains.skiko-skiko-0.144.6-iosMain-cinterop/org.jetbrains.skiko_skiko-cinterop-uikit-9wZN-w.klib",
+    "sourceSetName": "iosMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "io.github.erkko68.filament",
+        "name": "filament"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "io.github.erkko68.filament",
+        "name": "filament"
+      }
+    },
+    "file": "/Users/darakucybala/AndroidStudioProjects/ComposeScene3D/.kotlin/metadata/kotlinTransformedCInteropMetadataLibraries/io.github.erkko68.filament-filament-0.1.3-beta04-iosMain-cinterop/io.github.erkko68.filament_filament-cinterop-filament-8RecrA.klib",
+    "sourceSetName": "iosMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "io.github.erkko68.filament",
+        "name": "filament-utils"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "io.github.erkko68.filament",
+        "name": "filament-utils"
+      }
+    },
+    "file": "/Users/darakucybala/AndroidStudioProjects/ComposeScene3D/.kotlin/metadata/kotlinTransformedCInteropMetadataLibraries/io.github.erkko68.filament-filament-utils-0.1.3-beta04-iosMain-cinterop/io.github.erkko68.filament_filament-utils-cinterop-filament_utils-xjlhtA.klib",
+    "sourceSetName": "iosMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "io.github.erkko68.filament",
+        "name": "gltfio"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "io.github.erkko68.filament",
+        "name": "gltfio"
+      }
+    },
+    "file": "/Users/darakucybala/AndroidStudioProjects/ComposeScene3D/.kotlin/metadata/kotlinTransformedCInteropMetadataLibraries/io.github.erkko68.filament-gltfio-0.1.3-beta04-iosMain-cinterop/io.github.erkko68.filament_gltfio-cinterop-gltfio-IEXwrw.klib",
+    "sourceSetName": "iosMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "io.github.erkko68.filament",
+        "name": "filamat"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "io.github.erkko68.filament",
+        "name": "filamat"
+      }
+    },
+    "file": "/Users/darakucybala/AndroidStudioProjects/ComposeScene3D/.kotlin/metadata/kotlinTransformedCInteropMetadataLibraries/io.github.erkko68.filament-filamat-0.1.3-beta04-iosMain-cinterop/io.github.erkko68.filament_filamat-cinterop-filamat-HKn0KA.klib",
+    "sourceSetName": "iosMain"
+  }
+]
