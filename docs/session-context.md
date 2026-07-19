@@ -384,15 +384,19 @@ State: unavailable/offline
 - Desktop runtime with PCF created the shadow map and ran without a Filament error or crash.
 - The independent Web/Wasm backend in `renderer-web` now uses WebGL2 GPU vertex/index buffers,
   GLSL shaders and a real depth buffer. It supports primitives, custom indexed geometry, nested
-  transforms and shared camera gestures, and deliberately reports GLB/textures/PBR/shadows as
-  unsupported. The browser entry point explicitly loads `web-app.js`, and a headless Chrome
+  transforms and shared camera gestures; full PBR and shadows remain unsupported. The browser
+  entry point explicitly loads `web-app.js`, and a headless Chrome
   runtime screenshot verified the rendered cube, sphere and plane.
 - Web base-color texture loading is complete for `TextureSource.Resource`, `Url` and `Bytes`.
   The renderer submits one GPU batch per mesh, includes UVs in the interleaved vertex buffer,
   caches WebGL textures by portable asset key, generates mipmaps and invalidates Compose after
   asynchronous browser image decoding. A checker-textured plane was verified in headless Chrome.
-- Next milestone: parse Web glTF/GLB into these textured GPU batches, then implement expanded PBR
-  texture channels and lighting.
+- Web GLB 2.0 loading is implemented for `ModelSource.Resource`, `Url` and `Bytes`. It parses
+  JSON/BIN chunks, typed and interleaved accessors, triangle meshes, node transforms and embedded
+  base-color images into the existing textured GPU batches. The shared 118-KB Duck GLB rendered
+  successfully in headless Chrome. JSON `.gltf`, skins, animation, morphs and sparse accessors are
+  not supported yet, so `skeletalAnimation` remains false.
+- Next milestone: external JSON `.gltf` resources and better loader diagnostics, then Web PBR.
 
 ## Completed local Maven alpha milestone
 
@@ -462,7 +466,7 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Continue with Web glTF/GLB loading on top of the textured GPU batches, then add Web PBR lighting.
+Continue with external JSON `.gltf` resources and loader diagnostics, then add Web PBR lighting.
 The user explicitly allowed breaking the old empty GroupNode API before alpha03. Do not expose
 backend types in public commonMain API.
 ```

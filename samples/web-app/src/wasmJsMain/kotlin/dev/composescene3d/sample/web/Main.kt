@@ -12,6 +12,7 @@ import dev.composescene3d.compose.Scene3D
 import dev.composescene3d.compose.rememberSceneController
 import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.PbrMaterial
+import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.Quaternion
 import dev.composescene3d.core.Transform
 import dev.composescene3d.core.TexturedMaterial
@@ -40,7 +41,7 @@ fun main() {
                             key = "cube",
                             size = Vec3(2f, 2f, 2f),
                             color = Vec3(0.16f, 0.58f, 0.96f),
-                            transform = Transform(translation = Vec3(-1.4f, 0f, 0f)),
+                            transform = Transform(translation = Vec3(-2.4f, 0f, 0f)),
                         )
                         sphere(
                             key = "sphere",
@@ -49,9 +50,14 @@ fun main() {
                                 baseColor = Color3D(0.96f, 0.36f, 0.14f),
                                 roughness = 0.35f,
                             ),
-                            transform = Transform(translation = Vec3(1.4f, 0f, 0f)),
+                            transform = Transform(translation = Vec3(2.4f, 0f, 0f)),
                         )
                     }
+                    model(
+                        key = "duck",
+                        source = ModelSource.Resource("duck.glb"),
+                        transform = Transform(translation = Vec3(0f, -1f, 0f)),
+                    )
                     plane(
                         key = "floor",
                         width = 10f,

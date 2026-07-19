@@ -27,6 +27,8 @@ import dev.composescene3d.core.EmissiveMaterial
 import dev.composescene3d.core.GroupNode
 import dev.composescene3d.core.Material3D
 import dev.composescene3d.core.MeshNode
+import dev.composescene3d.core.ModelNode
+import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.NodeKey
 import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.core.PlaneNode
@@ -49,6 +51,7 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 import kotlin.math.tan
 import kotlin.js.unsafeCast
+import kotlin.js.JsArray
 import kotlinx.browser.document
 import org.khronos.webgl.Float32Array
 import org.khronos.webgl.Uint32Array
@@ -59,6 +62,7 @@ import org.khronos.webgl.WebGLRenderingContext
 import org.khronos.webgl.WebGLShader
 import org.khronos.webgl.WebGLTexture
 import org.khronos.webgl.set
+import org.khronos.webgl.get
 import org.w3c.dom.HTMLCanvasElement
 import org.w3c.dom.HTMLImageElement
 
@@ -232,6 +236,8 @@ private class WebGlSurface(private val invalidate: () -> Unit) {
     private val useTextureUniform: org.khronos.webgl.WebGLUniformLocation?
     private val textureCache = mutableMapOf<String, WebGLTexture>()
     private val loadingTextures = mutableSetOf<String>()
+    private val modelCache = mutableMapOf<String, List<MeshData>>()
+    private val loadingModels = mutableSetOf<String>()
     private var width = 1
     private var height = 1
 
@@ -266,7 +272,10 @@ private class WebGlSurface(private val invalidate: () -> Unit) {
     }
 
     fun render(nodes: Collection<SceneNode>, camera: SceneCameraState, background: Color3D) {
-        val batches = buildGpuBatches(nodes, camera, width.toFloat(), height.toFloat())
+        val batches = buildGpuBatches(
+            nodes, camera, width.toFloat(), height.toFloat(),
+            resolveModel = { node -> resolveModel(node) },
+        )
         gl.viewport(0, 0, canvas.width, canvas.height)
         gl.clearColor(background.red, background.green, background.blue, background.alpha)
         gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT or WebGLRenderingContext.DEPTH_BUFFER_BIT)
@@ -341,6 +350,29 @@ private class WebGlSurface(private val invalidate: () -> Unit) {
         })
     }
 
+    private fun resolveModel(node: ModelNode): List<MeshData>? {
+        val key = node.source.assetKey().value
+        modelCache[key]?.let { return it }
+        if (loadingModels.add(key)) {
+            val accept: (Uint8Array) -> Unit = { bytes ->
+                runCatching { parseGlb(bytes, key) }
+                    .onSuccess { modelCache[key] = it }
+                loadingModels.remove(key)
+                invalidate()
+            }
+            when (val source = node.source) {
+                is ModelSource.Bytes -> accept(source.value.toTypedArray())
+                is ModelSource.Resource -> fetchBytes(source.path, accept) {
+                    loadingModels.remove(key)
+                }
+                is ModelSource.Url -> fetchBytes(source.value, accept) {
+                    loadingModels.remove(key)
+                }
+            }
+        }
+        return null
+    }
+
     private fun createProgram(vertexSource: String, fragmentSource: String): WebGLProgram {
         val vertex = compileShader(WebGLRenderingContext.VERTEX_SHADER, vertexSource)
         val fragment = compileShader(WebGLRenderingContext.FRAGMENT_SHADER, fragmentSource)
@@ -378,14 +410,9 @@ private fun buildGpuBatches(
     camera: SceneCameraState,
     width: Float,
     height: Float,
+    resolveModel: (ModelNode) -> List<MeshData>?,
 ): List<GpuMesh> = buildList {
-    fun append(node: SceneNode, parents: List<Transform>) {
-        val transforms = listOf(node.transform) + parents
-        if (node is GroupNode) {
-            node.children.forEach { append(it, transforms) }
-            return
-        }
-        val mesh = node.toMesh() ?: return
+    fun appendMesh(mesh: MeshData, transforms: List<Transform>) {
         val vertices = mutableListOf<Float>()
         mesh.positions.forEachIndexed { index, position ->
             val world = transforms.fold(position) { point, transform -> transform.apply(point) }
@@ -402,6 +429,20 @@ private fun buildGpuBatches(
         }
         add(GpuMesh(vertices.toFloatArray(), mesh.indices.toIntArray(),
             (mesh.material as? TexturedMaterial)?.baseColorTexture))
+    }
+    fun append(node: SceneNode, parents: List<Transform>) {
+        val transforms = listOf(node.transform) + parents
+        if (node is GroupNode) {
+            node.children.forEach { append(it, transforms) }
+            return
+        }
+        if (node is ModelNode) {
+            if (!node.visible) return
+            resolveModel(node)?.forEach { appendMesh(it, transforms) }
+            return
+        }
+        val mesh = node.toMesh() ?: return
+        appendMesh(mesh, transforms)
     }
     nodes.forEach { append(it, emptyList()) }
 }
@@ -442,6 +483,69 @@ private fun ByteArray.toTypedArray() = Uint8Array(size).also { result ->
     forEachIndexed { index, value -> result[index] = value }
 }
 
+private external interface JsGlbPrimitive : JsAny {
+    val positions: Float32Array
+    val normals: Float32Array
+    val uvs: Float32Array?
+    val indices: Uint32Array
+    val color: Float32Array
+    val texture: Uint8Array?
+}
+
+private fun parseGlb(bytes: Uint8Array, cacheKey: String): List<MeshData> {
+    val parsed = parseGlbData(bytes)
+    return List(parsed.length) { primitiveIndex ->
+        val primitive = requireNotNull(parsed[primitiveIndex])
+        val texture = primitive.texture?.let { data ->
+            TextureSource.Bytes(
+                value = ByteArray(data.length) { data[it] },
+                cacheKey = "$cacheKey:image:$primitiveIndex",
+            )
+        }
+        val color = primitive.color
+        MeshData(
+            positions = FloatArray(primitive.positions.length) { primitive.positions[it] }.toVec3List(),
+            indices = List(primitive.indices.length) { primitive.indices[it] },
+            normals = FloatArray(primitive.normals.length) { primitive.normals[it] }.toVec3List(),
+            uvs = primitive.uvs?.let { values -> FloatArray(values.length) { values[it] } },
+            material = texture?.let(::TexturedMaterial) ?: PbrMaterial(
+                baseColor = Color3D(color[0], color[1], color[2], color[3]),
+            ),
+        )
+    }
+}
+
+@JsFun("""(bytes) => {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  if (view.getUint32(0, true) !== 0x46546c67 || view.getUint32(4, true) !== 2) throw new Error('Expected GLB 2.0');
+  let offset = 12, json = null, bin = null;
+  while (offset < view.byteLength) {
+    const length = view.getUint32(offset, true), type = view.getUint32(offset + 4, true); offset += 8;
+    if (type === 0x4e4f534a) json = JSON.parse(new TextDecoder().decode(bytes.subarray(offset, offset + length)));
+    if (type === 0x004e4942) bin = bytes.subarray(offset, offset + length);
+    offset += length;
+  }
+  if (!json || !bin) throw new Error('GLB must contain JSON and BIN chunks');
+  const components = { 5120:1, 5121:1, 5122:2, 5123:2, 5125:4, 5126:4 };
+  const counts = { SCALAR:1, VEC2:2, VEC3:3, VEC4:4, MAT4:16 };
+  const readComponent = (dv, p, type) => type===5120?dv.getInt8(p):type===5121?dv.getUint8(p):type===5122?dv.getInt16(p,true):type===5123?dv.getUint16(p,true):type===5125?dv.getUint32(p,true):dv.getFloat32(p,true);
+  const accessor = (index, integer) => {
+    const a=json.accessors[index], bv=json.bufferViews[a.bufferView], n=counts[a.type], bytesPer=components[a.componentType];
+    const stride=bv.byteStride || n*bytesPer, start=(bv.byteOffset||0)+(a.byteOffset||0), out=integer?new Uint32Array(a.count*n):new Float32Array(a.count*n);
+    const dv=new DataView(bin.buffer, bin.byteOffset, bin.byteLength);
+    for(let i=0;i<a.count;i++) for(let c=0;c<n;c++) out[i*n+c]=readComponent(dv,start+i*stride+c*bytesPer,a.componentType);
+    return out;
+  };
+  const identity=()=>new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]);
+  const mul=(a,b)=>{const o=new Float32Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++)for(let k=0;k<4;k++)o[c*4+r]+=a[k*4+r]*b[c*4+k];return o;};
+  const local=(n)=>{if(n.matrix)return new Float32Array(n.matrix);const t=n.translation||[0,0,0],s=n.scale||[1,1,1],q=n.rotation||[0,0,0,1],x=q[0],y=q[1],z=q[2],w=q[3],m=identity();m[0]=(1-2*y*y-2*z*z)*s[0];m[1]=(2*x*y+2*w*z)*s[0];m[2]=(2*x*z-2*w*y)*s[0];m[4]=(2*x*y-2*w*z)*s[1];m[5]=(1-2*x*x-2*z*z)*s[1];m[6]=(2*y*z+2*w*x)*s[1];m[8]=(2*x*z+2*w*y)*s[2];m[9]=(2*y*z-2*w*x)*s[2];m[10]=(1-2*x*x-2*y*y)*s[2];m[12]=t[0];m[13]=t[1];m[14]=t[2];return m;};
+  const imageBytes=(textureIndex)=>{if(textureIndex==null)return null;const tex=json.textures[textureIndex],img=json.images[tex.source];if(img.bufferView==null)return null;const bv=json.bufferViews[img.bufferView],start=bv.byteOffset||0;return bin.slice(start,start+bv.byteLength);};
+  const output=[];
+  const visit=(nodeIndex,parent)=>{const node=json.nodes[nodeIndex],world=mul(parent,local(node));if(node.mesh!=null){for(const p of json.meshes[node.mesh].primitives){if(p.mode!=null&&p.mode!==4)continue;const pos=accessor(p.attributes.POSITION,false),nor=p.attributes.NORMAL!=null?accessor(p.attributes.NORMAL,false):new Float32Array(pos.length),uv=p.attributes.TEXCOORD_0!=null?accessor(p.attributes.TEXCOORD_0,false):null,idx=p.indices!=null?accessor(p.indices,true):new Uint32Array(pos.length/3);if(p.indices==null)for(let i=0;i<idx.length;i++)idx[i]=i;for(let i=0;i<pos.length;i+=3){const x=pos[i],y=pos[i+1],z=pos[i+2];pos[i]=world[0]*x+world[4]*y+world[8]*z+world[12];pos[i+1]=world[1]*x+world[5]*y+world[9]*z+world[13];pos[i+2]=world[2]*x+world[6]*y+world[10]*z+world[14];const nx=nor[i],ny=nor[i+1],nz=nor[i+2],tx=world[0]*nx+world[4]*ny+world[8]*nz,ty=world[1]*nx+world[5]*ny+world[9]*nz,tz=world[2]*nx+world[6]*ny+world[10]*nz,l=Math.hypot(tx,ty,tz)||1;nor[i]=tx/l;nor[i+1]=ty/l;nor[i+2]=tz/l;}const mat=p.material!=null?json.materials[p.material]:null,pbr=mat&&mat.pbrMetallicRoughness,color=new Float32Array((pbr&&pbr.baseColorFactor)||[0.7,0.7,0.7,1]),texture=imageBytes(pbr&&pbr.baseColorTexture&&pbr.baseColorTexture.index);output.push({positions:pos,normals:nor,uvs:uv,indices:idx,color,texture});}}for(const child of node.children||[])visit(child,world);};
+  const scene=json.scenes[(json.scene||0)],roots=scene?scene.nodes:json.nodes.map((_,i)=>i);for(const root of roots)visit(root,identity());return output;
+}""")
+private external fun parseGlbData(bytes: Uint8Array): JsArray<JsGlbPrimitive>
+
 @JsFun("(canvas) => canvas.getContext('webgl2')")
 private external fun webGl2Context(canvas: HTMLCanvasElement): WebGLRenderingContext?
 
@@ -457,6 +561,13 @@ private external fun bytesUrl(bytes: Uint8Array): String
 
 @JsFun("(url) => URL.revokeObjectURL(url)")
 private external fun revokeObjectUrl(url: String)
+
+@JsFun("(url, onLoad, onError) => fetch(url).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.arrayBuffer(); }).then(b => onLoad(new Uint8Array(b))).catch(() => onError())")
+private external fun fetchBytes(
+    url: String,
+    onLoad: (Uint8Array) -> Unit,
+    onError: () -> Unit,
+)
 
 private const val VERTEX_SHADER = """#version 300 es
 precision highp float;
