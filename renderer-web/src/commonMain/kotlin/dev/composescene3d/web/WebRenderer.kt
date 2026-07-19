@@ -247,6 +247,19 @@ private fun Material3D.shadingModel() = when (this) {
     is UnlitMaterial, is EmissiveMaterial -> 1
     else -> 0
 }
+private fun Material3D.normalScale() = (this as? TexturedMaterial)?.normalScale ?: 1f
+private fun Material3D.emissiveColor() = when (this) {
+    is TexturedMaterial -> emissiveColor
+    is EmissiveMaterial -> color
+    else -> Color3D.Black
+}
+private fun Material3D.emissiveIntensity() = when (this) {
+    is TexturedMaterial -> if (emissiveTexture != null) emissiveIntensity else 0f
+    is EmissiveMaterial -> intensity
+    else -> 0f
+}
+private fun Material3D.ambientOcclusionStrength() =
+    (this as? TexturedMaterial)?.ambientOcclusionStrength ?: 1f
 private fun Color3D.toColor(multiplier: Float = 1f) = Color(
     (red*multiplier).coerceIn(0f,1f), (green*multiplier).coerceIn(0f,1f),
     (blue*multiplier).coerceIn(0f,1f), alpha.coerceIn(0f,1f),
@@ -274,6 +287,15 @@ private class WebGlSurface(
     private val colorAttribute: Int
     private val uvAttribute: Int
     private val useTextureUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val textureUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val useNormalTextureUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val normalTextureUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val useMetallicRoughnessTextureUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val metallicRoughnessTextureUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val useEmissiveTextureUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val emissiveTextureUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val useAmbientOcclusionTextureUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val ambientOcclusionTextureUniform: org.khronos.webgl.WebGLUniformLocation?
     private val cameraPositionUniform: org.khronos.webgl.WebGLUniformLocation?
     private val lightDirectionUniform: org.khronos.webgl.WebGLUniformLocation?
     private val lightColorUniform: org.khronos.webgl.WebGLUniformLocation?
@@ -282,6 +304,10 @@ private class WebGlSurface(
     private val roughnessUniform: org.khronos.webgl.WebGLUniformLocation?
     private val reflectanceUniform: org.khronos.webgl.WebGLUniformLocation?
     private val shadingModelUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val normalScaleUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val emissiveColorUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val emissiveIntensityUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val ambientOcclusionStrengthUniform: org.khronos.webgl.WebGLUniformLocation?
     private val textureCache = mutableMapOf<String, WebGLTexture>()
     private val loadingTextures = mutableSetOf<String>()
     private val failedTextures = mutableSetOf<String>()
@@ -306,6 +332,15 @@ private class WebGlSurface(
         colorAttribute = gl.getAttribLocation(program, "aColor")
         uvAttribute = gl.getAttribLocation(program, "aUv")
         useTextureUniform = gl.getUniformLocation(program, "uUseTexture")
+        textureUniform = gl.getUniformLocation(program, "uTexture")
+        useNormalTextureUniform = gl.getUniformLocation(program, "uUseNormalTexture")
+        normalTextureUniform = gl.getUniformLocation(program, "uNormalTexture")
+        useMetallicRoughnessTextureUniform = gl.getUniformLocation(program, "uUseMetallicRoughnessTexture")
+        metallicRoughnessTextureUniform = gl.getUniformLocation(program, "uMetallicRoughnessTexture")
+        useEmissiveTextureUniform = gl.getUniformLocation(program, "uUseEmissiveTexture")
+        emissiveTextureUniform = gl.getUniformLocation(program, "uEmissiveTexture")
+        useAmbientOcclusionTextureUniform = gl.getUniformLocation(program, "uUseAmbientOcclusionTexture")
+        ambientOcclusionTextureUniform = gl.getUniformLocation(program, "uAmbientOcclusionTexture")
         cameraPositionUniform = gl.getUniformLocation(program, "uCameraPosition")
         lightDirectionUniform = gl.getUniformLocation(program, "uLightDirection")
         lightColorUniform = gl.getUniformLocation(program, "uLightColor")
@@ -314,6 +349,10 @@ private class WebGlSurface(
         roughnessUniform = gl.getUniformLocation(program, "uRoughness")
         reflectanceUniform = gl.getUniformLocation(program, "uReflectance")
         shadingModelUniform = gl.getUniformLocation(program, "uShadingModel")
+        normalScaleUniform = gl.getUniformLocation(program, "uNormalScale")
+        emissiveColorUniform = gl.getUniformLocation(program, "uEmissiveColor")
+        emissiveIntensityUniform = gl.getUniformLocation(program, "uEmissiveIntensity")
+        ambientOcclusionStrengthUniform = gl.getUniformLocation(program, "uAmbientOcclusionStrength")
         gl.enable(WebGLRenderingContext.DEPTH_TEST)
         gl.depthFunc(WebGLRenderingContext.LEQUAL)
     }
@@ -365,7 +404,18 @@ private class WebGlSurface(
             gl.uniform1f(roughnessUniform, mesh.roughness)
             gl.uniform1f(reflectanceUniform, mesh.reflectance)
             gl.uniform1i(shadingModelUniform, mesh.shadingModel)
-            bindTexture(mesh.texture)
+            gl.uniform1f(normalScaleUniform, mesh.normalScale)
+            gl.uniform3f(emissiveColorUniform,
+                mesh.emissiveColor.red, mesh.emissiveColor.green, mesh.emissiveColor.blue)
+            gl.uniform1f(emissiveIntensityUniform, mesh.emissiveIntensity)
+            gl.uniform1f(ambientOcclusionStrengthUniform, mesh.ambientOcclusionStrength)
+            bindTexture(mesh.baseColorTexture, 0, useTextureUniform, textureUniform)
+            bindTexture(mesh.normalTexture, 1, useNormalTextureUniform, normalTextureUniform)
+            bindTexture(mesh.metallicRoughnessTexture, 2,
+                useMetallicRoughnessTextureUniform, metallicRoughnessTextureUniform)
+            bindTexture(mesh.emissiveTexture, 3, useEmissiveTextureUniform, emissiveTextureUniform)
+            bindTexture(mesh.ambientOcclusionTexture, 4,
+                useAmbientOcclusionTextureUniform, ambientOcclusionTextureUniform)
             gl.bindBuffer(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER, indexBuffer)
             gl.bufferData(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER, mesh.indices.toTypedArray(), WebGLRenderingContext.DYNAMIC_DRAW)
             gl.drawElements(WebGLRenderingContext.TRIANGLES, mesh.indices.size,
@@ -381,25 +431,31 @@ private class WebGlSurface(
         canvas.remove()
     }
 
-    private fun bindTexture(source: TextureSource?) {
+    private fun bindTexture(
+        source: TextureSource?,
+        unit: Int,
+        useUniform: org.khronos.webgl.WebGLUniformLocation?,
+        samplerUniform: org.khronos.webgl.WebGLUniformLocation?,
+    ) {
         if (source == null) {
-            gl.uniform1i(useTextureUniform, 0)
+            gl.uniform1i(useUniform, 0)
             return
         }
         val key = source.assetKey().value
         val texture = textureCache[key]
         if (texture == null) {
             if (key in failedTextures) {
-                gl.uniform1i(useTextureUniform, 0)
+                gl.uniform1i(useUniform, 0)
                 return
             }
             requestTexture(key, source)
-            gl.uniform1i(useTextureUniform, 0)
+            gl.uniform1i(useUniform, 0)
             return
         }
-        gl.activeTexture(WebGLRenderingContext.TEXTURE0)
+        gl.activeTexture(WebGLRenderingContext.TEXTURE0 + unit)
         gl.bindTexture(WebGLRenderingContext.TEXTURE_2D, texture)
-        gl.uniform1i(useTextureUniform, 1)
+        gl.uniform1i(samplerUniform, unit)
+        gl.uniform1i(useUniform, 1)
     }
 
     private fun requestTexture(key: String, source: TextureSource) {
@@ -503,11 +559,19 @@ private class WebGlSurface(
 private data class GpuMesh(
     val vertices: FloatArray,
     val indices: IntArray,
-    val texture: TextureSource?,
+    val baseColorTexture: TextureSource?,
+    val normalTexture: TextureSource?,
+    val metallicRoughnessTexture: TextureSource?,
+    val emissiveTexture: TextureSource?,
+    val ambientOcclusionTexture: TextureSource?,
     val metallic: Float,
     val roughness: Float,
     val reflectance: Float,
     val shadingModel: Int,
+    val normalScale: Float,
+    val emissiveColor: Color3D,
+    val emissiveIntensity: Float,
+    val ambientOcclusionStrength: Float,
 )
 
 private data class WebDirectionalLight(val color: Vec3, val intensity: Float)
@@ -547,14 +611,23 @@ private fun buildGpuBatches(
                 color.red, color.green, color.blue, color.alpha,
                 uv?.get(index*2) ?: 0f, uv?.get(index*2+1) ?: 0f)
         }
+        val textured = mesh.material as? TexturedMaterial
         add(GpuMesh(
             vertices = vertices.toFloatArray(),
             indices = mesh.indices.toIntArray(),
-            texture = (mesh.material as? TexturedMaterial)?.baseColorTexture,
+            baseColorTexture = textured?.baseColorTexture,
+            normalTexture = textured?.normalTexture,
+            metallicRoughnessTexture = textured?.metallicRoughnessTexture,
+            emissiveTexture = textured?.emissiveTexture,
+            ambientOcclusionTexture = textured?.ambientOcclusionTexture,
             metallic = mesh.material.metallic(),
             roughness = mesh.material.roughness(),
             reflectance = mesh.material.reflectance(),
             shadingModel = mesh.material.shadingModel(),
+            normalScale = mesh.material.normalScale(),
+            emissiveColor = mesh.material.emissiveColor(),
+            emissiveIntensity = mesh.material.emissiveIntensity(),
+            ambientOcclusionStrength = mesh.material.ambientOcclusionStrength(),
         ))
     }
     fun append(node: SceneNode, parents: List<Transform>) {
@@ -622,28 +695,50 @@ private external interface JsGlbPrimitive : JsAny {
     val indices: Uint32Array
     val color: Float32Array
     val texture: Uint8Array?
+    val normalTexture: Uint8Array?
+    val metallicRoughnessTexture: Uint8Array?
+    val emissiveTexture: Uint8Array?
+    val ambientOcclusionTexture: Uint8Array?
     val metallic: Float
     val roughness: Float
+    val normalScale: Float
+    val emissiveColor: Float32Array
+    val ambientOcclusionStrength: Float
 }
 
 private fun parseGlb(bytes: Uint8Array, cacheKey: String): List<MeshData> {
     val parsed = parseGlbData(bytes)
     return List(parsed.length) { primitiveIndex ->
         val primitive = requireNotNull(parsed[primitiveIndex])
-        val texture = primitive.texture?.let { data ->
+        fun texture(data: Uint8Array?, channel: String) = data?.let {
             TextureSource.Bytes(
-                value = ByteArray(data.length) { data[it] },
-                cacheKey = "$cacheKey:image:$primitiveIndex",
+                value = ByteArray(it.length) { index -> it[index] },
+                cacheKey = "$cacheKey:image:$primitiveIndex:$channel",
             )
         }
+        val baseColorTexture = texture(primitive.texture, "baseColor")
         val color = primitive.color
+        val emissive = primitive.emissiveColor
         MeshData(
             positions = FloatArray(primitive.positions.length) { primitive.positions[it] }.toVec3List(),
             indices = List(primitive.indices.length) { primitive.indices[it] },
             normals = FloatArray(primitive.normals.length) { primitive.normals[it] }.toVec3List(),
             uvs = primitive.uvs?.let { values -> FloatArray(values.length) { values[it] } },
-            material = texture?.let {
-                TexturedMaterial(it, metallic = primitive.metallic, roughness = primitive.roughness)
+            material = baseColorTexture?.let {
+                TexturedMaterial(
+                    baseColorTexture = it,
+                    metallic = primitive.metallic,
+                    roughness = primitive.roughness,
+                    normalTexture = texture(primitive.normalTexture, "normal"),
+                    metallicRoughnessTexture = texture(
+                        primitive.metallicRoughnessTexture, "metallicRoughness"),
+                    emissiveTexture = texture(primitive.emissiveTexture, "emissive"),
+                    ambientOcclusionTexture = texture(
+                        primitive.ambientOcclusionTexture, "ambientOcclusion"),
+                    normalScale = primitive.normalScale,
+                    emissiveColor = Color3D(emissive[0], emissive[1], emissive[2]),
+                    ambientOcclusionStrength = primitive.ambientOcclusionStrength,
+                )
             } ?: PbrMaterial(
                 baseColor = Color3D(color[0], color[1], color[2], color[3]),
                 metallic = primitive.metallic,
@@ -679,7 +774,7 @@ private fun parseGlb(bytes: Uint8Array, cacheKey: String): List<MeshData> {
   const local=(n)=>{if(n.matrix)return new Float32Array(n.matrix);const t=n.translation||[0,0,0],s=n.scale||[1,1,1],q=n.rotation||[0,0,0,1],x=q[0],y=q[1],z=q[2],w=q[3],m=identity();m[0]=(1-2*y*y-2*z*z)*s[0];m[1]=(2*x*y+2*w*z)*s[0];m[2]=(2*x*z-2*w*y)*s[0];m[4]=(2*x*y-2*w*z)*s[1];m[5]=(1-2*x*x-2*z*z)*s[1];m[6]=(2*y*z+2*w*x)*s[1];m[8]=(2*x*z+2*w*y)*s[2];m[9]=(2*y*z-2*w*x)*s[2];m[10]=(1-2*x*x-2*y*y)*s[2];m[12]=t[0];m[13]=t[1];m[14]=t[2];return m;};
   const imageBytes=(textureIndex)=>{if(textureIndex==null)return null;const tex=json.textures[textureIndex],img=json.images[tex.source];if(img.bufferView==null)return null;const bv=json.bufferViews[img.bufferView],start=bv.byteOffset||0;return bin.slice(start,start+bv.byteLength);};
   const output=[];
-  const visit=(nodeIndex,parent)=>{const node=json.nodes[nodeIndex],world=mul(parent,local(node));if(node.mesh!=null){for(const p of json.meshes[node.mesh].primitives){if(p.mode!=null&&p.mode!==4)continue;const pos=accessor(p.attributes.POSITION,false),nor=p.attributes.NORMAL!=null?accessor(p.attributes.NORMAL,false):new Float32Array(pos.length),uv=p.attributes.TEXCOORD_0!=null?accessor(p.attributes.TEXCOORD_0,false):null,idx=p.indices!=null?accessor(p.indices,true):new Uint32Array(pos.length/3);if(p.indices==null)for(let i=0;i<idx.length;i++)idx[i]=i;for(let i=0;i<pos.length;i+=3){const x=pos[i],y=pos[i+1],z=pos[i+2];pos[i]=world[0]*x+world[4]*y+world[8]*z+world[12];pos[i+1]=world[1]*x+world[5]*y+world[9]*z+world[13];pos[i+2]=world[2]*x+world[6]*y+world[10]*z+world[14];const nx=nor[i],ny=nor[i+1],nz=nor[i+2],tx=world[0]*nx+world[4]*ny+world[8]*nz,ty=world[1]*nx+world[5]*ny+world[9]*nz,tz=world[2]*nx+world[6]*ny+world[10]*nz,l=Math.hypot(tx,ty,tz)||1;nor[i]=tx/l;nor[i+1]=ty/l;nor[i+2]=tz/l;}const mat=p.material!=null?json.materials[p.material]:null,pbr=mat&&mat.pbrMetallicRoughness,color=new Float32Array((pbr&&pbr.baseColorFactor)||[0.7,0.7,0.7,1]),texture=imageBytes(pbr&&pbr.baseColorTexture&&pbr.baseColorTexture.index),metallic=pbr&&pbr.metallicFactor!=null?pbr.metallicFactor:1,roughness=pbr&&pbr.roughnessFactor!=null?pbr.roughnessFactor:1;output.push({positions:pos,normals:nor,uvs:uv,indices:idx,color,texture,metallic,roughness});}}for(const child of node.children||[])visit(child,world);};
+  const visit=(nodeIndex,parent)=>{const node=json.nodes[nodeIndex],world=mul(parent,local(node));if(node.mesh!=null){for(const p of json.meshes[node.mesh].primitives){if(p.mode!=null&&p.mode!==4)continue;const pos=accessor(p.attributes.POSITION,false),nor=p.attributes.NORMAL!=null?accessor(p.attributes.NORMAL,false):new Float32Array(pos.length),uv=p.attributes.TEXCOORD_0!=null?accessor(p.attributes.TEXCOORD_0,false):null,idx=p.indices!=null?accessor(p.indices,true):new Uint32Array(pos.length/3);if(p.indices==null)for(let i=0;i<idx.length;i++)idx[i]=i;for(let i=0;i<pos.length;i+=3){const x=pos[i],y=pos[i+1],z=pos[i+2];pos[i]=world[0]*x+world[4]*y+world[8]*z+world[12];pos[i+1]=world[1]*x+world[5]*y+world[9]*z+world[13];pos[i+2]=world[2]*x+world[6]*y+world[10]*z+world[14];const nx=nor[i],ny=nor[i+1],nz=nor[i+2],tx=world[0]*nx+world[4]*ny+world[8]*nz,ty=world[1]*nx+world[5]*ny+world[9]*nz,tz=world[2]*nx+world[6]*ny+world[10]*nz,l=Math.hypot(tx,ty,tz)||1;nor[i]=tx/l;nor[i+1]=ty/l;nor[i+2]=tz/l;}const mat=p.material!=null?json.materials[p.material]:null,pbr=mat&&mat.pbrMetallicRoughness,color=new Float32Array((pbr&&pbr.baseColorFactor)||[0.7,0.7,0.7,1]),texture=imageBytes(pbr&&pbr.baseColorTexture&&pbr.baseColorTexture.index),normalTexture=imageBytes(mat&&mat.normalTexture&&mat.normalTexture.index),metallicRoughnessTexture=imageBytes(pbr&&pbr.metallicRoughnessTexture&&pbr.metallicRoughnessTexture.index),emissiveTexture=imageBytes(mat&&mat.emissiveTexture&&mat.emissiveTexture.index),ambientOcclusionTexture=imageBytes(mat&&mat.occlusionTexture&&mat.occlusionTexture.index),metallic=pbr&&pbr.metallicFactor!=null?pbr.metallicFactor:1,roughness=pbr&&pbr.roughnessFactor!=null?pbr.roughnessFactor:1,normalScale=mat&&mat.normalTexture&&mat.normalTexture.scale!=null?mat.normalTexture.scale:1,emissiveColor=new Float32Array((mat&&mat.emissiveFactor)||[0,0,0]),ambientOcclusionStrength=mat&&mat.occlusionTexture&&mat.occlusionTexture.strength!=null?mat.occlusionTexture.strength:1;output.push({positions:pos,normals:nor,uvs:uv,indices:idx,color,texture,normalTexture,metallicRoughnessTexture,emissiveTexture,ambientOcclusionTexture,metallic,roughness,normalScale,emissiveColor,ambientOcclusionStrength});}}for(const child of node.children||[])visit(child,world);};
   const scene=json.scenes[(json.scene||0)],roots=scene?scene.nodes:json.nodes.map((_,i)=>i);for(const root of roots)visit(root,identity());return output;
 }""")
 private external fun parseGlbData(bytes: Uint8Array): JsArray<JsGlbPrimitive>
@@ -781,6 +876,14 @@ in vec4 vColor;
 in vec2 vUv;
 uniform sampler2D uTexture;
 uniform bool uUseTexture;
+uniform sampler2D uNormalTexture;
+uniform bool uUseNormalTexture;
+uniform sampler2D uMetallicRoughnessTexture;
+uniform bool uUseMetallicRoughnessTexture;
+uniform sampler2D uEmissiveTexture;
+uniform bool uUseEmissiveTexture;
+uniform sampler2D uAmbientOcclusionTexture;
+uniform bool uUseAmbientOcclusionTexture;
 uniform vec3 uCameraPosition;
 uniform vec3 uLightDirection;
 uniform vec3 uLightColor;
@@ -789,6 +892,10 @@ uniform float uMetallic;
 uniform float uRoughness;
 uniform float uReflectance;
 uniform int uShadingModel;
+uniform float uNormalScale;
+uniform vec3 uEmissiveColor;
+uniform float uEmissiveIntensity;
+uniform float uAmbientOcclusionStrength;
 out vec4 outColor;
 
 const float PI = 3.14159265359;
@@ -810,6 +917,19 @@ vec3 fresnelSchlick(float cosTheta, vec3 f0) {
     return f0 + (1.0 - f0) * pow(1.0 - cosTheta, 5.0);
 }
 
+mat3 cotangentFrame(vec3 normal, vec3 position, vec2 uv) {
+    vec3 dp1 = dFdx(position);
+    vec3 dp2 = dFdy(position);
+    vec2 duv1 = dFdx(uv);
+    vec2 duv2 = dFdy(uv);
+    vec3 dp2Perp = cross(dp2, normal);
+    vec3 dp1Perp = cross(normal, dp1);
+    vec3 tangent = dp2Perp * duv1.x + dp1Perp * duv2.x;
+    vec3 bitangent = dp2Perp * duv1.y + dp1Perp * duv2.y;
+    float scale = inversesqrt(max(max(dot(tangent, tangent), dot(bitangent, bitangent)), 0.0001));
+    return mat3(tangent * scale, bitangent * scale, normal);
+}
+
 void main() {
     vec4 base = uUseTexture ? texture(uTexture, vUv) * vColor : vColor;
     if (uUseTexture) base.rgb = pow(base.rgb, vec3(2.2));
@@ -819,6 +939,11 @@ void main() {
     }
 
     vec3 n = normalize(vNormal);
+    if (uUseNormalTexture) {
+        vec3 mappedNormal = texture(uNormalTexture, vUv).xyz * 2.0 - 1.0;
+        mappedNormal.xy *= uNormalScale;
+        n = normalize(cotangentFrame(n, vWorldPosition, vUv) * mappedNormal);
+    }
     vec3 v = normalize(uCameraPosition - vWorldPosition);
     vec3 l = normalize(uLightDirection);
     vec3 h = normalize(v + l);
@@ -826,8 +951,10 @@ void main() {
     float nDotV = max(dot(n, v), 0.0001);
     float nDotH = max(dot(n, h), 0.0);
     float hDotV = max(dot(h, v), 0.0);
-    float roughness = clamp(uRoughness, 0.045, 1.0);
-    float metallic = clamp(uMetallic, 0.0, 1.0);
+    vec4 metallicRoughness = uUseMetallicRoughnessTexture
+        ? texture(uMetallicRoughnessTexture, vUv) : vec4(1.0);
+    float roughness = clamp(uRoughness * metallicRoughness.g, 0.045, 1.0);
+    float metallic = clamp(uMetallic * metallicRoughness.b, 0.0, 1.0);
     vec3 f0 = mix(vec3(0.16 * uReflectance * uReflectance), base.rgb, metallic);
     vec3 f = fresnelSchlick(hDotV, f0);
     float d = distributionGgx(nDotH, roughness);
@@ -835,8 +962,17 @@ void main() {
     vec3 specular = d * g * f / max(4.0 * nDotV * nDotL, 0.0001);
     vec3 diffuse = (1.0 - f) * (1.0 - metallic) * base.rgb / PI;
     vec3 direct = (diffuse + specular) * uLightColor * uLightIntensity * nDotL;
-    vec3 ambient = base.rgb * (0.06 + 0.04 * (1.0 - roughness));
-    vec3 mapped = (direct + ambient) / (direct + ambient + vec3(1.0));
+    float aoSample = uUseAmbientOcclusionTexture ? texture(uAmbientOcclusionTexture, vUv).r : 1.0;
+    float ao = mix(1.0, aoSample, uAmbientOcclusionStrength);
+    vec3 ambient = base.rgb * (0.06 + 0.04 * (1.0 - roughness)) * ao;
+    vec3 emissive = uEmissiveColor * uEmissiveIntensity;
+    if (uUseEmissiveTexture) {
+        emissive *= pow(texture(uEmissiveTexture, vUv).rgb, vec3(2.2));
+    } else if (uEmissiveIntensity == 0.0) {
+        emissive = vec3(0.0);
+    }
+    vec3 lit = direct + ambient + emissive;
+    vec3 mapped = lit / (lit + vec3(1.0));
     mapped = pow(mapped, vec3(1.0 / 2.2));
     outColor = vec4(mapped, base.a);
 }

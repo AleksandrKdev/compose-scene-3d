@@ -415,8 +415,12 @@ State: unavailable/offline
   from glTF and advertises `physicallyBasedRendering`. Box geometry now has separate per-face
   vertices/normals instead of incorrectly smoothed corner normals. Headless Chrome verified the
   PBR sphere, textured Duck, checker plane and corrected cube.
-- Next milestone: Web normal, metallic-roughness, emissive and AO texture channels, then additional
-  light types and shadows.
+- Web PBR now binds base-color, normal, metallic-roughness, emissive and ambient-occlusion maps to
+  independent texture units. Normal mapping reconstructs the tangent frame from screen-space
+  derivatives, metallic/roughness follow glTF B/G channels, albedo/emissive are decoded from sRGB,
+  and AO strength affects ambient light. The GLB/glTF parser extracts the same channels and scalar
+  factors from embedded images. A Web sample with five SVG maps was verified in headless Chrome.
+- Next milestone: Web point and spot lights, then shadows and broader glTF coverage.
 
 ## Completed local Maven alpha milestone
 
@@ -486,8 +490,7 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Continue Web PBR with normal, metallic-roughness, emissive and AO texture channels, then additional
-light types and shadows.
+Continue Web PBR with point and spot lights, then shadows and broader glTF coverage.
 The user explicitly allowed breaking the old empty GroupNode API before alpha03. Do not expose
 backend types in public commonMain API.
 ```
