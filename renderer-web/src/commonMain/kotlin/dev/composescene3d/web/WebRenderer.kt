@@ -142,6 +142,10 @@ private data class MeshData(
     val normals: List<Vec3>,
     val uvs: FloatArray?,
     val material: Material3D,
+    val alphaMode: Int = WEB_ALPHA_OPAQUE,
+    val alphaCutoff: Float = 0.5f,
+    val doubleSided: Boolean = false,
+    val baseColorFactor: Color3D? = null,
 )
 
 private fun SceneNode.toMesh(): MeshData? = when (this) {
@@ -316,6 +320,8 @@ private class WebGlSurface(
     private val emissiveColorUniform: org.khronos.webgl.WebGLUniformLocation?
     private val emissiveIntensityUniform: org.khronos.webgl.WebGLUniformLocation?
     private val ambientOcclusionStrengthUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val alphaModeUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val alphaCutoffUniform: org.khronos.webgl.WebGLUniformLocation?
     private val cameraRightUniform: org.khronos.webgl.WebGLUniformLocation?
     private val cameraUpUniform: org.khronos.webgl.WebGLUniformLocation?
     private val cameraForwardUniform: org.khronos.webgl.WebGLUniformLocation?
@@ -415,6 +421,8 @@ private class WebGlSurface(
         emissiveColorUniform = gl.getUniformLocation(program, "uEmissiveColor")
         emissiveIntensityUniform = gl.getUniformLocation(program, "uEmissiveIntensity")
         ambientOcclusionStrengthUniform = gl.getUniformLocation(program, "uAmbientOcclusionStrength")
+        alphaModeUniform = gl.getUniformLocation(program, "uAlphaMode")
+        alphaCutoffUniform = gl.getUniformLocation(program, "uAlphaCutoff")
         cameraRightUniform = gl.getUniformLocation(program, "uCameraRight")
         cameraUpUniform = gl.getUniformLocation(program, "uCameraUp")
         cameraForwardUniform = gl.getUniformLocation(program, "uCameraForward")
@@ -554,8 +562,22 @@ private class WebGlSurface(
         }
         uploadPointLights(lights.points)
         uploadSpotLights(lights.spots)
-        preparedMeshes.forEach { prepared ->
+        preparedMeshes.sortedBy { it.mesh.alphaMode }.forEach { prepared ->
             val mesh = prepared.mesh
+            if (mesh.alphaMode == WEB_ALPHA_BLEND) {
+                gl.enable(WebGLRenderingContext.BLEND)
+                gl.blendFunc(WebGLRenderingContext.SRC_ALPHA, WebGLRenderingContext.ONE_MINUS_SRC_ALPHA)
+                gl.depthMask(false)
+            } else {
+                gl.disable(WebGLRenderingContext.BLEND)
+                gl.depthMask(true)
+            }
+            if (mesh.doubleSided) {
+                gl.disable(WebGLRenderingContext.CULL_FACE)
+            } else {
+                gl.enable(WebGLRenderingContext.CULL_FACE)
+                gl.cullFace(WebGLRenderingContext.BACK)
+            }
             gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, prepared.buffers.vertex)
             gl.enableVertexAttribArray(worldPositionAttribute)
             gl.vertexAttribPointer(worldPositionAttribute, 3, WebGLRenderingContext.FLOAT, false, 64, 16)
@@ -574,6 +596,8 @@ private class WebGlSurface(
                 mesh.emissiveColor.red, mesh.emissiveColor.green, mesh.emissiveColor.blue)
             gl.uniform1f(emissiveIntensityUniform, mesh.emissiveIntensity)
             gl.uniform1f(ambientOcclusionStrengthUniform, mesh.ambientOcclusionStrength)
+            gl.uniform1i(alphaModeUniform, mesh.alphaMode)
+            gl.uniform1f(alphaCutoffUniform, mesh.alphaCutoff)
             gl.uniform1i(receiveShadowUniform, if (mesh.receiveShadows) 1 else 0)
             bindTexture(mesh.baseColorTexture, 0, useTextureUniform, textureUniform)
             bindTexture(mesh.normalTexture, 1, useNormalTextureUniform, normalTextureUniform)
@@ -586,6 +610,9 @@ private class WebGlSurface(
             gl.drawElements(WebGLRenderingContext.TRIANGLES, mesh.indices.size,
                 WebGLRenderingContext.UNSIGNED_INT, 0)
         }
+        gl.disable(WebGLRenderingContext.BLEND)
+        gl.disable(WebGLRenderingContext.CULL_FACE)
+        gl.depthMask(true)
     }
 
     fun close() {
@@ -618,7 +645,8 @@ private class WebGlSurface(
         uploadShadowBasis(program = true, projection)
         gl.enable(WebGLRenderingContext.POLYGON_OFFSET_FILL)
         gl.polygonOffset(SHADOW_POLYGON_OFFSET_FACTOR, SHADOW_POLYGON_OFFSET_UNITS)
-        batches.filter { it.mesh.castShadows }.forEach { prepared ->
+        batches.filter { it.mesh.castShadows && it.mesh.alphaMode != WEB_ALPHA_BLEND }
+            .forEach { prepared ->
             val mesh = prepared.mesh
             gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, prepared.buffers.vertex)
             gl.enableVertexAttribArray(shadowWorldPositionAttribute)
@@ -903,6 +931,9 @@ private data class GpuMesh(
     val ambientOcclusionStrength: Float,
     val castShadows: Boolean,
     val receiveShadows: Boolean,
+    val alphaMode: Int,
+    val alphaCutoff: Float,
+    val doubleSided: Boolean,
 )
 
 private data class WebMeshBuffers(
@@ -1088,7 +1119,7 @@ private fun buildGpuBatches(
             val normal = transforms.fold(mesh.normals[index]) { value, transform ->
                 transform.rotation.rotate(value)
             }.normalized()
-            val color = mesh.material.color()
+            val color = mesh.baseColorFactor?.toColor() ?: mesh.material.color()
             val uv = mesh.uvs
             vertices += listOf(0f, 0f, 0f, 0f,
                 world.x, world.y, world.z,
@@ -1115,6 +1146,9 @@ private fun buildGpuBatches(
             ambientOcclusionStrength = mesh.material.ambientOcclusionStrength(),
             castShadows = castShadows,
             receiveShadows = receiveShadows,
+            alphaMode = if (mesh.material is TransparentMaterial) WEB_ALPHA_BLEND else mesh.alphaMode,
+            alphaCutoff = mesh.alphaCutoff,
+            doubleSided = mesh.doubleSided || mesh.material is TransparentMaterial,
         ))
     }
     fun append(node: SceneNode, parents: List<Transform>) {
@@ -1187,6 +1221,9 @@ private external interface JsGlbPrimitive : JsAny {
     val normalScale: Float
     val emissiveColor: Float32Array
     val ambientOcclusionStrength: Float
+    val alphaMode: Int
+    val alphaCutoff: Float
+    val doubleSided: Boolean
 }
 
 private fun parseGlb(bytes: Uint8Array, cacheKey: String): List<MeshData> {
@@ -1227,6 +1264,10 @@ private fun parseGlb(bytes: Uint8Array, cacheKey: String): List<MeshData> {
                 metallic = primitive.metallic,
                 roughness = primitive.roughness,
             ),
+            alphaMode = primitive.alphaMode,
+            alphaCutoff = primitive.alphaCutoff,
+            doubleSided = primitive.doubleSided,
+            baseColorFactor = Color3D(color[0], color[1], color[2], color[3]),
         )
     }
 }
@@ -1257,7 +1298,7 @@ private fun parseGlb(bytes: Uint8Array, cacheKey: String): List<MeshData> {
   const local=(n)=>{if(n.matrix)return new Float32Array(n.matrix);const t=n.translation||[0,0,0],s=n.scale||[1,1,1],q=n.rotation||[0,0,0,1],x=q[0],y=q[1],z=q[2],w=q[3],m=identity();m[0]=(1-2*y*y-2*z*z)*s[0];m[1]=(2*x*y+2*w*z)*s[0];m[2]=(2*x*z-2*w*y)*s[0];m[4]=(2*x*y-2*w*z)*s[1];m[5]=(1-2*x*x-2*z*z)*s[1];m[6]=(2*y*z+2*w*x)*s[1];m[8]=(2*x*z+2*w*y)*s[2];m[9]=(2*y*z-2*w*x)*s[2];m[10]=(1-2*x*x-2*y*y)*s[2];m[12]=t[0];m[13]=t[1];m[14]=t[2];return m;};
   const imageBytes=(textureIndex)=>{if(textureIndex==null)return null;const tex=json.textures[textureIndex],img=json.images[tex.source];if(img.bufferView==null)return null;const bv=json.bufferViews[img.bufferView],start=bv.byteOffset||0;return bin.slice(start,start+bv.byteLength);};
   const output=[];
-  const visit=(nodeIndex,parent)=>{const node=json.nodes[nodeIndex],world=mul(parent,local(node));if(node.mesh!=null){for(const p of json.meshes[node.mesh].primitives){if(p.mode!=null&&p.mode!==4)continue;const pos=accessor(p.attributes.POSITION,false),nor=p.attributes.NORMAL!=null?accessor(p.attributes.NORMAL,false):new Float32Array(pos.length),uv=p.attributes.TEXCOORD_0!=null?accessor(p.attributes.TEXCOORD_0,false):null,idx=p.indices!=null?accessor(p.indices,true):new Uint32Array(pos.length/3);if(p.indices==null)for(let i=0;i<idx.length;i++)idx[i]=i;for(let i=0;i<pos.length;i+=3){const x=pos[i],y=pos[i+1],z=pos[i+2];pos[i]=world[0]*x+world[4]*y+world[8]*z+world[12];pos[i+1]=world[1]*x+world[5]*y+world[9]*z+world[13];pos[i+2]=world[2]*x+world[6]*y+world[10]*z+world[14];const nx=nor[i],ny=nor[i+1],nz=nor[i+2],tx=world[0]*nx+world[4]*ny+world[8]*nz,ty=world[1]*nx+world[5]*ny+world[9]*nz,tz=world[2]*nx+world[6]*ny+world[10]*nz,l=Math.hypot(tx,ty,tz)||1;nor[i]=tx/l;nor[i+1]=ty/l;nor[i+2]=tz/l;}const mat=p.material!=null?json.materials[p.material]:null,pbr=mat&&mat.pbrMetallicRoughness,color=new Float32Array((pbr&&pbr.baseColorFactor)||[0.7,0.7,0.7,1]),texture=imageBytes(pbr&&pbr.baseColorTexture&&pbr.baseColorTexture.index),normalTexture=imageBytes(mat&&mat.normalTexture&&mat.normalTexture.index),metallicRoughnessTexture=imageBytes(pbr&&pbr.metallicRoughnessTexture&&pbr.metallicRoughnessTexture.index),emissiveTexture=imageBytes(mat&&mat.emissiveTexture&&mat.emissiveTexture.index),ambientOcclusionTexture=imageBytes(mat&&mat.occlusionTexture&&mat.occlusionTexture.index),metallic=pbr&&pbr.metallicFactor!=null?pbr.metallicFactor:1,roughness=pbr&&pbr.roughnessFactor!=null?pbr.roughnessFactor:1,normalScale=mat&&mat.normalTexture&&mat.normalTexture.scale!=null?mat.normalTexture.scale:1,emissiveColor=new Float32Array((mat&&mat.emissiveFactor)||[0,0,0]),ambientOcclusionStrength=mat&&mat.occlusionTexture&&mat.occlusionTexture.strength!=null?mat.occlusionTexture.strength:1;output.push({positions:pos,normals:nor,uvs:uv,indices:idx,color,texture,normalTexture,metallicRoughnessTexture,emissiveTexture,ambientOcclusionTexture,metallic,roughness,normalScale,emissiveColor,ambientOcclusionStrength});}}for(const child of node.children||[])visit(child,world);};
+  const visit=(nodeIndex,parent)=>{const node=json.nodes[nodeIndex],world=mul(parent,local(node));if(node.mesh!=null){for(const p of json.meshes[node.mesh].primitives){if(p.mode!=null&&p.mode!==4)continue;const pos=accessor(p.attributes.POSITION,false),nor=p.attributes.NORMAL!=null?accessor(p.attributes.NORMAL,false):new Float32Array(pos.length),uv=p.attributes.TEXCOORD_0!=null?accessor(p.attributes.TEXCOORD_0,false):null,idx=p.indices!=null?accessor(p.indices,true):new Uint32Array(pos.length/3);if(p.indices==null)for(let i=0;i<idx.length;i++)idx[i]=i;for(let i=0;i<pos.length;i+=3){const x=pos[i],y=pos[i+1],z=pos[i+2];pos[i]=world[0]*x+world[4]*y+world[8]*z+world[12];pos[i+1]=world[1]*x+world[5]*y+world[9]*z+world[13];pos[i+2]=world[2]*x+world[6]*y+world[10]*z+world[14];const nx=nor[i],ny=nor[i+1],nz=nor[i+2],tx=world[0]*nx+world[4]*ny+world[8]*nz,ty=world[1]*nx+world[5]*ny+world[9]*nz,tz=world[2]*nx+world[6]*ny+world[10]*nz,l=Math.hypot(tx,ty,tz)||1;nor[i]=tx/l;nor[i+1]=ty/l;nor[i+2]=tz/l;}const mat=p.material!=null?json.materials[p.material]:null,pbr=mat&&mat.pbrMetallicRoughness,color=new Float32Array((pbr&&pbr.baseColorFactor)||[0.7,0.7,0.7,1]),texture=imageBytes(pbr&&pbr.baseColorTexture&&pbr.baseColorTexture.index),normalTexture=imageBytes(mat&&mat.normalTexture&&mat.normalTexture.index),metallicRoughnessTexture=imageBytes(pbr&&pbr.metallicRoughnessTexture&&pbr.metallicRoughnessTexture.index),emissiveTexture=imageBytes(mat&&mat.emissiveTexture&&mat.emissiveTexture.index),ambientOcclusionTexture=imageBytes(mat&&mat.occlusionTexture&&mat.occlusionTexture.index),metallic=pbr&&pbr.metallicFactor!=null?pbr.metallicFactor:1,roughness=pbr&&pbr.roughnessFactor!=null?pbr.roughnessFactor:1,normalScale=mat&&mat.normalTexture&&mat.normalTexture.scale!=null?mat.normalTexture.scale:1,emissiveColor=new Float32Array((mat&&mat.emissiveFactor)||[0,0,0]),ambientOcclusionStrength=mat&&mat.occlusionTexture&&mat.occlusionTexture.strength!=null?mat.occlusionTexture.strength:1,alphaMode=mat&&mat.alphaMode==="MASK"?1:mat&&mat.alphaMode==="BLEND"?2:0,alphaCutoff=mat&&mat.alphaCutoff!=null?mat.alphaCutoff:0.5,doubleSided=!!(mat&&mat.doubleSided);output.push({positions:pos,normals:nor,uvs:uv,indices:idx,color,texture,normalTexture,metallicRoughnessTexture,emissiveTexture,ambientOcclusionTexture,metallic,roughness,normalScale,emissiveColor,ambientOcclusionStrength,alphaMode,alphaCutoff,doubleSided});}}for(const child of node.children||[])visit(child,world);};
   const scene=json.scenes[(json.scene||0)],roots=scene?scene.nodes:json.nodes.map((_,i)=>i);for(const root of roots)visit(root,identity());return output;
 }""")
 private external fun parseGlbData(bytes: Uint8Array): JsArray<JsGlbPrimitive>
@@ -1358,6 +1399,8 @@ private external fun loadGltfAsGlb(
 )
 
 private const val MAX_WEB_LIGHTS = 4
+private const val WEB_ALPHA_OPAQUE = 0
+private const val WEB_ALPHA_BLEND = 2
 private const val MAX_WEB_SHADOW_MAP_SIZE = 2048
 private const val VERTEX_STRIDE_FLOATS = 16
 private const val WORLD_POSITION_FLOAT_OFFSET = 4
@@ -1478,6 +1521,8 @@ uniform float uNormalScale;
 uniform vec3 uEmissiveColor;
 uniform float uEmissiveIntensity;
 uniform float uAmbientOcclusionStrength;
+uniform int uAlphaMode;
+uniform float uAlphaCutoff;
 uniform int uPointLightCount;
 uniform vec3 uPointLightPositions[4];
 uniform vec3 uPointLightColors[4];
@@ -1608,6 +1653,7 @@ float spotShadow(vec3 worldPosition) {
 
 void main() {
     vec4 base = uUseTexture ? texture(uTexture, vUv) * vColor : vColor;
+    if (uAlphaMode == 1 && base.a < uAlphaCutoff) discard;
     if (uUseTexture) base.rgb = pow(base.rgb, vec3(2.2));
     if (uShadingModel == 1) {
         outColor = uUseTexture ? vec4(pow(base.rgb, vec3(1.0 / 2.2)), base.a) : base;

@@ -451,7 +451,11 @@ State: unavailable/offline
   revision. Orbit/pan/zoom, texture completion and ordinary redraws reuse the arrays; successful
   asynchronous GLB/glTF parsing increments the revision and rebuilds them. Synchronous
   `ModelSource.Bytes` parsing now contributes its meshes to the same render immediately.
-- Next milestone: broaden Web glTF support with alpha modes and double-sided materials.
+- Web glTF materials now preserve base-color factors and implement `OPAQUE`, alpha-cutoff `MASK`
+  and post-opaque `BLEND` rendering. Blend meshes use source-alpha blending without depth writes
+  and do not cast falsely solid shadows. `doubleSided` controls face culling. The external glTF
+  sample uses a translucent, double-sided textured primitive and was verified in headless Chrome.
+- Next milestone: Web glTF sampler settings and texture-coordinate set selection.
 
 ## Completed local Maven alpha milestone
 
@@ -521,7 +525,7 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Continue Web glTF coverage with alpha modes and double-sided materials.
+Continue Web glTF coverage with sampler settings and texture-coordinate set selection.
 The user explicitly allowed breaking the old empty GroupNode API before alpha03. Do not expose
 backend types in public commonMain API.
 ```

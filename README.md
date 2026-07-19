@@ -34,6 +34,8 @@ Source repository: [AleksandrKdev/compose-scene-3d](https://github.com/Aleksandr
   maps. Camera projection runs in the vertex shader. Per-mesh WebGL buffers persist across renders,
   are shared by all active passes and skip uploads while world-space geometry is unchanged. CPU
   mesh batches are likewise reused until the scene or asynchronously loaded model set changes.
+  Imported glTF materials honor base-color factors, `OPAQUE`/`MASK`/`BLEND`, `alphaCutoff` and
+  `doubleSided`.
 - `renderer-testkit`: an internal backend-neutral conformance harness for retained commands,
   lifecycle behavior and capability declarations. New renderers must pass the same contract.
 - `samples/android-app`, `samples/desktop-app`, `samples/ios-app` and `samples/web-app`:
@@ -233,7 +235,7 @@ protection. Cascades, contact shadows and the other filtering techniques still f
 
 ## Roadmap
 
-1. Continue glTF feature coverage, starting with alpha modes and double-sided materials.
+1. Add Web glTF sampler settings and texture-coordinate set selection.
 2. Continue glTF feature coverage and optimize Web GPU resource submission.
 3. Stabilize the public API based on cross-backend experience.
 

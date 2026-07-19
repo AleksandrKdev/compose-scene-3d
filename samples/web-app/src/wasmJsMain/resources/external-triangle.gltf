@@ -18,7 +18,14 @@
   ],
   "images": [{ "uri": "checker.svg" }],
   "textures": [{ "source": 0 }],
-  "materials": [{ "pbrMetallicRoughness": { "baseColorTexture": { "index": 0 } } }],
+  "materials": [{
+    "alphaMode": "BLEND",
+    "doubleSided": true,
+    "pbrMetallicRoughness": {
+      "baseColorFactor": [0.55, 0.85, 1.0, 0.58],
+      "baseColorTexture": { "index": 0 }
+    }
+  }],
   "meshes": [{ "primitives": [{
     "attributes": { "POSITION": 0, "NORMAL": 1, "TEXCOORD_0": 2 },
     "indices": 3,
