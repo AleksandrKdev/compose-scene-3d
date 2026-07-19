@@ -476,8 +476,11 @@ private class WebGlSurface(
             resolveModel = { node -> resolveModel(node) },
         )
         val lights = nodes.webLights()
+        val directionalProjection = lights.directional.shadow?.let { shadow ->
+            fittedDirectionalShadowProjection(batches, camera.target, shadow.mapSize)
+        } ?: directionalShadowProjection(camera.target)
         lights.directional.shadow?.let { shadow ->
-            renderShadowMap(batches, directionalShadowProjection(camera.target), shadow, spot = false)
+            renderShadowMap(batches, directionalProjection, shadow, spot = false)
         }
         val shadowSpot = lights.spots.firstOrNull { it.shadow != null }
         shadowSpot?.shadow?.let { shadow ->
@@ -491,7 +494,6 @@ private class WebGlSurface(
         gl.useProgram(program)
         val light = lights.directional
         val shadowEnabled = light.shadow != null
-        val shadowBasis = directionalShadowProjection(camera.target)
         gl.uniform3f(cameraPositionUniform, camera.eye.x, camera.eye.y, camera.eye.z)
         gl.uniform3f(lightDirectionUniform, -0.3f, 1f, 0.5f)
         gl.uniform3f(lightColorUniform, light.color.x, light.color.y, light.color.z)
@@ -500,7 +502,7 @@ private class WebGlSurface(
         gl.uniform1f(shadowBiasUniform, light.shadow?.let {
             it.constantBias + it.normalBias * 0.0005f
         } ?: 0f)
-        uploadShadowBasis(program = false, shadowBasis)
+        uploadShadowBasis(program = false, directionalProjection)
         if (shadowEnabled) {
             gl.activeTexture(WebGLRenderingContext.TEXTURE0 + SHADOW_TEXTURE_UNIT)
             gl.bindTexture(WebGLRenderingContext.TEXTURE_2D, requireNotNull(shadowTarget).texture)
@@ -590,6 +592,8 @@ private class WebGlSurface(
         gl.clear(WebGLRenderingContext.DEPTH_BUFFER_BIT)
         gl.useProgram(shadowProgram)
         uploadShadowBasis(program = true, projection)
+        gl.enable(WebGLRenderingContext.POLYGON_OFFSET_FILL)
+        gl.polygonOffset(SHADOW_POLYGON_OFFSET_FACTOR, SHADOW_POLYGON_OFFSET_UNITS)
         batches.filter(GpuMesh::castShadows).forEach { mesh ->
             gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, vertexBuffer)
             gl.bufferData(WebGLRenderingContext.ARRAY_BUFFER,
@@ -603,6 +607,7 @@ private class WebGlSurface(
             gl.drawElements(WebGLRenderingContext.TRIANGLES, mesh.indices.size,
                 WebGLRenderingContext.UNSIGNED_INT, 0)
         }
+        gl.disable(WebGLRenderingContext.POLYGON_OFFSET_FILL)
         gl.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, null)
     }
 
@@ -858,6 +863,56 @@ private fun directionalShadowProjection(center: Vec3): ShadowBasis {
     val right = forward.cross(Vec3(0f, 1f, 0f)).normalized()
     return ShadowBasis(center, right, right.cross(forward).normalized(), forward)
 }
+
+private fun fittedDirectionalShadowProjection(
+    batches: List<GpuMesh>,
+    fallbackCenter: Vec3,
+    mapSize: Int,
+): ShadowBasis {
+    val basis = directionalShadowProjection(fallbackCenter)
+    var minRight = Float.POSITIVE_INFINITY
+    var maxRight = Float.NEGATIVE_INFINITY
+    var minUp = Float.POSITIVE_INFINITY
+    var maxUp = Float.NEGATIVE_INFINITY
+    var minForward = Float.POSITIVE_INFINITY
+    var maxForward = Float.NEGATIVE_INFINITY
+    var vertexCount = 0
+    batches.forEach { mesh ->
+        var offset = WORLD_POSITION_FLOAT_OFFSET
+        while (offset + 2 < mesh.vertices.size) {
+            val point = Vec3(mesh.vertices[offset], mesh.vertices[offset + 1], mesh.vertices[offset + 2])
+            val right = point.dot(basis.right)
+            val up = point.dot(basis.up)
+            val forward = point.dot(basis.forward)
+            minRight = minOf(minRight, right)
+            maxRight = maxOf(maxRight, right)
+            minUp = minOf(minUp, up)
+            maxUp = maxOf(maxUp, up)
+            minForward = minOf(minForward, forward)
+            maxForward = maxOf(maxForward, forward)
+            vertexCount++
+            offset += VERTEX_STRIDE_FLOATS
+        }
+    }
+    if (vertexCount == 0) return basis
+
+    val halfWidth = (maxRight - minRight) * 0.5f + DIRECTIONAL_SHADOW_PADDING
+    val halfHeight = (maxUp - minUp) * 0.5f + DIRECTIONAL_SHADOW_PADDING
+    val extent = maxOf(halfWidth, halfHeight, MIN_DIRECTIONAL_SHADOW_EXTENT)
+    val depth = maxOf(
+        (maxForward - minForward) * 0.5f + DIRECTIONAL_SHADOW_DEPTH_PADDING,
+        MIN_DIRECTIONAL_SHADOW_DEPTH,
+    )
+    val texelSize = 2f * extent / mapSize.coerceAtMost(MAX_WEB_SHADOW_MAP_SIZE)
+    val centerRight = snapToStep((minRight + maxRight) * 0.5f, texelSize)
+    val centerUp = snapToStep((minUp + maxUp) * 0.5f, texelSize)
+    val centerForward = (minForward + maxForward) * 0.5f
+    val center = basis.right * centerRight + basis.up * centerUp + basis.forward * centerForward
+    return basis.copy(center = center, extent = extent, depth = depth)
+}
+
+private fun snapToStep(value: Float, step: Float): Float =
+    kotlin.math.floor(value / step + 0.5f) * step
 
 private fun spotShadowProjection(light: WebSpotLight): ShadowBasis {
     val referenceUp = if (kotlin.math.abs(light.direction.y) > 0.98f) {
@@ -1249,6 +1304,14 @@ private external fun loadGltfAsGlb(
 
 private const val MAX_WEB_LIGHTS = 4
 private const val MAX_WEB_SHADOW_MAP_SIZE = 2048
+private const val VERTEX_STRIDE_FLOATS = 16
+private const val WORLD_POSITION_FLOAT_OFFSET = 4
+private const val DIRECTIONAL_SHADOW_PADDING = 0.5f
+private const val DIRECTIONAL_SHADOW_DEPTH_PADDING = 1f
+private const val MIN_DIRECTIONAL_SHADOW_EXTENT = 1f
+private const val MIN_DIRECTIONAL_SHADOW_DEPTH = 2f
+private const val SHADOW_POLYGON_OFFSET_FACTOR = 2f
+private const val SHADOW_POLYGON_OFFSET_UNITS = 4f
 private const val SHADOW_TEXTURE_UNIT = 5
 private const val SPOT_SHADOW_TEXTURE_UNIT = 6
 

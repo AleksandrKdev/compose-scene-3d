@@ -224,12 +224,13 @@ provenance is unknown.
 On Web, the first shadow-enabled directional and spot lights each get a depth map with 3x3 PCF.
 The directional map uses an orthographic projection and the spot map follows its position,
 direction, outer cone and falloff with a perspective projection. `mapSize` is honored up to 2048,
-and node-level `castShadows`/`receiveShadows` flags are supported. Cascades, contact shadows and
-the other filtering techniques still fall back to portable PCF.
+and node-level `castShadows`/`receiveShadows` flags are supported. The directional frustum fits the
+current world-space geometry with padding, texel-grid stabilization and polygon-offset acne
+protection. Cascades, contact shadows and the other filtering techniques still fall back to PCF.
 
 ## Roadmap
 
-1. Improve the Web directional shadow frustum and reduce redundant GPU buffer uploads.
+1. Reduce redundant Web GPU buffer uploads and cache immutable mesh data.
 2. Continue glTF feature coverage and optimize Web GPU resource submission.
 3. Stabilize the public API based on cross-backend experience.
 
