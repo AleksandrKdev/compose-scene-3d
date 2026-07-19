@@ -221,14 +221,15 @@ shadow pass.
 including materials embedded in loaded GLB assets. Use `Pcf` as the portable default when asset
 provenance is unknown.
 
-On Web, the first shadow-enabled directional light currently gets one depth map with 3x3 PCF.
-`mapSize` is honored up to 2048, and node-level `castShadows`/`receiveShadows` flags are supported.
-Cascades, contact shadows, spot-light shadows and the other filtering techniques still fall back
-to this single portable PCF implementation.
+On Web, the first shadow-enabled directional and spot lights each get a depth map with 3x3 PCF.
+The directional map uses an orthographic projection and the spot map follows its position,
+direction, outer cone and falloff with a perspective projection. `mapSize` is honored up to 2048,
+and node-level `castShadows`/`receiveShadows` flags are supported. Cascades, contact shadows and
+the other filtering techniques still fall back to portable PCF.
 
 ## Roadmap
 
-1. Add Web spot-light shadows and improve the directional shadow frustum.
+1. Improve the Web directional shadow frustum and reduce redundant GPU buffer uploads.
 2. Continue glTF feature coverage and optimize Web GPU resource submission.
 3. Stabilize the public API based on cross-backend experience.
 

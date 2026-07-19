@@ -67,6 +67,11 @@ fun main() {
                         falloff = 10f,
                         innerConeRadians = 0.32f,
                         outerConeRadians = 0.62f,
+                        shadow = ShadowMap3D(
+                            mapSize = 1024,
+                            constantBias = 0.002f,
+                            normalBias = 1f,
+                        ),
                         transform = Transform(translation = Vec3(3f, 4f, 3f)),
                     )
                     group(

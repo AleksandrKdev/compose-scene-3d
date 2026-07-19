@@ -433,8 +433,11 @@ State: unavailable/offline
   constant/normal bias and node-level `castShadows`/`receiveShadows`. Shadowing affects direct
   directional light only, leaving ambient and local lights intact. The sample was verified in
   headless Chrome without the previous cube acne; its old emissive floor marker was removed.
-- Next milestone: Web spot-light shadows and directional-frustum improvements, then broader glTF
-  coverage and GPU submission optimization.
+- Web now also renders one independent spot-light shadow map. Its perspective projection follows
+  the transformed light position/direction, outer cone and falloff, and its 3x3 PCF result affects
+  only that spot light's direct contribution. Directional and spot shadows can be active together.
+- Next milestone: directional-frustum improvements and fewer Web GPU buffer uploads, then broader
+  glTF coverage.
 
 ## Completed local Maven alpha milestone
 
@@ -504,8 +507,8 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Continue with Web spot-light shadows and directional-frustum improvements, then broader glTF
-coverage and GPU submission optimization.
+Continue with Web directional-frustum improvements and fewer GPU buffer uploads, then broader
+glTF coverage.
 The user explicitly allowed breaking the old empty GroupNode API before alpha03. Do not expose
 backend types in public commonMain API.
 ```
