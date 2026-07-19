@@ -290,7 +290,6 @@ private class WebGlSurface(
     private var spotShadowTarget: WebShadowTarget? = null
     private var spotShadowTargetSize = 0
     private val meshBuffers = mutableListOf<WebMeshBuffers>()
-    private val positionAttribute: Int
     private val worldPositionAttribute: Int
     private val normalAttribute: Int
     private val colorAttribute: Int
@@ -317,6 +316,14 @@ private class WebGlSurface(
     private val emissiveColorUniform: org.khronos.webgl.WebGLUniformLocation?
     private val emissiveIntensityUniform: org.khronos.webgl.WebGLUniformLocation?
     private val ambientOcclusionStrengthUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val cameraRightUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val cameraUpUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val cameraForwardUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val cameraAspectUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val cameraScaleUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val cameraNearUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val cameraFarUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val cameraPerspectiveUniform: org.khronos.webgl.WebGLUniformLocation?
     private val useShadowUniform: org.khronos.webgl.WebGLUniformLocation?
     private val receiveShadowUniform: org.khronos.webgl.WebGLUniformLocation?
     private val shadowTextureUniform: org.khronos.webgl.WebGLUniformLocation?
@@ -378,7 +385,6 @@ private class WebGlSurface(
         }
         program = createProgram(VERTEX_SHADER, FRAGMENT_SHADER)
         shadowProgram = createProgram(SHADOW_VERTEX_SHADER, SHADOW_FRAGMENT_SHADER)
-        positionAttribute = gl.getAttribLocation(program, "aPosition")
         worldPositionAttribute = gl.getAttribLocation(program, "aWorldPosition")
         normalAttribute = gl.getAttribLocation(program, "aNormal")
         colorAttribute = gl.getAttribLocation(program, "aColor")
@@ -405,6 +411,14 @@ private class WebGlSurface(
         emissiveColorUniform = gl.getUniformLocation(program, "uEmissiveColor")
         emissiveIntensityUniform = gl.getUniformLocation(program, "uEmissiveIntensity")
         ambientOcclusionStrengthUniform = gl.getUniformLocation(program, "uAmbientOcclusionStrength")
+        cameraRightUniform = gl.getUniformLocation(program, "uCameraRight")
+        cameraUpUniform = gl.getUniformLocation(program, "uCameraUp")
+        cameraForwardUniform = gl.getUniformLocation(program, "uCameraForward")
+        cameraAspectUniform = gl.getUniformLocation(program, "uCameraAspect")
+        cameraScaleUniform = gl.getUniformLocation(program, "uCameraScale")
+        cameraNearUniform = gl.getUniformLocation(program, "uCameraNear")
+        cameraFarUniform = gl.getUniformLocation(program, "uCameraFar")
+        cameraPerspectiveUniform = gl.getUniformLocation(program, "uCameraPerspective")
         useShadowUniform = gl.getUniformLocation(program, "uUseShadow")
         receiveShadowUniform = gl.getUniformLocation(program, "uReceiveShadow")
         shadowTextureUniform = gl.getUniformLocation(program, "uShadowTexture")
@@ -469,7 +483,7 @@ private class WebGlSurface(
 
     fun render(nodes: Collection<SceneNode>, camera: SceneCameraState, background: Color3D) {
         val batches = buildGpuBatches(
-            nodes, camera, width.toFloat(), height.toFloat(),
+            nodes,
             resolveModel = { node -> resolveModel(node) },
         )
         val preparedMeshes = prepareMeshes(batches)
@@ -490,6 +504,7 @@ private class WebGlSurface(
         if (batches.isEmpty()) return
 
         gl.useProgram(program)
+        uploadCamera(camera)
         val light = lights.directional
         val shadowEnabled = light.shadow != null
         gl.uniform3f(cameraPositionUniform, camera.eye.x, camera.eye.y, camera.eye.z)
@@ -532,8 +547,6 @@ private class WebGlSurface(
         preparedMeshes.forEach { prepared ->
             val mesh = prepared.mesh
             gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, prepared.buffers.vertex)
-            gl.enableVertexAttribArray(positionAttribute)
-            gl.vertexAttribPointer(positionAttribute, 4, WebGLRenderingContext.FLOAT, false, 64, 0)
             gl.enableVertexAttribArray(worldPositionAttribute)
             gl.vertexAttribPointer(worldPositionAttribute, 3, WebGLRenderingContext.FLOAT, false, 64, 16)
             gl.enableVertexAttribArray(normalAttribute)
@@ -621,13 +634,47 @@ private class WebGlSurface(
         }
         return meshes.mapIndexed { index, mesh ->
             val buffers = meshBuffers[index]
-            gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, buffers.vertex)
-            gl.bufferData(WebGLRenderingContext.ARRAY_BUFFER,
-                mesh.vertices.toTypedArray(), WebGLRenderingContext.DYNAMIC_DRAW)
-            gl.bindBuffer(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER, buffers.index)
-            gl.bufferData(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER,
-                mesh.indices.toTypedArray(), WebGLRenderingContext.DYNAMIC_DRAW)
+            val vertexHash = mesh.vertices.contentHashCode()
+            if (buffers.vertexHash != vertexHash) {
+                gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, buffers.vertex)
+                gl.bufferData(WebGLRenderingContext.ARRAY_BUFFER,
+                    mesh.vertices.toTypedArray(), WebGLRenderingContext.STATIC_DRAW)
+                buffers.vertexHash = vertexHash
+            }
+            val indexHash = mesh.indices.contentHashCode()
+            if (buffers.indexHash != indexHash) {
+                gl.bindBuffer(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER, buffers.index)
+                gl.bufferData(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER,
+                    mesh.indices.toTypedArray(), WebGLRenderingContext.STATIC_DRAW)
+                buffers.indexHash = indexHash
+            }
             PreparedGpuMesh(mesh, buffers)
+        }
+    }
+
+    private fun uploadCamera(camera: SceneCameraState) {
+        val forward = (camera.target - camera.eye).normalized()
+        val right = forward.cross(camera.up).normalized()
+        val cameraUp = right.cross(forward)
+        val aspect = (width.toFloat() / height.toFloat()).coerceAtLeast(0.01f)
+        gl.uniform3f(cameraRightUniform, right.x, right.y, right.z)
+        gl.uniform3f(cameraUpUniform, cameraUp.x, cameraUp.y, cameraUp.z)
+        gl.uniform3f(cameraForwardUniform, forward.x, forward.y, forward.z)
+        gl.uniform1f(cameraAspectUniform, aspect)
+        when (val projection = camera.projection) {
+            is CameraProjection.Perspective -> {
+                gl.uniform1i(cameraPerspectiveUniform, 1)
+                gl.uniform1f(cameraScaleUniform,
+                    (1.0 / tan(projection.verticalFovDegrees * PI / 360.0)).toFloat())
+                gl.uniform1f(cameraNearUniform, projection.near.toFloat())
+                gl.uniform1f(cameraFarUniform, projection.far.toFloat())
+            }
+            is CameraProjection.Orthographic -> {
+                gl.uniform1i(cameraPerspectiveUniform, 0)
+                gl.uniform1f(cameraScaleUniform, 2f / projection.verticalSize.toFloat())
+                gl.uniform1f(cameraNearUniform, projection.near.toFloat())
+                gl.uniform1f(cameraFarUniform, projection.far.toFloat())
+            }
         }
     }
 
@@ -846,6 +893,8 @@ private data class GpuMesh(
 private data class WebMeshBuffers(
     val vertex: WebGLBuffer,
     val index: WebGLBuffer,
+    var vertexHash: Int? = null,
+    var indexHash: Int? = null,
 )
 
 private data class PreparedGpuMesh(
@@ -1010,9 +1059,6 @@ private fun Collection<SceneNode>.webLights(): WebLights {
 
 private fun buildGpuBatches(
     nodes: Collection<SceneNode>,
-    camera: SceneCameraState,
-    width: Float,
-    height: Float,
     resolveModel: (ModelNode) -> List<MeshData>?,
 ): List<GpuMesh> = buildList {
     fun appendMesh(
@@ -1024,13 +1070,12 @@ private fun buildGpuBatches(
         val vertices = mutableListOf<Float>()
         mesh.positions.forEachIndexed { index, position ->
             val world = transforms.fold(position) { point, transform -> transform.apply(point) }
-            val clip = camera.projectClip(world, width, height) ?: ClipPoint(2f, 2f, 1f, 1f)
             val normal = transforms.fold(mesh.normals[index]) { value, transform ->
                 transform.rotation.rotate(value)
             }.normalized()
             val color = mesh.material.color()
             val uv = mesh.uvs
-            vertices += listOf(clip.x, clip.y, clip.z, clip.w,
+            vertices += listOf(0f, 0f, 0f, 0f,
                 world.x, world.y, world.z,
                 normal.x, normal.y, normal.z,
                 color.red, color.green, color.blue, color.alpha,
@@ -1094,41 +1139,6 @@ private fun SceneNode.receiveShadows() = when (this) {
     is MeshNode -> receiveShadows
     is ModelNode -> receiveShadows
     else -> false
-}
-
-private data class ClipPoint(val x: Float, val y: Float, val z: Float, val w: Float)
-
-private fun SceneCameraState.projectClip(point: Vec3, width: Float, height: Float): ClipPoint? {
-    val forward = (target - eye).normalized()
-    val right = forward.cross(up).normalized()
-    val cameraUp = right.cross(forward)
-    val relative = point - eye
-    val x = relative.dot(right)
-    val y = relative.dot(cameraUp)
-    val z = relative.dot(forward)
-    val aspect = (width / height).coerceAtLeast(0.01f)
-    when (val value = projection) {
-        is CameraProjection.Perspective -> {
-            val near = value.near.toFloat()
-            val far = value.far.toFloat()
-            if (z <= near || z >= far) return null
-            val scale = (1.0 / tan(value.verticalFovDegrees * PI / 360.0)).toFloat()
-            return ClipPoint(
-                x * scale / aspect,
-                y * scale,
-                perspectiveClipDepth(z, near, far),
-                z,
-            )
-        }
-        is CameraProjection.Orthographic -> {
-            val near = value.near.toFloat()
-            val far = value.far.toFloat()
-            if (z <= near || z >= far) return null
-            val depth = ((z - near) / (far - near)) * 2f - 1f
-            val scale = 2f / value.verticalSize.toFloat()
-            return ClipPoint(x * scale / aspect, y * scale, depth, 1f)
-        }
-    }
 }
 
 internal fun perspectiveClipDepth(z: Float, near: Float, far: Float): Float {
@@ -1387,17 +1397,37 @@ void main() {}
 
 private const val VERTEX_SHADER = """#version 300 es
 precision highp float;
-in vec4 aPosition;
 in vec3 aWorldPosition;
 in vec3 aNormal;
 in vec4 aColor;
 in vec2 aUv;
+uniform vec3 uCameraPosition;
+uniform vec3 uCameraRight;
+uniform vec3 uCameraUp;
+uniform vec3 uCameraForward;
+uniform float uCameraAspect;
+uniform float uCameraScale;
+uniform float uCameraNear;
+uniform float uCameraFar;
+uniform bool uCameraPerspective;
 out vec3 vWorldPosition;
 out vec3 vNormal;
 out vec4 vColor;
 out vec2 vUv;
 void main() {
-    gl_Position = aPosition;
+    vec3 relative = aWorldPosition - uCameraPosition;
+    float x = dot(relative, uCameraRight);
+    float y = dot(relative, uCameraUp);
+    float z = dot(relative, uCameraForward);
+    if (uCameraPerspective) {
+        float a = (uCameraFar + uCameraNear) / (uCameraFar - uCameraNear);
+        float b = -2.0 * uCameraFar * uCameraNear / (uCameraFar - uCameraNear);
+        gl_Position = vec4(x * uCameraScale / uCameraAspect,
+            y * uCameraScale, a * z + b, z);
+    } else {
+        float depth = ((z - uCameraNear) / (uCameraFar - uCameraNear)) * 2.0 - 1.0;
+        gl_Position = vec4(x * uCameraScale / uCameraAspect, y * uCameraScale, depth, 1.0);
+    }
     vWorldPosition = aWorldPosition;
     vNormal = aNormal;
     vColor = aColor;

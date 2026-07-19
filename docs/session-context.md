@@ -443,8 +443,12 @@ State: unavailable/offline
   and the main, directional-shadow and spot-shadow passes reuse those buffers; previously a fully
   shadowed scene uploaded the same arrays three times. Surplus buffers are deleted when the batch
   count shrinks and every remaining buffer is released by `close()`.
-- Next milestone: move camera projection into the Web vertex shader and skip unchanged geometry
-  uploads, then broader glTF coverage.
+- Web camera projection now runs in the main vertex shader for both perspective and orthographic
+  cameras. CPU batches contain stable world-space data, and buffer content hashes suppress
+  `bufferData` calls during orbit, pan and zoom when geometry is unchanged. Projection uniforms are
+  the only camera-dependent GPU update.
+- Next milestone: cache CPU-side Web mesh batches to avoid rebuilding unchanged arrays, then
+  broader glTF coverage.
 
 ## Completed local Maven alpha milestone
 
@@ -514,8 +518,8 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Continue by moving camera projection into the Web vertex shader and skipping unchanged geometry
-uploads, then broaden glTF coverage.
+Continue by caching CPU-side Web mesh batches to avoid rebuilding unchanged vertex arrays, then
+broaden glTF coverage.
 The user explicitly allowed breaking the old empty GroupNode API before alpha03. Do not expose
 backend types in public commonMain API.
 ```
