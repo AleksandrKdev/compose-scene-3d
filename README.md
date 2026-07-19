@@ -151,10 +151,11 @@ Metallic-roughness maps follow the glTF convention: roughness is read from the g
 metallic from blue. Albedo and emissive maps decode as sRGB; normal, metallic-roughness and AO maps
 remain linear data. Missing optional maps do not consume placeholder application assets.
 
-The WebGL2 backend currently consumes `baseColorTexture` and mesh UV coordinates. It supports all
-three `TextureSource` variants, generates mipmaps after browser image decoding, and redraws the
-viewport when asynchronous loading completes. Normal, metallic-roughness, emissive and AO maps
-remain implemented only by the Filament backend until the Web PBR shader milestone.
+The WebGL2 backend implements direct-light metallic/roughness PBR with a GGX specular BRDF,
+tone mapping and perspective-correct base-color texture sampling. It consumes the first
+`DirectionalLightNode` in the scene and supports all three `TextureSource` variants, generates
+mipmaps after browser image decoding, and redraws the viewport when asynchronous loading completes.
+Normal, metallic-roughness, emissive and AO texture maps remain implemented only by Filament.
 
 Web models accept the same `ModelSource.Resource`, `Url` and `Bytes` variants. The current loader
 supports GLB 2.0 JSON/BIN chunks, triangle primitives, indexed or non-indexed accessors, interleaved
@@ -219,8 +220,8 @@ provenance is unknown.
 
 ## Roadmap
 
-1. Add Web PBR shaders, expanded texture channels and lighting.
-2. Add Web shadows and continue glTF feature coverage.
+1. Expand Web PBR to normal, metallic-roughness, emissive and AO texture maps.
+2. Add more Web light types, shadows and continue glTF feature coverage.
 3. Stabilize the public API based on cross-backend experience.
 
 ## Running the samples

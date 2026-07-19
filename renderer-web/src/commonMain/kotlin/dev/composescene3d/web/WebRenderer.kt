@@ -23,6 +23,7 @@ import dev.composescene3d.core.BoxNode
 import dev.composescene3d.core.CameraProjection
 import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.CylinderNode
+import dev.composescene3d.core.DirectionalLightNode
 import dev.composescene3d.core.EmissiveMaterial
 import dev.composescene3d.core.GroupNode
 import dev.composescene3d.core.Material3D
@@ -80,7 +81,7 @@ class WebRenderer(
     override val capabilities = RendererCapabilities(
         primitiveGeometry = true,
         customGeometry = true,
-        physicallyBasedRendering = false,
+        physicallyBasedRendering = true,
     )
 
     override fun apply(commands: List<SceneCommand>) {
@@ -139,7 +140,7 @@ private data class MeshData(
 )
 
 private fun SceneNode.toMesh(): MeshData? = when (this) {
-    is BoxNode -> boxMesh(size, UnlitMaterial(Color3D(color.x, color.y, color.z)))
+    is BoxNode -> boxMesh(size, PbrMaterial(baseColor = Color3D(color.x, color.y, color.z)))
     is MeshNode -> MeshData(
         geometry.positions.toVec3List(), geometry.indices.toList(), geometry.normals.toVec3List(),
         geometry.uvs, material,
@@ -152,11 +153,18 @@ private fun SceneNode.toMesh(): MeshData? = when (this) {
 
 private fun boxMesh(size: Vec3, material: Material3D): MeshData {
     val x = size.x / 2f; val y = size.y / 2f; val z = size.z / 2f
-    val p = listOf(Vec3(-x,-y,-z), Vec3(x,-y,-z), Vec3(x,y,-z), Vec3(-x,y,-z),
-        Vec3(-x,-y,z), Vec3(x,-y,z), Vec3(x,y,z), Vec3(-x,y,z))
-    val i = listOf(0,2,1,0,3,2, 4,5,6,4,6,7, 0,1,5,0,5,4,
-        3,7,6,3,6,2, 1,2,6,1,6,5, 0,4,7,0,7,3)
-    val n = p.map(Vec3::normalized)
+    val p = mutableListOf<Vec3>(); val n = mutableListOf<Vec3>(); val i = mutableListOf<Int>()
+    fun face(normal: Vec3, a: Vec3, b: Vec3, c: Vec3, d: Vec3) {
+        val first = p.size
+        p += listOf(a, b, c, d); n += List(4) { normal }
+        i += listOf(first, first + 1, first + 2, first, first + 2, first + 3)
+    }
+    face(Vec3(0f,0f,1f), Vec3(-x,-y,z), Vec3(x,-y,z), Vec3(x,y,z), Vec3(-x,y,z))
+    face(Vec3(0f,0f,-1f), Vec3(x,-y,-z), Vec3(-x,-y,-z), Vec3(-x,y,-z), Vec3(x,y,-z))
+    face(Vec3(0f,1f,0f), Vec3(-x,y,z), Vec3(x,y,z), Vec3(x,y,-z), Vec3(-x,y,-z))
+    face(Vec3(0f,-1f,0f), Vec3(-x,-y,-z), Vec3(x,-y,-z), Vec3(x,-y,z), Vec3(-x,-y,z))
+    face(Vec3(1f,0f,0f), Vec3(x,-y,z), Vec3(x,-y,-z), Vec3(x,y,-z), Vec3(x,y,z))
+    face(Vec3(-1f,0f,0f), Vec3(-x,-y,-z), Vec3(-x,-y,z), Vec3(-x,y,z), Vec3(-x,y,-z))
     return MeshData(p, i, n, null, material)
 }
 
@@ -211,12 +219,33 @@ private fun Quaternion.rotate(v: Vec3): Vec3 {
     val q = Vec3(x,y,z); val uv = q.cross(v); val uuv = q.cross(uv)
     return v + uv * (2f*w) + uuv * 2f
 }
-private fun Material3D.color(light: Float): Color = when (this) {
-    is PbrMaterial -> baseColor.toColor(light)
+private fun Material3D.color(): Color = when (this) {
+    is PbrMaterial -> baseColor.toColor()
     is UnlitMaterial -> color.toColor()
     is EmissiveMaterial -> color.toColor(intensity)
-    is TransparentMaterial -> color.toColor(light)
-    else -> Color(0.7f*light, 0.7f*light, 0.7f*light)
+    is TransparentMaterial -> color.toColor()
+    is TexturedMaterial -> Color.White
+}
+private fun Material3D.metallic() = when (this) {
+    is PbrMaterial -> metallic
+    is TransparentMaterial -> metallic
+    is TexturedMaterial -> metallic
+    else -> 0f
+}
+private fun Material3D.roughness() = when (this) {
+    is PbrMaterial -> roughness
+    is TransparentMaterial -> roughness
+    is TexturedMaterial -> roughness
+    else -> 1f
+}
+private fun Material3D.reflectance() = when (this) {
+    is PbrMaterial -> reflectance
+    is TransparentMaterial -> reflectance
+    else -> 0.5f
+}
+private fun Material3D.shadingModel() = when (this) {
+    is UnlitMaterial, is EmissiveMaterial -> 1
+    else -> 0
 }
 private fun Color3D.toColor(multiplier: Float = 1f) = Color(
     (red*multiplier).coerceIn(0f,1f), (green*multiplier).coerceIn(0f,1f),
@@ -240,9 +269,19 @@ private class WebGlSurface(
     private val vertexBuffer: WebGLBuffer
     private val indexBuffer: WebGLBuffer
     private val positionAttribute: Int
+    private val worldPositionAttribute: Int
+    private val normalAttribute: Int
     private val colorAttribute: Int
     private val uvAttribute: Int
     private val useTextureUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val cameraPositionUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val lightDirectionUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val lightColorUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val lightIntensityUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val metallicUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val roughnessUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val reflectanceUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val shadingModelUniform: org.khronos.webgl.WebGLUniformLocation?
     private val textureCache = mutableMapOf<String, WebGLTexture>()
     private val loadingTextures = mutableSetOf<String>()
     private val failedTextures = mutableSetOf<String>()
@@ -262,9 +301,19 @@ private class WebGlSurface(
         vertexBuffer = requireNotNull(gl.createBuffer())
         indexBuffer = requireNotNull(gl.createBuffer())
         positionAttribute = gl.getAttribLocation(program, "aPosition")
+        worldPositionAttribute = gl.getAttribLocation(program, "aWorldPosition")
+        normalAttribute = gl.getAttribLocation(program, "aNormal")
         colorAttribute = gl.getAttribLocation(program, "aColor")
         uvAttribute = gl.getAttribLocation(program, "aUv")
         useTextureUniform = gl.getUniformLocation(program, "uUseTexture")
+        cameraPositionUniform = gl.getUniformLocation(program, "uCameraPosition")
+        lightDirectionUniform = gl.getUniformLocation(program, "uLightDirection")
+        lightColorUniform = gl.getUniformLocation(program, "uLightColor")
+        lightIntensityUniform = gl.getUniformLocation(program, "uLightIntensity")
+        metallicUniform = gl.getUniformLocation(program, "uMetallic")
+        roughnessUniform = gl.getUniformLocation(program, "uRoughness")
+        reflectanceUniform = gl.getUniformLocation(program, "uReflectance")
+        shadingModelUniform = gl.getUniformLocation(program, "uShadingModel")
         gl.enable(WebGLRenderingContext.DEPTH_TEST)
         gl.depthFunc(WebGLRenderingContext.LEQUAL)
     }
@@ -294,15 +343,28 @@ private class WebGlSurface(
         if (batches.isEmpty()) return
 
         gl.useProgram(program)
+        val light = nodes.firstDirectionalLight()
+        gl.uniform3f(cameraPositionUniform, camera.eye.x, camera.eye.y, camera.eye.z)
+        gl.uniform3f(lightDirectionUniform, -0.3f, 1f, 0.5f)
+        gl.uniform3f(lightColorUniform, light.color.x, light.color.y, light.color.z)
+        gl.uniform1f(lightIntensityUniform, light.intensity)
         batches.forEach { mesh ->
             gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, vertexBuffer)
             gl.bufferData(WebGLRenderingContext.ARRAY_BUFFER, mesh.vertices.toTypedArray(), WebGLRenderingContext.DYNAMIC_DRAW)
             gl.enableVertexAttribArray(positionAttribute)
-            gl.vertexAttribPointer(positionAttribute, 4, WebGLRenderingContext.FLOAT, false, 40, 0)
+            gl.vertexAttribPointer(positionAttribute, 4, WebGLRenderingContext.FLOAT, false, 64, 0)
+            gl.enableVertexAttribArray(worldPositionAttribute)
+            gl.vertexAttribPointer(worldPositionAttribute, 3, WebGLRenderingContext.FLOAT, false, 64, 16)
+            gl.enableVertexAttribArray(normalAttribute)
+            gl.vertexAttribPointer(normalAttribute, 3, WebGLRenderingContext.FLOAT, false, 64, 28)
             gl.enableVertexAttribArray(colorAttribute)
-            gl.vertexAttribPointer(colorAttribute, 4, WebGLRenderingContext.FLOAT, false, 40, 16)
+            gl.vertexAttribPointer(colorAttribute, 4, WebGLRenderingContext.FLOAT, false, 64, 40)
             gl.enableVertexAttribArray(uvAttribute)
-            gl.vertexAttribPointer(uvAttribute, 2, WebGLRenderingContext.FLOAT, false, 40, 32)
+            gl.vertexAttribPointer(uvAttribute, 2, WebGLRenderingContext.FLOAT, false, 64, 56)
+            gl.uniform1f(metallicUniform, mesh.metallic)
+            gl.uniform1f(roughnessUniform, mesh.roughness)
+            gl.uniform1f(reflectanceUniform, mesh.reflectance)
+            gl.uniform1i(shadingModelUniform, mesh.shadingModel)
             bindTexture(mesh.texture)
             gl.bindBuffer(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER, indexBuffer)
             gl.bufferData(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER, mesh.indices.toTypedArray(), WebGLRenderingContext.DYNAMIC_DRAW)
@@ -442,7 +504,25 @@ private data class GpuMesh(
     val vertices: FloatArray,
     val indices: IntArray,
     val texture: TextureSource?,
+    val metallic: Float,
+    val roughness: Float,
+    val reflectance: Float,
+    val shadingModel: Int,
 )
+
+private data class WebDirectionalLight(val color: Vec3, val intensity: Float)
+
+private fun Collection<SceneNode>.firstDirectionalLight(): WebDirectionalLight {
+    fun find(nodes: Collection<SceneNode>): DirectionalLightNode? {
+        nodes.forEach { node ->
+            if (node is DirectionalLightNode) return node
+            if (node is GroupNode) find(node.children)?.let { return it }
+        }
+        return null
+    }
+    val node = find(this) ?: return WebDirectionalLight(Vec3.One, 2f)
+    return WebDirectionalLight(node.color, node.intensity / 100_000f)
+}
 
 private fun buildGpuBatches(
     nodes: Collection<SceneNode>,
@@ -459,16 +539,23 @@ private fun buildGpuBatches(
             val normal = transforms.fold(mesh.normals[index]) { value, transform ->
                 transform.rotation.rotate(value)
             }.normalized()
-            val light = (0.2f + 0.8f * normal.dot(Vec3(0.35f, 0.8f, 0.45f).normalized()))
-                .coerceIn(0.15f, 1f)
-            val color = mesh.material.color(light)
+            val color = mesh.material.color()
             val uv = mesh.uvs
             vertices += listOf(clip.x, clip.y, clip.z, clip.w,
+                world.x, world.y, world.z,
+                normal.x, normal.y, normal.z,
                 color.red, color.green, color.blue, color.alpha,
                 uv?.get(index*2) ?: 0f, uv?.get(index*2+1) ?: 0f)
         }
-        add(GpuMesh(vertices.toFloatArray(), mesh.indices.toIntArray(),
-            (mesh.material as? TexturedMaterial)?.baseColorTexture))
+        add(GpuMesh(
+            vertices = vertices.toFloatArray(),
+            indices = mesh.indices.toIntArray(),
+            texture = (mesh.material as? TexturedMaterial)?.baseColorTexture,
+            metallic = mesh.material.metallic(),
+            roughness = mesh.material.roughness(),
+            reflectance = mesh.material.reflectance(),
+            shadingModel = mesh.material.shadingModel(),
+        ))
     }
     fun append(node: SceneNode, parents: List<Transform>) {
         val transforms = listOf(node.transform) + parents
@@ -535,6 +622,8 @@ private external interface JsGlbPrimitive : JsAny {
     val indices: Uint32Array
     val color: Float32Array
     val texture: Uint8Array?
+    val metallic: Float
+    val roughness: Float
 }
 
 private fun parseGlb(bytes: Uint8Array, cacheKey: String): List<MeshData> {
@@ -553,8 +642,12 @@ private fun parseGlb(bytes: Uint8Array, cacheKey: String): List<MeshData> {
             indices = List(primitive.indices.length) { primitive.indices[it] },
             normals = FloatArray(primitive.normals.length) { primitive.normals[it] }.toVec3List(),
             uvs = primitive.uvs?.let { values -> FloatArray(values.length) { values[it] } },
-            material = texture?.let(::TexturedMaterial) ?: PbrMaterial(
+            material = texture?.let {
+                TexturedMaterial(it, metallic = primitive.metallic, roughness = primitive.roughness)
+            } ?: PbrMaterial(
                 baseColor = Color3D(color[0], color[1], color[2], color[3]),
+                metallic = primitive.metallic,
+                roughness = primitive.roughness,
             ),
         )
     }
@@ -586,7 +679,7 @@ private fun parseGlb(bytes: Uint8Array, cacheKey: String): List<MeshData> {
   const local=(n)=>{if(n.matrix)return new Float32Array(n.matrix);const t=n.translation||[0,0,0],s=n.scale||[1,1,1],q=n.rotation||[0,0,0,1],x=q[0],y=q[1],z=q[2],w=q[3],m=identity();m[0]=(1-2*y*y-2*z*z)*s[0];m[1]=(2*x*y+2*w*z)*s[0];m[2]=(2*x*z-2*w*y)*s[0];m[4]=(2*x*y-2*w*z)*s[1];m[5]=(1-2*x*x-2*z*z)*s[1];m[6]=(2*y*z+2*w*x)*s[1];m[8]=(2*x*z+2*w*y)*s[2];m[9]=(2*y*z-2*w*x)*s[2];m[10]=(1-2*x*x-2*y*y)*s[2];m[12]=t[0];m[13]=t[1];m[14]=t[2];return m;};
   const imageBytes=(textureIndex)=>{if(textureIndex==null)return null;const tex=json.textures[textureIndex],img=json.images[tex.source];if(img.bufferView==null)return null;const bv=json.bufferViews[img.bufferView],start=bv.byteOffset||0;return bin.slice(start,start+bv.byteLength);};
   const output=[];
-  const visit=(nodeIndex,parent)=>{const node=json.nodes[nodeIndex],world=mul(parent,local(node));if(node.mesh!=null){for(const p of json.meshes[node.mesh].primitives){if(p.mode!=null&&p.mode!==4)continue;const pos=accessor(p.attributes.POSITION,false),nor=p.attributes.NORMAL!=null?accessor(p.attributes.NORMAL,false):new Float32Array(pos.length),uv=p.attributes.TEXCOORD_0!=null?accessor(p.attributes.TEXCOORD_0,false):null,idx=p.indices!=null?accessor(p.indices,true):new Uint32Array(pos.length/3);if(p.indices==null)for(let i=0;i<idx.length;i++)idx[i]=i;for(let i=0;i<pos.length;i+=3){const x=pos[i],y=pos[i+1],z=pos[i+2];pos[i]=world[0]*x+world[4]*y+world[8]*z+world[12];pos[i+1]=world[1]*x+world[5]*y+world[9]*z+world[13];pos[i+2]=world[2]*x+world[6]*y+world[10]*z+world[14];const nx=nor[i],ny=nor[i+1],nz=nor[i+2],tx=world[0]*nx+world[4]*ny+world[8]*nz,ty=world[1]*nx+world[5]*ny+world[9]*nz,tz=world[2]*nx+world[6]*ny+world[10]*nz,l=Math.hypot(tx,ty,tz)||1;nor[i]=tx/l;nor[i+1]=ty/l;nor[i+2]=tz/l;}const mat=p.material!=null?json.materials[p.material]:null,pbr=mat&&mat.pbrMetallicRoughness,color=new Float32Array((pbr&&pbr.baseColorFactor)||[0.7,0.7,0.7,1]),texture=imageBytes(pbr&&pbr.baseColorTexture&&pbr.baseColorTexture.index);output.push({positions:pos,normals:nor,uvs:uv,indices:idx,color,texture});}}for(const child of node.children||[])visit(child,world);};
+  const visit=(nodeIndex,parent)=>{const node=json.nodes[nodeIndex],world=mul(parent,local(node));if(node.mesh!=null){for(const p of json.meshes[node.mesh].primitives){if(p.mode!=null&&p.mode!==4)continue;const pos=accessor(p.attributes.POSITION,false),nor=p.attributes.NORMAL!=null?accessor(p.attributes.NORMAL,false):new Float32Array(pos.length),uv=p.attributes.TEXCOORD_0!=null?accessor(p.attributes.TEXCOORD_0,false):null,idx=p.indices!=null?accessor(p.indices,true):new Uint32Array(pos.length/3);if(p.indices==null)for(let i=0;i<idx.length;i++)idx[i]=i;for(let i=0;i<pos.length;i+=3){const x=pos[i],y=pos[i+1],z=pos[i+2];pos[i]=world[0]*x+world[4]*y+world[8]*z+world[12];pos[i+1]=world[1]*x+world[5]*y+world[9]*z+world[13];pos[i+2]=world[2]*x+world[6]*y+world[10]*z+world[14];const nx=nor[i],ny=nor[i+1],nz=nor[i+2],tx=world[0]*nx+world[4]*ny+world[8]*nz,ty=world[1]*nx+world[5]*ny+world[9]*nz,tz=world[2]*nx+world[6]*ny+world[10]*nz,l=Math.hypot(tx,ty,tz)||1;nor[i]=tx/l;nor[i+1]=ty/l;nor[i+2]=tz/l;}const mat=p.material!=null?json.materials[p.material]:null,pbr=mat&&mat.pbrMetallicRoughness,color=new Float32Array((pbr&&pbr.baseColorFactor)||[0.7,0.7,0.7,1]),texture=imageBytes(pbr&&pbr.baseColorTexture&&pbr.baseColorTexture.index),metallic=pbr&&pbr.metallicFactor!=null?pbr.metallicFactor:1,roughness=pbr&&pbr.roughnessFactor!=null?pbr.roughnessFactor:1;output.push({positions:pos,normals:nor,uvs:uv,indices:idx,color,texture,metallic,roughness});}}for(const child of node.children||[])visit(child,world);};
   const scene=json.scenes[(json.scene||0)],roots=scene?scene.nodes:json.nodes.map((_,i)=>i);for(const root of roots)visit(root,identity());return output;
 }""")
 private external fun parseGlbData(bytes: Uint8Array): JsArray<JsGlbPrimitive>
@@ -663,25 +756,88 @@ private external fun loadGltfAsGlb(
 private const val VERTEX_SHADER = """#version 300 es
 precision highp float;
 in vec4 aPosition;
+in vec3 aWorldPosition;
+in vec3 aNormal;
 in vec4 aColor;
 in vec2 aUv;
+out vec3 vWorldPosition;
+out vec3 vNormal;
 out vec4 vColor;
 out vec2 vUv;
 void main() {
     gl_Position = aPosition;
+    vWorldPosition = aWorldPosition;
+    vNormal = aNormal;
     vColor = aColor;
     vUv = aUv;
 }
 """
 
 private const val FRAGMENT_SHADER = """#version 300 es
-precision mediump float;
+precision highp float;
+in vec3 vWorldPosition;
+in vec3 vNormal;
 in vec4 vColor;
 in vec2 vUv;
 uniform sampler2D uTexture;
 uniform bool uUseTexture;
+uniform vec3 uCameraPosition;
+uniform vec3 uLightDirection;
+uniform vec3 uLightColor;
+uniform float uLightIntensity;
+uniform float uMetallic;
+uniform float uRoughness;
+uniform float uReflectance;
+uniform int uShadingModel;
 out vec4 outColor;
+
+const float PI = 3.14159265359;
+
+float distributionGgx(float nDotH, float roughness) {
+    float a = roughness * roughness;
+    float a2 = a * a;
+    float denominator = nDotH * nDotH * (a2 - 1.0) + 1.0;
+    return a2 / max(PI * denominator * denominator, 0.0001);
+}
+
+float geometrySchlickGgx(float nDotV, float roughness) {
+    float r = roughness + 1.0;
+    float k = r * r / 8.0;
+    return nDotV / max(nDotV * (1.0 - k) + k, 0.0001);
+}
+
+vec3 fresnelSchlick(float cosTheta, vec3 f0) {
+    return f0 + (1.0 - f0) * pow(1.0 - cosTheta, 5.0);
+}
+
 void main() {
-    outColor = uUseTexture ? texture(uTexture, vUv) * vColor : vColor;
+    vec4 base = uUseTexture ? texture(uTexture, vUv) * vColor : vColor;
+    if (uUseTexture) base.rgb = pow(base.rgb, vec3(2.2));
+    if (uShadingModel == 1) {
+        outColor = uUseTexture ? vec4(pow(base.rgb, vec3(1.0 / 2.2)), base.a) : base;
+        return;
+    }
+
+    vec3 n = normalize(vNormal);
+    vec3 v = normalize(uCameraPosition - vWorldPosition);
+    vec3 l = normalize(uLightDirection);
+    vec3 h = normalize(v + l);
+    float nDotL = max(dot(n, l), 0.0);
+    float nDotV = max(dot(n, v), 0.0001);
+    float nDotH = max(dot(n, h), 0.0);
+    float hDotV = max(dot(h, v), 0.0);
+    float roughness = clamp(uRoughness, 0.045, 1.0);
+    float metallic = clamp(uMetallic, 0.0, 1.0);
+    vec3 f0 = mix(vec3(0.16 * uReflectance * uReflectance), base.rgb, metallic);
+    vec3 f = fresnelSchlick(hDotV, f0);
+    float d = distributionGgx(nDotH, roughness);
+    float g = geometrySchlickGgx(nDotV, roughness) * geometrySchlickGgx(nDotL, roughness);
+    vec3 specular = d * g * f / max(4.0 * nDotV * nDotL, 0.0001);
+    vec3 diffuse = (1.0 - f) * (1.0 - metallic) * base.rgb / PI;
+    vec3 direct = (diffuse + specular) * uLightColor * uLightIntensity * nDotL;
+    vec3 ambient = base.rgb * (0.06 + 0.04 * (1.0 - roughness));
+    vec3 mapped = (direct + ambient) / (direct + ambient + vec3(1.0));
+    mapped = pow(mapped, vec3(1.0 / 2.2));
+    outColor = vec4(mapped, base.a);
 }
 """

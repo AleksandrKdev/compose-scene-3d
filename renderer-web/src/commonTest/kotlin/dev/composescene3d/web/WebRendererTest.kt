@@ -26,7 +26,11 @@ class WebRendererTest {
     @Test
     fun advertisesOnlyImplementedFeatures() {
         assertEquals(
-            RendererCapabilities(primitiveGeometry = true, customGeometry = true),
+            RendererCapabilities(
+                primitiveGeometry = true,
+                customGeometry = true,
+                physicallyBasedRendering = true,
+            ),
             WebRenderer().capabilities,
         )
     }

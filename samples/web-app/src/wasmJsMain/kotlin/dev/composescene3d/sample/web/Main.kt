@@ -42,6 +42,10 @@ fun main() {
             Box(Modifier.fillMaxSize()) {
                 WebViewport(renderer)
                 Scene3D(controller) {
+                    directionalLight(
+                        key = "sun",
+                        intensity = 120_000f,
+                    )
                     group(
                         key = "assembly",
                         transform = Transform(rotation = Quaternion(0f, 0.2f, 0f, 0.98f)),

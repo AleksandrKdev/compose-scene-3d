@@ -409,7 +409,14 @@ State: unavailable/offline
   For interactive verification run
   `./gradlew :samples:web-app:wasmJsBrowserDevelopmentRun --no-configuration-cache` and open
   `http://localhost:8080/`. At the time this context was saved, that development server was running.
-- Next milestone: Web PBR shaders, expanded texture channels and lighting.
+- Web direct-light PBR is implemented with fragment-stage GGX specular, Lambert diffuse, metallic,
+  roughness, reflectance, tone mapping and camera-dependent highlights. It consumes the first
+  directional light, preserves the unlit/emissive paths, reads scalar metallic/roughness factors
+  from glTF and advertises `physicallyBasedRendering`. Box geometry now has separate per-face
+  vertices/normals instead of incorrectly smoothed corner normals. Headless Chrome verified the
+  PBR sphere, textured Duck, checker plane and corrected cube.
+- Next milestone: Web normal, metallic-roughness, emissive and AO texture channels, then additional
+  light types and shadows.
 
 ## Completed local Maven alpha milestone
 
@@ -479,7 +486,8 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Continue with Web PBR shaders, expanded texture channels and lighting.
+Continue Web PBR with normal, metallic-roughness, emissive and AO texture channels, then additional
+light types and shadows.
 The user explicitly allowed breaking the old empty GroupNode API before alpha03. Do not expose
 backend types in public commonMain API.
 ```
