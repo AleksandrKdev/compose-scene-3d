@@ -78,6 +78,29 @@ Scene3D(controller) {
 translation, quaternion rotation and scale are inherited through any number of nested groups.
 Node keys remain unique across the entire tree, and picking still reports the leaf node key.
 
+Custom indexed triangle meshes use portable CPU-side arrays. Positions and normals contain three
+floats per vertex; UVs contain two and are required for `TexturedMaterial`. Indices use
+counter-clockwise triangle winding when viewed from the front:
+
+```kotlin
+val triangle = Geometry3D(
+    positions = floatArrayOf(-1f, 0f, 0f, 1f, 0f, 0f, 0f, 1f, 0f),
+    indices = intArrayOf(0, 1, 2),
+    normals = floatArrayOf(0f, 0f, 1f, 0f, 0f, 1f, 0f, 0f, 1f),
+    uvs = floatArrayOf(0f, 0f, 1f, 0f, 0.5f, 1f),
+)
+
+mesh(
+    key = "triangle",
+    geometry = triangle,
+    material = PbrMaterial(baseColor = Color3D.Magenta),
+)
+```
+
+The Filament backend calculates the bounding box and tangent-frame quaternions, uploads immutable
+vertex/index buffers, participates in scene hierarchy and picking, and releases native resources
+when geometry leaves the composition.
+
 `Color3D` distinguishes sRGB input from linear-sRGB values and supports RGB/RGBA/ARGB factories
 and named colors. Primitive materials can be `PbrMaterial`, `UnlitMaterial`, `EmissiveMaterial`,
 `TexturedMaterial` or `TransparentMaterial`.
@@ -131,11 +154,10 @@ results on Android, Desktop and iOS.
 
 ## Roadmap
 
-1. Add backend-neutral custom indexed mesh geometry with normals and UV coordinates.
-2. Add normal, metallic-roughness, emissive and ambient-occlusion texture channels.
-3. Expose portable shadow controls.
-4. Implement an independent Web/Wasm renderer behind the same scene contract.
-5. Stabilize the public API based on cross-backend experience.
+1. Add normal, metallic-roughness, emissive and ambient-occlusion texture channels.
+2. Expose portable shadow controls.
+3. Implement an independent Web/Wasm renderer behind the same scene contract.
+4. Stabilize the public API based on cross-backend experience.
 
 ## Running the samples
 

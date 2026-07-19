@@ -198,6 +198,70 @@ data class CylinderNode(
     }
 }
 
+/** Indexed triangle geometry stored in backend-neutral, non-interleaved arrays. */
+class Geometry3D(
+    val positions: FloatArray,
+    val indices: IntArray,
+    val normals: FloatArray,
+    val uvs: FloatArray? = null,
+) {
+    val vertexCount: Int get() = positions.size / 3
+    val triangleCount: Int get() = indices.size / 3
+
+    init {
+        require(positions.size >= 9 && positions.size % 3 == 0) {
+            "Geometry positions must contain at least three XYZ vertices"
+        }
+        require(normals.size == positions.size) {
+            "Geometry must contain one XYZ normal per vertex"
+        }
+        require(indices.isNotEmpty() && indices.size % 3 == 0) {
+            "Geometry indices must contain complete triangles"
+        }
+        require(uvs == null || uvs.size == vertexCount * 2) {
+            "Geometry UVs must contain one UV pair per vertex"
+        }
+        require(positions.all(Float::isFinite)) { "Geometry positions must be finite" }
+        require(normals.all(Float::isFinite)) { "Geometry normals must be finite" }
+        require(uvs?.all(Float::isFinite) != false) { "Geometry UVs must be finite" }
+        require(indices.all { it in 0 until vertexCount }) {
+            "Geometry indices must reference an existing vertex"
+        }
+        require(normals.asList().chunked(3).all { (x, y, z) -> x != 0f || y != 0f || z != 0f }) {
+            "Geometry normals cannot be zero vectors"
+        }
+    }
+
+    override fun equals(other: Any?): Boolean = other is Geometry3D &&
+        positions.contentEquals(other.positions) &&
+        indices.contentEquals(other.indices) &&
+        normals.contentEquals(other.normals) &&
+        nullableContentEquals(uvs, other.uvs)
+
+    override fun hashCode(): Int {
+        var result = positions.contentHashCode()
+        result = 31 * result + indices.contentHashCode()
+        result = 31 * result + normals.contentHashCode()
+        return 31 * result + (uvs?.contentHashCode() ?: 0)
+    }
+}
+
+private fun nullableContentEquals(first: FloatArray?, second: FloatArray?): Boolean =
+    first === second || (first != null && second != null && first.contentEquals(second))
+
+data class MeshNode(
+    override val key: NodeKey,
+    val geometry: Geometry3D,
+    val material: Material3D = PbrMaterial(),
+    override val transform: Transform = Transform(),
+) : SceneNode {
+    init {
+        require(material !is TexturedMaterial || geometry.uvs != null) {
+            "Textured mesh geometry requires UV coordinates"
+        }
+    }
+}
+
 data class DirectionalLightNode(
     override val key: NodeKey,
     val intensity: Float,

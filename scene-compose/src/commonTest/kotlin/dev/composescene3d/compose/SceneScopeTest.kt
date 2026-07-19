@@ -4,6 +4,8 @@ import dev.composescene3d.core.CylinderNode
 import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.EmissiveMaterial
 import dev.composescene3d.core.GroupNode
+import dev.composescene3d.core.Geometry3D
+import dev.composescene3d.core.MeshNode
 import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.core.PlaneNode
 import dev.composescene3d.core.PointLightNode
@@ -84,5 +86,19 @@ class SceneScopeTest {
         assertIs<dev.composescene3d.core.BoxNode>(vehicle.children[0])
         val wheels = assertIs<GroupNode>(vehicle.children[1])
         assertEquals(listOf("front-wheel", "rear-wheel"), wheels.children.map { it.key.value })
+    }
+
+    @Test
+    fun buildsCustomIndexedMesh() {
+        val geometry = Geometry3D(
+            positions = floatArrayOf(-1f, 0f, 0f, 1f, 0f, 0f, 0f, 1f, 0f),
+            indices = intArrayOf(0, 1, 2),
+            normals = floatArrayOf(0f, 0f, 1f, 0f, 0f, 1f, 0f, 0f, 1f),
+            uvs = floatArrayOf(0f, 0f, 1f, 0f, 0.5f, 1f),
+        )
+
+        val scene = SceneScope().apply { mesh("triangle", geometry) }.build()
+
+        assertEquals(geometry, assertIs<MeshNode>(scene.nodes.single()).geometry)
     }
 }

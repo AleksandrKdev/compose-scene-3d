@@ -3,6 +3,7 @@ package dev.composescene3d.core
 /** Features that a backend actually implements, not merely features supported by its GPU API. */
 data class RendererCapabilities(
     val primitiveGeometry: Boolean = false,
+    val customGeometry: Boolean = false,
     val physicallyBasedRendering: Boolean = false,
     val bloom: Boolean = false,
     val skeletalAnimation: Boolean = false,

@@ -9,6 +9,8 @@ import dev.composescene3d.core.BoxNode
 import dev.composescene3d.core.CylinderNode
 import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.Material3D
+import dev.composescene3d.core.Geometry3D
+import dev.composescene3d.core.MeshNode
 import dev.composescene3d.core.ModelNode
 import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.NodeKey
@@ -90,6 +92,15 @@ class SceneScope internal constructor() {
         transform: Transform = Transform(),
     ) {
         nodes += CylinderNode(NodeKey(key), radius, height, segments, material, transform)
+    }
+
+    fun mesh(
+        key: String,
+        geometry: Geometry3D,
+        material: Material3D = PbrMaterial(),
+        transform: Transform = Transform(),
+    ) {
+        nodes += MeshNode(NodeKey(key), geometry, material, transform)
     }
 
     fun directionalLight(

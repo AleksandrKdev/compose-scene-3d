@@ -290,8 +290,8 @@ State: unavailable/offline
 - Transparent materials and preprocessed cubemap/IBL loading are completed in the milestones below.
 - Filament KMP does not provide a common HDR equirectangular-to-cubemap decoder, so raw HDR loading
   is deliberately not promised by the public API.
-- The scene graph now supports nested transform groups. The next implementation step is portable
-  custom indexed mesh geometry, followed by expanded PBR texture channels and shadows.
+- The scene graph and portable custom indexed meshes are implemented. The next implementation
+  step is expanded PBR texture channels, followed by shadows.
 
 ## Transparent material milestone (2026-07-19)
 
@@ -334,6 +334,20 @@ State: unavailable/offline
   native child entities; removed descendants are also removed from picking maps.
 - This intentionally changes the unreleased development `GroupNode` constructor before alpha03.
 - Next milestone: backend-neutral indexed mesh geometry with positions, indices, normals and UVs.
+
+## Custom geometry milestone (2026-07-19)
+
+- Added content-aware `Geometry3D` with validated positions, triangle indices, per-vertex normals
+  and optional UVs, plus `MeshNode` and `SceneScope.mesh`.
+- Textured meshes require UV coordinates; invalid sizes, non-finite attributes, zero normals and
+  out-of-range indices fail before reaching a renderer.
+- Filament computes tangent-frame quaternions and an accurate AABB, uploads immutable 32-bit index
+  and vertex buffers, integrates meshes with nested groups and picking, and disposes GPU resources.
+- `RendererCapabilities.customGeometry` distinguishes this support from built-in primitives.
+- Android, Desktop and iOS samples render a magenta indexed triangle inside a transform group.
+- JVM tests, ABI checks, Android APK and iOS simulator framework builds pass; Desktop runtime
+  created the custom GPU mesh and ran without a Filament error or crash.
+- Next milestone: expanded PBR texture channels (normal, metallic-roughness, emissive and AO).
 
 ## Completed local Maven alpha milestone
 
@@ -403,7 +417,7 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Start with the custom indexed mesh geometry milestone described in the current checkpoint.
+Start with the expanded PBR texture channels milestone described in the current checkpoint.
 The user explicitly allowed breaking the old empty GroupNode API before alpha03. Do not expose
 backend types in public commonMain API.
 ```

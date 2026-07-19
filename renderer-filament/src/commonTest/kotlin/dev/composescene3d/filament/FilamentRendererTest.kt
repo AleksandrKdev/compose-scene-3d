@@ -20,6 +20,7 @@ class FilamentRendererTest {
         retainedNodes = { it.nodes.toList() },
         expectedCapabilities = RendererCapabilities(
             primitiveGeometry = true,
+            customGeometry = true,
             physicallyBasedRendering = true,
             skeletalAnimation = true,
         ),

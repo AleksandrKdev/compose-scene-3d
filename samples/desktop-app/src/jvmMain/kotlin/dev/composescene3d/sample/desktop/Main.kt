@@ -26,8 +26,16 @@ import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.TransparentMaterial
 import dev.composescene3d.core.EnvironmentMap
 import dev.composescene3d.core.TextureSource
+import dev.composescene3d.core.Geometry3D
 import dev.composescene3d.filament.FilamentRenderer
 import dev.composescene3d.filament.FilamentViewport
+
+private val sampleTriangle = Geometry3D(
+    positions = floatArrayOf(-0.7f, 0f, 0f, 0.7f, 0f, 0f, 0f, 1.1f, 0f),
+    indices = intArrayOf(0, 1, 2),
+    normals = floatArrayOf(0f, 0f, 1f, 0f, 0f, 1f, 0f, 0f, 1f),
+    uvs = floatArrayOf(0f, 0f, 1f, 0f, 0.5f, 1f),
+)
 
 fun main() = application {
     Window(onCloseRequest = ::exitApplication, title = "ComposeScene3D") {
@@ -104,6 +112,12 @@ fun main() = application {
                             roughness = 0.12f,
                         ),
                         transform = Transform(translation = Vec3(0f, 0.8f, 0f)),
+                    )
+                    mesh(
+                        key = "custom-triangle",
+                        geometry = sampleTriangle,
+                        material = PbrMaterial(baseColor = Color3D.Magenta, roughness = 0.35f),
+                        transform = Transform(translation = Vec3(0f, 1.35f, 0f)),
                     )
                 }
                 plane(

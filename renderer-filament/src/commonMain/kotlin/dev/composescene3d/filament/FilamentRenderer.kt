@@ -3,6 +3,7 @@ package dev.composescene3d.filament
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -12,6 +13,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -29,6 +31,7 @@ import dev.composescene3d.core.ModelNode
 import dev.composescene3d.core.ModelAssetKey
 import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.Material3D
+import dev.composescene3d.core.MeshNode
 import dev.composescene3d.core.NodeKey
 import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.core.PlaneNode
@@ -150,6 +153,7 @@ class FilamentRenderer(
     }
     override val capabilities = RendererCapabilities(
         primitiveGeometry = true,
+        customGeometry = true,
         physicallyBasedRendering = true,
         skeletalAnimation = true,
     )
@@ -387,15 +391,22 @@ private fun FilamentSceneScope.FilamentNodes(
                 is SphereNode -> FilamentSphere(renderer, node)
                 is PlaneNode -> FilamentPlane(renderer, node)
                 is CylinderNode -> FilamentCylinder(renderer, node)
+                is MeshNode -> FilamentMesh(renderer, node)
                 is DirectionalLightNode -> FilamentLight(node)
                 is PointLightNode -> FilamentLight(node)
                 is SpotLightNode -> FilamentLight(node)
-                is GroupNode -> Group(
-                    position = node.transform.translation.toFilamentPosition(),
-                    rotation = node.transform.rotation.toFilamentQuaternion(),
-                    scale = node.transform.scale.toFilamentScale(),
-                ) {
-                    FilamentNodes(renderer, node.children)
+                is GroupNode -> {
+                    val groupEntity = remember(node.key) { mutableStateOf<Int?>(null) }
+                    Group(
+                        position = node.transform.translation.toFilamentPosition(),
+                        rotation = node.transform.rotation.toFilamentQuaternion(),
+                        scale = node.transform.scale.toFilamentScale(),
+                        onCreate = { groupEntity.value = it },
+                    ) {
+                        CompositionLocalProvider(LocalComposeScene3DParent provides groupEntity.value) {
+                            FilamentNodes(renderer, node.children)
+                        }
+                    }
                 }
                 is ModelNode -> error("Model nodes are rendered in shared asset groups")
             }
@@ -605,7 +616,7 @@ private fun FilamentSceneScope.FilamentCylinder(renderer: FilamentRenderer, node
 }
 
 @Composable
-private fun rememberSceneMaterial(renderer: FilamentRenderer, material: Material3D) = when (material) {
+internal fun rememberSceneMaterial(renderer: FilamentRenderer, material: Material3D) = when (material) {
     is PbrMaterial -> rememberColorMaterialInstance(
         color = material.baseColor.toFilamentColor(),
         metallic = material.metallic,

@@ -192,6 +192,19 @@ public final class dev/composescene3d/core/EnvironmentMap {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class dev/composescene3d/core/Geometry3D {
+	public fun <init> ([F[I[F[F)V
+	public synthetic fun <init> ([F[I[F[FILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIndices ()[I
+	public final fun getNormals ()[F
+	public final fun getPositions ()[F
+	public final fun getTriangleCount ()I
+	public final fun getUvs ()[F
+	public final fun getVertexCount ()I
+	public fun hashCode ()I
+}
+
 public final class dev/composescene3d/core/GroupNode : dev/composescene3d/core/SceneNode {
 	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;Ldev/composescene3d/core/Transform;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;Ldev/composescene3d/core/Transform;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -209,6 +222,24 @@ public final class dev/composescene3d/core/GroupNode : dev/composescene3d/core/S
 }
 
 public abstract interface class dev/composescene3d/core/Material3D {
+}
+
+public final class dev/composescene3d/core/MeshNode : dev/composescene3d/core/SceneNode {
+	public synthetic fun <init> (Ljava/lang/String;Ldev/composescene3d/core/Geometry3D;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ldev/composescene3d/core/Geometry3D;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-V7PxYp4 ()Ljava/lang/String;
+	public final fun component2 ()Ldev/composescene3d/core/Geometry3D;
+	public final fun component3 ()Ldev/composescene3d/core/Material3D;
+	public final fun component4 ()Ldev/composescene3d/core/Transform;
+	public final fun copy-dKfVh_c (Ljava/lang/String;Ldev/composescene3d/core/Geometry3D;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;)Ldev/composescene3d/core/MeshNode;
+	public static synthetic fun copy-dKfVh_c$default (Ldev/composescene3d/core/MeshNode;Ljava/lang/String;Ldev/composescene3d/core/Geometry3D;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ILjava/lang/Object;)Ldev/composescene3d/core/MeshNode;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getGeometry ()Ldev/composescene3d/core/Geometry3D;
+	public fun getKey-V7PxYp4 ()Ljava/lang/String;
+	public final fun getMaterial ()Ldev/composescene3d/core/Material3D;
+	public fun getTransform ()Ldev/composescene3d/core/Transform;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class dev/composescene3d/core/ModelAssetKey {
@@ -380,17 +411,19 @@ public final class dev/composescene3d/core/Quaternion$Companion {
 
 public final class dev/composescene3d/core/RendererCapabilities {
 	public fun <init> ()V
-	public fun <init> (ZZZZZ)V
-	public synthetic fun <init> (ZZZZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZZZZZZ)V
+	public synthetic fun <init> (ZZZZZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
 	public final fun component2 ()Z
 	public final fun component3 ()Z
 	public final fun component4 ()Z
 	public final fun component5 ()Z
-	public final fun copy (ZZZZZ)Ldev/composescene3d/core/RendererCapabilities;
-	public static synthetic fun copy$default (Ldev/composescene3d/core/RendererCapabilities;ZZZZZILjava/lang/Object;)Ldev/composescene3d/core/RendererCapabilities;
+	public final fun component6 ()Z
+	public final fun copy (ZZZZZZ)Ldev/composescene3d/core/RendererCapabilities;
+	public static synthetic fun copy$default (Ldev/composescene3d/core/RendererCapabilities;ZZZZZZILjava/lang/Object;)Ldev/composescene3d/core/RendererCapabilities;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBloom ()Z
+	public final fun getCustomGeometry ()Z
 	public final fun getPhysicallyBasedRendering ()Z
 	public final fun getPicking ()Z
 	public final fun getPrimitiveGeometry ()Z

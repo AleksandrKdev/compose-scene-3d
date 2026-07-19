@@ -392,6 +392,26 @@ final class dev.composescene3d.core/EnvironmentMap { // dev.composescene3d.core/
     final fun toString(): kotlin/String // dev.composescene3d.core/EnvironmentMap.toString|toString(){}[0]
 }
 
+final class dev.composescene3d.core/Geometry3D { // dev.composescene3d.core/Geometry3D|null[0]
+    constructor <init>(kotlin/FloatArray, kotlin/IntArray, kotlin/FloatArray, kotlin/FloatArray? = ...) // dev.composescene3d.core/Geometry3D.<init>|<init>(kotlin.FloatArray;kotlin.IntArray;kotlin.FloatArray;kotlin.FloatArray?){}[0]
+
+    final val indices // dev.composescene3d.core/Geometry3D.indices|{}indices[0]
+        final fun <get-indices>(): kotlin/IntArray // dev.composescene3d.core/Geometry3D.indices.<get-indices>|<get-indices>(){}[0]
+    final val normals // dev.composescene3d.core/Geometry3D.normals|{}normals[0]
+        final fun <get-normals>(): kotlin/FloatArray // dev.composescene3d.core/Geometry3D.normals.<get-normals>|<get-normals>(){}[0]
+    final val positions // dev.composescene3d.core/Geometry3D.positions|{}positions[0]
+        final fun <get-positions>(): kotlin/FloatArray // dev.composescene3d.core/Geometry3D.positions.<get-positions>|<get-positions>(){}[0]
+    final val triangleCount // dev.composescene3d.core/Geometry3D.triangleCount|{}triangleCount[0]
+        final fun <get-triangleCount>(): kotlin/Int // dev.composescene3d.core/Geometry3D.triangleCount.<get-triangleCount>|<get-triangleCount>(){}[0]
+    final val uvs // dev.composescene3d.core/Geometry3D.uvs|{}uvs[0]
+        final fun <get-uvs>(): kotlin/FloatArray? // dev.composescene3d.core/Geometry3D.uvs.<get-uvs>|<get-uvs>(){}[0]
+    final val vertexCount // dev.composescene3d.core/Geometry3D.vertexCount|{}vertexCount[0]
+        final fun <get-vertexCount>(): kotlin/Int // dev.composescene3d.core/Geometry3D.vertexCount.<get-vertexCount>|<get-vertexCount>(){}[0]
+
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/Geometry3D.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/Geometry3D.hashCode|hashCode(){}[0]
+}
+
 final class dev.composescene3d.core/GroupNode : dev.composescene3d.core/SceneNode { // dev.composescene3d.core/GroupNode|null[0]
     constructor <init>(dev.composescene3d.core/NodeKey, kotlin.collections/List<dev.composescene3d.core/SceneNode>, dev.composescene3d.core/Transform = ...) // dev.composescene3d.core/GroupNode.<init>|<init>(dev.composescene3d.core.NodeKey;kotlin.collections.List<dev.composescene3d.core.SceneNode>;dev.composescene3d.core.Transform){}[0]
 
@@ -409,6 +429,28 @@ final class dev.composescene3d.core/GroupNode : dev.composescene3d.core/SceneNod
     final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/GroupNode.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // dev.composescene3d.core/GroupNode.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // dev.composescene3d.core/GroupNode.toString|toString(){}[0]
+}
+
+final class dev.composescene3d.core/MeshNode : dev.composescene3d.core/SceneNode { // dev.composescene3d.core/MeshNode|null[0]
+    constructor <init>(dev.composescene3d.core/NodeKey, dev.composescene3d.core/Geometry3D, dev.composescene3d.core/Material3D = ..., dev.composescene3d.core/Transform = ...) // dev.composescene3d.core/MeshNode.<init>|<init>(dev.composescene3d.core.NodeKey;dev.composescene3d.core.Geometry3D;dev.composescene3d.core.Material3D;dev.composescene3d.core.Transform){}[0]
+
+    final val geometry // dev.composescene3d.core/MeshNode.geometry|{}geometry[0]
+        final fun <get-geometry>(): dev.composescene3d.core/Geometry3D // dev.composescene3d.core/MeshNode.geometry.<get-geometry>|<get-geometry>(){}[0]
+    final val key // dev.composescene3d.core/MeshNode.key|{}key[0]
+        final fun <get-key>(): dev.composescene3d.core/NodeKey // dev.composescene3d.core/MeshNode.key.<get-key>|<get-key>(){}[0]
+    final val material // dev.composescene3d.core/MeshNode.material|{}material[0]
+        final fun <get-material>(): dev.composescene3d.core/Material3D // dev.composescene3d.core/MeshNode.material.<get-material>|<get-material>(){}[0]
+    final val transform // dev.composescene3d.core/MeshNode.transform|{}transform[0]
+        final fun <get-transform>(): dev.composescene3d.core/Transform // dev.composescene3d.core/MeshNode.transform.<get-transform>|<get-transform>(){}[0]
+
+    final fun component1(): dev.composescene3d.core/NodeKey // dev.composescene3d.core/MeshNode.component1|component1(){}[0]
+    final fun component2(): dev.composescene3d.core/Geometry3D // dev.composescene3d.core/MeshNode.component2|component2(){}[0]
+    final fun component3(): dev.composescene3d.core/Material3D // dev.composescene3d.core/MeshNode.component3|component3(){}[0]
+    final fun component4(): dev.composescene3d.core/Transform // dev.composescene3d.core/MeshNode.component4|component4(){}[0]
+    final fun copy(dev.composescene3d.core/NodeKey = ..., dev.composescene3d.core/Geometry3D = ..., dev.composescene3d.core/Material3D = ..., dev.composescene3d.core/Transform = ...): dev.composescene3d.core/MeshNode // dev.composescene3d.core/MeshNode.copy|copy(dev.composescene3d.core.NodeKey;dev.composescene3d.core.Geometry3D;dev.composescene3d.core.Material3D;dev.composescene3d.core.Transform){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/MeshNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/MeshNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.composescene3d.core/MeshNode.toString|toString(){}[0]
 }
 
 final class dev.composescene3d.core/ModelNode : dev.composescene3d.core/SceneNode { // dev.composescene3d.core/ModelNode|null[0]
@@ -536,10 +578,12 @@ final class dev.composescene3d.core/Quaternion { // dev.composescene3d.core/Quat
 }
 
 final class dev.composescene3d.core/RendererCapabilities { // dev.composescene3d.core/RendererCapabilities|null[0]
-    constructor <init>(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...) // dev.composescene3d.core/RendererCapabilities.<init>|<init>(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
+    constructor <init>(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...) // dev.composescene3d.core/RendererCapabilities.<init>|<init>(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
 
     final val bloom // dev.composescene3d.core/RendererCapabilities.bloom|{}bloom[0]
         final fun <get-bloom>(): kotlin/Boolean // dev.composescene3d.core/RendererCapabilities.bloom.<get-bloom>|<get-bloom>(){}[0]
+    final val customGeometry // dev.composescene3d.core/RendererCapabilities.customGeometry|{}customGeometry[0]
+        final fun <get-customGeometry>(): kotlin/Boolean // dev.composescene3d.core/RendererCapabilities.customGeometry.<get-customGeometry>|<get-customGeometry>(){}[0]
     final val physicallyBasedRendering // dev.composescene3d.core/RendererCapabilities.physicallyBasedRendering|{}physicallyBasedRendering[0]
         final fun <get-physicallyBasedRendering>(): kotlin/Boolean // dev.composescene3d.core/RendererCapabilities.physicallyBasedRendering.<get-physicallyBasedRendering>|<get-physicallyBasedRendering>(){}[0]
     final val picking // dev.composescene3d.core/RendererCapabilities.picking|{}picking[0]
@@ -554,7 +598,8 @@ final class dev.composescene3d.core/RendererCapabilities { // dev.composescene3d
     final fun component3(): kotlin/Boolean // dev.composescene3d.core/RendererCapabilities.component3|component3(){}[0]
     final fun component4(): kotlin/Boolean // dev.composescene3d.core/RendererCapabilities.component4|component4(){}[0]
     final fun component5(): kotlin/Boolean // dev.composescene3d.core/RendererCapabilities.component5|component5(){}[0]
-    final fun copy(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...): dev.composescene3d.core/RendererCapabilities // dev.composescene3d.core/RendererCapabilities.copy|copy(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
+    final fun component6(): kotlin/Boolean // dev.composescene3d.core/RendererCapabilities.component6|component6(){}[0]
+    final fun copy(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...): dev.composescene3d.core/RendererCapabilities // dev.composescene3d.core/RendererCapabilities.copy|copy(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/RendererCapabilities.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // dev.composescene3d.core/RendererCapabilities.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // dev.composescene3d.core/RendererCapabilities.toString|toString(){}[0]
