@@ -28,15 +28,15 @@ class ReconcilerTest {
     @Test
     fun removesInReverseOrderBeforeCreatingNodes() {
         val old = SceneDescription(
-            listOf(GroupNode(NodeKey("parent")), GroupNode(NodeKey("child")))
+            listOf(GroupNode(NodeKey("parent"), emptyList()), GroupNode(NodeKey("child"), emptyList()))
         )
-        val next = SceneDescription(listOf(GroupNode(NodeKey("replacement"))))
+        val next = SceneDescription(listOf(GroupNode(NodeKey("replacement"), emptyList())))
 
         assertEquals(
             listOf(
                 SceneCommand.Remove(NodeKey("child")),
                 SceneCommand.Remove(NodeKey("parent")),
-                SceneCommand.Create(GroupNode(NodeKey("replacement"))),
+                SceneCommand.Create(GroupNode(NodeKey("replacement"), emptyList())),
             ),
             reconcile(old, next),
         )
@@ -45,7 +45,32 @@ class ReconcilerTest {
     @Test
     fun rejectsDuplicateKeys() {
         assertFailsWith<IllegalArgumentException> {
-            SceneDescription(listOf(GroupNode(NodeKey("same")), GroupNode(NodeKey("same"))))
+            SceneDescription(
+                listOf(GroupNode(NodeKey("same"), emptyList()), GroupNode(NodeKey("same"), emptyList()))
+            )
         }
+    }
+
+    @Test
+    fun rejectsDuplicateKeysAcrossNestedGroups() {
+        assertFailsWith<IllegalArgumentException> {
+            SceneDescription(
+                listOf(
+                    GroupNode(
+                        NodeKey("root"),
+                        listOf(GroupNode(NodeKey("nested"), listOf(BoxNode(NodeKey("root"))))),
+                    )
+                )
+            )
+        }
+    }
+
+    @Test
+    fun flattensSceneTreeInPreOrder() {
+        val leaf = SphereNode(NodeKey("leaf"))
+        val nested = GroupNode(NodeKey("nested"), listOf(leaf))
+        val root = GroupNode(NodeKey("root"), listOf(nested))
+
+        assertEquals(listOf(root, nested, leaf), listOf(root).flattenSceneNodes())
     }
 }

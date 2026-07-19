@@ -42,22 +42,28 @@ Source repository: [AleksandrKdev/compose-scene-3d](https://github.com/Aleksandr
 
 ```kotlin
 val controller = rememberSceneController(renderer)
+val assemblyRotation = Quaternion(0f, sin(angle / 2f), 0f, cos(angle / 2f))
 
 Scene3D(controller) {
-    sphere(
-        key = "accent",
-        material = PbrMaterial(
-            baseColor = Color3D(0.9f, 0.55f, 0.12f),
-            metallic = 1f,
-            roughness = 0.2f,
-        ),
-        transform = Transform(translation = Vec3(-1.5f, 0f, 0f)),
-    )
-    model(
-        key = "product",
-        source = ModelSource.Resource("files/product.glb"),
-        transform = Transform(scale = Vec3(0.5f, 0.5f, 0.5f)),
-    )
+    group(
+        key = "product-assembly",
+        transform = Transform(rotation = assemblyRotation),
+    ) {
+        sphere(
+            key = "accent",
+            material = PbrMaterial(
+                baseColor = Color3D(0.9f, 0.55f, 0.12f),
+                metallic = 1f,
+                roughness = 0.2f,
+            ),
+            transform = Transform(translation = Vec3(-1.5f, 0f, 0f)),
+        )
+        model(
+            key = "product",
+            source = ModelSource.Resource("files/product.glb"),
+            transform = Transform(scale = Vec3(0.5f, 0.5f, 0.5f)),
+        )
+    }
     directionalLight(key = "sun", intensity = 50_000f)
     pointLight(
         key = "warm-fill",
@@ -67,6 +73,10 @@ Scene3D(controller) {
     )
 }
 ```
+
+`group { ... }` creates a real scene-graph node. Child transforms are local to their parent;
+translation, quaternion rotation and scale are inherited through any number of nested groups.
+Node keys remain unique across the entire tree, and picking still reports the leaf node key.
 
 `Color3D` distinguishes sRGB input from linear-sRGB values and supports RGB/RGBA/ARGB factories
 and named colors. Primitive materials can be `PbrMaterial`, `UnlitMaterial`, `EmissiveMaterial`,
@@ -121,9 +131,11 @@ results on Android, Desktop and iOS.
 
 ## Roadmap
 
-1. Implement an independent Web/Wasm renderer behind the same scene contract.
-2. Add normal and metallic-roughness texture channels based on cross-backend capability results.
-3. Stabilize the public API based on cross-backend experience.
+1. Add backend-neutral custom indexed mesh geometry with normals and UV coordinates.
+2. Add normal, metallic-roughness, emissive and ambient-occlusion texture channels.
+3. Expose portable shadow controls.
+4. Implement an independent Web/Wasm renderer behind the same scene contract.
+5. Stabilize the public API based on cross-backend experience.
 
 ## Running the samples
 

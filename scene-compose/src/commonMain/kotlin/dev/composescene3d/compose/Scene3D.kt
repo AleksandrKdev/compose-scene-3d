@@ -17,6 +17,7 @@ import dev.composescene3d.core.PlaneNode
 import dev.composescene3d.core.PointLightNode
 import dev.composescene3d.core.SceneController
 import dev.composescene3d.core.SceneDescription
+import dev.composescene3d.core.GroupNode
 import dev.composescene3d.core.SceneNode
 import dev.composescene3d.core.SceneRenderer
 import dev.composescene3d.core.SphereNode
@@ -34,6 +35,19 @@ class SceneScope internal constructor() {
         visible: Boolean = true,
     ) {
         nodes += ModelNode(NodeKey(key), source, transform, visible)
+    }
+
+    /**
+     * Adds a transform group. Every node declared in [content] uses coordinates local to this
+     * group and inherits its translation, rotation and scale.
+     */
+    fun group(
+        key: String,
+        transform: Transform = Transform(),
+        content: SceneScope.() -> Unit,
+    ) {
+        val children = SceneScope().apply(content).nodes.toList()
+        nodes += GroupNode(NodeKey(key), children, transform)
     }
 
     fun box(

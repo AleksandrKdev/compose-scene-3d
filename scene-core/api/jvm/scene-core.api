@@ -193,13 +193,15 @@ public final class dev/composescene3d/core/EnvironmentMap {
 }
 
 public final class dev/composescene3d/core/GroupNode : dev/composescene3d/core/SceneNode {
-	public synthetic fun <init> (Ljava/lang/String;Ldev/composescene3d/core/Transform;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun <init> (Ljava/lang/String;Ldev/composescene3d/core/Transform;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;Ldev/composescene3d/core/Transform;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;Ldev/composescene3d/core/Transform;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-V7PxYp4 ()Ljava/lang/String;
-	public final fun component2 ()Ldev/composescene3d/core/Transform;
-	public final fun copy-N3PrLpo (Ljava/lang/String;Ldev/composescene3d/core/Transform;)Ldev/composescene3d/core/GroupNode;
-	public static synthetic fun copy-N3PrLpo$default (Ldev/composescene3d/core/GroupNode;Ljava/lang/String;Ldev/composescene3d/core/Transform;ILjava/lang/Object;)Ldev/composescene3d/core/GroupNode;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Ldev/composescene3d/core/Transform;
+	public final fun copy-MaWGq3A (Ljava/lang/String;Ljava/util/List;Ldev/composescene3d/core/Transform;)Ldev/composescene3d/core/GroupNode;
+	public static synthetic fun copy-MaWGq3A$default (Ldev/composescene3d/core/GroupNode;Ljava/lang/String;Ljava/util/List;Ldev/composescene3d/core/Transform;ILjava/lang/Object;)Ldev/composescene3d/core/GroupNode;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getChildren ()Ljava/util/List;
 	public fun getKey-V7PxYp4 ()Ljava/lang/String;
 	public fun getTransform ()Ldev/composescene3d/core/Transform;
 	public fun hashCode ()I
@@ -464,6 +466,7 @@ public final class dev/composescene3d/core/SceneDescription$Companion {
 public final class dev/composescene3d/core/SceneKt {
 	public static final fun assetKey (Ldev/composescene3d/core/ModelSource;)Ljava/lang/String;
 	public static final fun assetKey (Ldev/composescene3d/core/TextureSource;)Ljava/lang/String;
+	public static final fun flattenSceneNodes (Ljava/lang/Iterable;)Ljava/util/List;
 }
 
 public abstract interface class dev/composescene3d/core/SceneNode {

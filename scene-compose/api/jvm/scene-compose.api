@@ -42,6 +42,8 @@ public final class dev/composescene3d/compose/SceneScope {
 	public static synthetic fun cylinder$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;FFILdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ILjava/lang/Object;)V
 	public final fun directionalLight (Ljava/lang/String;FLdev/composescene3d/core/Vec3;Ldev/composescene3d/core/Transform;)V
 	public static synthetic fun directionalLight$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;FLdev/composescene3d/core/Vec3;Ldev/composescene3d/core/Transform;ILjava/lang/Object;)V
+	public final fun group (Ljava/lang/String;Ldev/composescene3d/core/Transform;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun group$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;Ldev/composescene3d/core/Transform;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public final fun model (Ljava/lang/String;Ldev/composescene3d/core/ModelSource;Ldev/composescene3d/core/Transform;Z)V
 	public static synthetic fun model$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;Ldev/composescene3d/core/ModelSource;Ldev/composescene3d/core/Transform;ZILjava/lang/Object;)V
 	public final fun plane (Ljava/lang/String;FFZLdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;)V

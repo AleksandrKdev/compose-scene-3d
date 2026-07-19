@@ -60,6 +60,7 @@ import io.github.erkko68.filament.compose.scene.PointLight
 import io.github.erkko68.filament.compose.scene.Position
 import io.github.erkko68.filament.compose.scene.Scale
 import io.github.erkko68.filament.compose.scene.GltfInstance
+import io.github.erkko68.filament.compose.scene.Group
 import io.github.erkko68.filament.compose.scene.rememberGltfAsset
 import io.github.erkko68.filament.compose.scene.SkyboxSource
 import io.github.erkko68.filament.compose.scene.rememberSkyboxState
@@ -173,13 +174,15 @@ class FilamentRenderer(
                     check(retainedNodes.containsKey(command.node.key)) {
                         "Cannot update missing node: ${command.node.key.value}"
                     }
+                    unregisterRemovedDescendants(command.previous, command.node)
                     retainedNodes[command.node.key] = command.node
                 }
                 is SceneCommand.Remove -> {
-                    unregisterEntities(command.key)
-                    check(retainedNodes.remove(command.key) != null) {
+                    val removed = retainedNodes.remove(command.key)
+                    check(removed != null) {
                         "Cannot remove missing node: ${command.key.value}"
                     }
+                    unregisterTree(removed)
                 }
             }
         }
@@ -207,7 +210,27 @@ class FilamentRenderer(
             if (entityToNode[entity] == key) entityToNode.remove(entity)
         }
     }
+
+    private fun unregisterTree(node: SceneNode) {
+        unregisterEntities(node.key)
+        if (node is GroupNode) node.children.forEach(::unregisterTree)
+    }
+
+    private fun unregisterRemovedDescendants(previous: SceneNode, next: SceneNode) {
+        val nextKeys = next.descendantKeys()
+        previous.descendants().filter { it.key !in nextKeys }.forEach { unregisterEntities(it.key) }
+    }
 }
+
+private fun SceneNode.descendants(): List<SceneNode> = buildList {
+    fun append(node: SceneNode) {
+        add(node)
+        if (node is GroupNode) node.children.forEach(::append)
+    }
+    append(this@descendants)
+}
+
+private fun SceneNode.descendantKeys(): Set<NodeKey> = descendants().mapTo(mutableSetOf()) { it.key }
 
 @Composable
 fun FilamentViewport(
@@ -344,26 +367,37 @@ private fun FilamentViewportContent(
             indirectLightState = environmentState.indirectLight,
             cameraState = filamentCameraState,
         ) {
-            val modelGroups = modelsByAssetKey(renderer.nodes)
-            modelGroups.forEach { (assetKey, models) ->
-                key("asset:${assetKey.value}") {
-                    FilamentModels(renderer, assetKey, models)
+            FilamentNodes(renderer, renderer.nodes)
+        }
+    }
+}
+
+@Composable
+private fun FilamentSceneScope.FilamentNodes(
+    renderer: FilamentRenderer,
+    nodes: Collection<SceneNode>,
+) {
+    modelsByAssetKey(nodes).forEach { (assetKey, models) ->
+        key("asset:${assetKey.value}") { FilamentModels(renderer, assetKey, models) }
+    }
+    nodes.filterNot { it is ModelNode }.forEach { node ->
+        key(node.key.value) {
+            when (node) {
+                is BoxNode -> FilamentBox(renderer, node)
+                is SphereNode -> FilamentSphere(renderer, node)
+                is PlaneNode -> FilamentPlane(renderer, node)
+                is CylinderNode -> FilamentCylinder(renderer, node)
+                is DirectionalLightNode -> FilamentLight(node)
+                is PointLightNode -> FilamentLight(node)
+                is SpotLightNode -> FilamentLight(node)
+                is GroupNode -> Group(
+                    position = node.transform.translation.toFilamentPosition(),
+                    rotation = node.transform.rotation.toFilamentQuaternion(),
+                    scale = node.transform.scale.toFilamentScale(),
+                ) {
+                    FilamentNodes(renderer, node.children)
                 }
-            }
-            renderer.nodes.filterNot { it is ModelNode }.forEach { node ->
-                key(node.key.value) {
-                    when (node) {
-                        is BoxNode -> FilamentBox(renderer, node)
-                        is SphereNode -> FilamentSphere(renderer, node)
-                        is PlaneNode -> FilamentPlane(renderer, node)
-                        is CylinderNode -> FilamentCylinder(renderer, node)
-                        is DirectionalLightNode -> FilamentLight(node)
-                        is PointLightNode -> FilamentLight(node)
-                        is SpotLightNode -> FilamentLight(node)
-                        is GroupNode -> Unit
-                        is ModelNode -> error("Model nodes are rendered in shared asset groups")
-                    }
-                }
+                is ModelNode -> error("Model nodes are rendered in shared asset groups")
             }
         }
     }

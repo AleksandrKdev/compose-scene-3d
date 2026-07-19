@@ -4,6 +4,7 @@ import dev.composescene3d.core.BoxNode
 import dev.composescene3d.core.NodeKey
 import dev.composescene3d.core.ModelNode
 import dev.composescene3d.core.ModelSource
+import dev.composescene3d.core.GroupNode
 import dev.composescene3d.core.SceneCommand
 import dev.composescene3d.core.RendererCapabilities
 import dev.composescene3d.core.Transform
@@ -95,5 +96,25 @@ class FilamentRendererTest {
 
         assertEquals(null, renderer.resolveEntity(41))
         assertEquals(null, renderer.resolveEntity(42))
+    }
+
+    @Test
+    fun entityMappingsFollowNestedGroupUpdatesAndRemoval() {
+        val renderer = FilamentRenderer()
+        val firstChild = BoxNode(NodeKey("first-child"))
+        val secondChild = BoxNode(NodeKey("second-child"))
+        val group = GroupNode(NodeKey("group"), listOf(firstChild, secondChild))
+        renderer.apply(listOf(SceneCommand.Create(group)))
+        renderer.registerEntities(firstChild.key, listOf(51))
+        renderer.registerEntities(secondChild.key, listOf(52))
+
+        val updated = group.copy(children = listOf(secondChild))
+        renderer.apply(listOf(SceneCommand.Update(group, updated)))
+
+        assertEquals(null, renderer.resolveEntity(51))
+        assertEquals(secondChild.key, renderer.resolveEntity(52))
+
+        renderer.apply(listOf(SceneCommand.Remove(group.key)))
+        assertEquals(null, renderer.resolveEntity(52))
     }
 }

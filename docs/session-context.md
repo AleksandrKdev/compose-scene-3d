@@ -290,8 +290,8 @@ State: unavailable/offline
 - Transparent materials and preprocessed cubemap/IBL loading are completed in the milestones below.
 - Filament KMP does not provide a common HDR equirectangular-to-cubemap decoder, so raw HDR loading
   is deliberately not promised by the public API.
-- Next implementation step is the independent Web/Wasm renderer behind the same `SceneRenderer`
-  contract.
+- The scene graph now supports nested transform groups. The next implementation step is portable
+  custom indexed mesh geometry, followed by expanded PBR texture channels and shadows.
 
 ## Transparent material milestone (2026-07-19)
 
@@ -321,7 +321,19 @@ State: unavailable/offline
   Desktop and iOS samples, plus provenance and reproduction instructions.
 - Android APK, Desktop, iOS simulator framework and JVM tests compile successfully. Desktop runtime
   launch decoded the KTX assets and ran without an engine error or crash.
-- Next major milestone: independent Web/Wasm backend behind the shared `SceneRenderer` contract.
+- The following scene-hierarchy milestone moves custom geometry ahead of the Web/Wasm backend so
+  both Filament and future web renderers share the same foundational mesh API.
+
+## Scene hierarchy milestone (2026-07-19)
+
+- `GroupNode` now owns child nodes; `SceneScope.group { ... }` supports arbitrary nesting.
+- Child translation, quaternion rotation and scale are local and inherited through native Filament
+  transform entities on Android, Desktop and iOS.
+- Keys are validated globally across the tree, including collisions between ancestors and leaves.
+- Reconciliation retains a group subtree as one root node while Compose keys retain unchanged
+  native child entities; removed descendants are also removed from picking maps.
+- This intentionally changes the unreleased development `GroupNode` constructor before alpha03.
+- Next milestone: backend-neutral indexed mesh geometry with positions, indices, normals and UVs.
 
 ## Completed local Maven alpha milestone
 
@@ -391,7 +403,7 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Start with the independent Web/Wasm renderer milestone described in the current checkpoint.
-Preserve the released alpha02 API where practical and do not expose backend types in public
-commonMain API.
+Start with the custom indexed mesh geometry milestone described in the current checkpoint.
+The user explicitly allowed breaking the old empty GroupNode API before alpha03. Do not expose
+backend types in public commonMain API.
 ```

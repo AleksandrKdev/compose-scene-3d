@@ -3,6 +3,7 @@ package dev.composescene3d.compose
 import dev.composescene3d.core.CylinderNode
 import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.EmissiveMaterial
+import dev.composescene3d.core.GroupNode
 import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.core.PlaneNode
 import dev.composescene3d.core.PointLightNode
@@ -65,5 +66,23 @@ class SceneScopeTest {
         }.build()
 
         assertEquals(glass, assertIs<SphereNode>(scene.nodes.single()).material)
+    }
+
+    @Test
+    fun buildsNestedTransformGroups() {
+        val scene = SceneScope().apply {
+            group("vehicle") {
+                box("body")
+                group("wheels") {
+                    cylinder("front-wheel")
+                    cylinder("rear-wheel")
+                }
+            }
+        }.build()
+
+        val vehicle = assertIs<GroupNode>(scene.nodes.single())
+        assertIs<dev.composescene3d.core.BoxNode>(vehicle.children[0])
+        val wheels = assertIs<GroupNode>(vehicle.children[1])
+        assertEquals(listOf("front-wheel", "rear-wheel"), wheels.children.map { it.key.value })
     }
 }

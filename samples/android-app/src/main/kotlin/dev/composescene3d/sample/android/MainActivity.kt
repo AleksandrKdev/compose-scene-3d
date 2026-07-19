@@ -86,32 +86,34 @@ private fun Sample() {
                     scale = Vec3.One,
                 ),
             )
-            sphere(
-                key = "metal-sphere",
-                material = PbrMaterial(
-                    baseColor = Color3D(0.9f, 0.55f, 0.12f),
-                    metallic = 1f,
-                    roughness = 0.18f,
-                ),
-                transform = Transform(translation = Vec3(-2f, 0f, 0f)),
-            )
-            cylinder(
-                key = "rough-cylinder",
-                material = PbrMaterial(
-                    baseColor = Color3D(0.25f, 0.85f, 0.4f),
-                    roughness = 0.85f,
-                ),
-                transform = Transform(translation = Vec3(2f, 0f, 0f)),
-            )
-            sphere(
-                key = "glass-sphere",
-                radius = 0.45f,
-                material = TransparentMaterial(
-                    color = Color3D(0.2f, 0.65f, 1f, alpha = 0.35f),
-                    roughness = 0.12f,
-                ),
-                transform = Transform(translation = Vec3(0f, 0.8f, 0f)),
-            )
+            group(key = "material-showcase") {
+                sphere(
+                    key = "metal-sphere",
+                    material = PbrMaterial(
+                        baseColor = Color3D(0.9f, 0.55f, 0.12f),
+                        metallic = 1f,
+                        roughness = 0.18f,
+                    ),
+                    transform = Transform(translation = Vec3(-2f, 0f, 0f)),
+                )
+                cylinder(
+                    key = "rough-cylinder",
+                    material = PbrMaterial(
+                        baseColor = Color3D(0.25f, 0.85f, 0.4f),
+                        roughness = 0.85f,
+                    ),
+                    transform = Transform(translation = Vec3(2f, 0f, 0f)),
+                )
+                sphere(
+                    key = "glass-sphere",
+                    radius = 0.45f,
+                    material = TransparentMaterial(
+                        color = Color3D(0.2f, 0.65f, 1f, alpha = 0.35f),
+                        roughness = 0.12f,
+                    ),
+                    transform = Transform(translation = Vec3(0f, 0.8f, 0f)),
+                )
+            }
             plane(
                 key = "ground",
                 width = 6f,

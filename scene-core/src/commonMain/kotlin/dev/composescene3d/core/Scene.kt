@@ -72,8 +72,13 @@ sealed interface SceneNode {
     val transform: Transform
 }
 
+/**
+ * A transform node whose [children] use local coordinates and inherit this group's transform.
+ * Groups can be nested to build articulated objects and movable scene assemblies.
+ */
 data class GroupNode(
     override val key: NodeKey,
+    val children: List<SceneNode>,
     override val transform: Transform = Transform(),
 ) : SceneNode
 
@@ -242,11 +247,24 @@ data class SpotLightNode(
 
 data class SceneDescription(val nodes: List<SceneNode>) {
     init {
-        val duplicateKeys = nodes.groupingBy(SceneNode::key).eachCount().filterValues { it > 1 }.keys
+        val duplicateKeys = nodes.flattenSceneNodes()
+            .groupingBy(SceneNode::key)
+            .eachCount()
+            .filterValues { it > 1 }
+            .keys
         require(duplicateKeys.isEmpty()) { "Duplicate scene node keys: $duplicateKeys" }
     }
 
     companion object {
         val Empty = SceneDescription(emptyList())
     }
+}
+
+/** Returns all nodes in deterministic pre-order, including group nodes themselves. */
+fun Iterable<SceneNode>.flattenSceneNodes(): List<SceneNode> = buildList {
+    fun append(node: SceneNode) {
+        add(node)
+        if (node is GroupNode) node.children.forEach(::append)
+    }
+    this@flattenSceneNodes.forEach(::append)
 }
