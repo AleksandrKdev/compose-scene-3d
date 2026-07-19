@@ -290,8 +290,8 @@ State: unavailable/offline
 - Transparent materials and preprocessed cubemap/IBL loading are completed in the milestones below.
 - Filament KMP does not provide a common HDR equirectangular-to-cubemap decoder, so raw HDR loading
   is deliberately not promised by the public API.
-- The scene graph, custom indexed meshes and expanded PBR textures are implemented. The next
-  implementation step is portable shadow controls.
+- The scene graph, custom indexed meshes, expanded PBR textures and portable shadows are
+  implemented. The next implementation step is the independent Web/Wasm backend.
 
 ## Transparent material milestone (2026-07-19)
 
@@ -365,6 +365,25 @@ State: unavailable/offline
   alpha03 ABI; ABI snapshots were updated after the API change.
 - Next milestone: backend-neutral shadow controls for meshes, primitives and lights.
 
+## Portable shadow milestone (2026-07-19)
+
+- Added per-renderable `castShadows`/`receiveShadows` to GLB models, built-in primitives and custom
+  meshes; model flags apply to every renderable entity in a glTF instance.
+- Added validated per-light `ShadowMap3D` for directional and spot lights with resolution, biases,
+  directional cascades, contact-shadow controls and soft-shadow bulb radius.
+- Added portable view techniques `Pcf`, `Pcfd`, `Vsm`, `Dpcf` and `Pcss`; null disables shadowing.
+- Point lights intentionally have no shadow option because the Filament backend does not implement
+  omnidirectional cubemap shadow maps.
+- Added `RendererCapabilities.shadows`; the Filament adapter maps every level without exposing its
+  native `ShadowConfig` or `Shadows` types.
+- Recompiled the transparent material with its VSM variant retained because Filament uses that
+  variant for VSM, DPCF and PCSS shadow receivers.
+- Samples use portable PCF with two-cascade directional shadows, contact shadows and a
+  receiver-only floor. PCSS remains available but requires the VSM receiver variant in every
+  loaded GLB material; the bundled Duck asset does not satisfy that requirement on Metal.
+- Desktop runtime with PCF created the shadow map and ran without a Filament error or crash.
+- Next milestone: independent Web/Wasm backend behind the shared scene contract.
+
 ## Completed local Maven alpha milestone
 
 - Fixed project coordinates: `dev.composescene3d:*:0.1.0-alpha01`.
@@ -433,7 +452,7 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Start with the portable shadow controls milestone described in the current checkpoint.
+Start with the independent Web/Wasm backend milestone described in the current checkpoint.
 The user explicitly allowed breaking the old empty GroupNode API before alpha03. Do not expose
 backend types in public commonMain API.
 ```

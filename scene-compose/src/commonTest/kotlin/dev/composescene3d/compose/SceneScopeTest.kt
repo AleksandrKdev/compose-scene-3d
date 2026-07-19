@@ -6,6 +6,7 @@ import dev.composescene3d.core.EmissiveMaterial
 import dev.composescene3d.core.GroupNode
 import dev.composescene3d.core.Geometry3D
 import dev.composescene3d.core.MeshNode
+import dev.composescene3d.core.ShadowMap3D
 import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.core.PlaneNode
 import dev.composescene3d.core.PointLightNode
@@ -104,5 +105,17 @@ class SceneScopeTest {
         val scene = SceneScope().apply { mesh("triangle", geometry) }.build()
 
         assertEquals(geometry, assertIs<MeshNode>(scene.nodes.single()).geometry)
+    }
+
+    @Test
+    fun buildsPortableShadowControls() {
+        val shadow = ShadowMap3D(mapSize = 2048, cascades = 2)
+        val scene = SceneScope().apply {
+            plane("receiver", castShadows = false, receiveShadows = true)
+            directionalLight("sun", intensity = 50_000f, shadow = shadow)
+        }.build()
+
+        assertEquals(false, assertIs<PlaneNode>(scene.nodes[0]).castShadows)
+        assertEquals(shadow, assertIs<dev.composescene3d.core.DirectionalLightNode>(scene.nodes[1]).shadow)
     }
 }

@@ -87,7 +87,69 @@ data class ModelNode(
     val source: ModelSource,
     override val transform: Transform = Transform(),
     val visible: Boolean = true,
+    val castShadows: Boolean = true,
+    val receiveShadows: Boolean = true,
 ) : SceneNode
+
+/** Per-light shadow-map quality. A null value on a light disables its shadows. */
+data class ShadowMap3D(
+    val mapSize: Int = 1024,
+    val constantBias: Float = 0.001f,
+    val normalBias: Float = 1f,
+    val shadowFar: Float = 0f,
+    val cascades: Int = 1,
+    val contactShadows: Boolean = false,
+    val contactShadowDistance: Float = 0.3f,
+    val contactShadowSteps: Int = 8,
+    val bulbRadius: Float = 0.02f,
+) {
+    init {
+        require(mapSize >= 8 && mapSize.isPowerOfTwo()) {
+            "Shadow map size must be a power of two and at least 8"
+        }
+        require(constantBias >= 0f && constantBias.isFinite()) {
+            "Shadow constant bias must be finite and non-negative"
+        }
+        require(normalBias >= 0f && normalBias.isFinite()) {
+            "Shadow normal bias must be finite and non-negative"
+        }
+        require(shadowFar >= 0f && shadowFar.isFinite()) {
+            "Shadow far distance must be finite and non-negative"
+        }
+        require(cascades in 1..4) { "Shadow cascades must be between 1 and 4" }
+        require(contactShadowDistance >= 0f && contactShadowDistance.isFinite()) {
+            "Contact shadow distance must be finite and non-negative"
+        }
+        require(contactShadowSteps > 0) { "Contact shadow steps must be positive" }
+        require(bulbRadius >= 0f && bulbRadius.isFinite()) {
+            "Shadow bulb radius must be finite and non-negative"
+        }
+    }
+}
+
+private fun Int.isPowerOfTwo(): Boolean = this > 0 && (this and (this - 1)) == 0
+
+/** View-wide shadow algorithm. Null at the viewport disables shadow rendering. */
+sealed interface ShadowTechnique3D {
+    data object Pcf : ShadowTechnique3D
+    data object Pcfd : ShadowTechnique3D
+    data class Vsm(
+        val highPrecision: Boolean = false,
+        val lightBleedReduction: Float = 0f,
+    ) : ShadowTechnique3D {
+        init {
+            require(lightBleedReduction in 0f..1f) {
+                "VSM light bleed reduction must be between 0 and 1"
+            }
+        }
+    }
+    data class Dpcf(val penumbraScale: Float = 1f) : ShadowTechnique3D {
+        init { require(penumbraScale >= 0f && penumbraScale.isFinite()) }
+    }
+    data class Pcss(val penumbraScale: Float = 1f) : ShadowTechnique3D {
+        init { require(penumbraScale >= 0f && penumbraScale.isFinite()) }
+    }
+}
 
 sealed interface Material3D
 
@@ -165,6 +227,8 @@ data class BoxNode(
     val size: Vec3 = Vec3.One,
     val color: Vec3 = Vec3(0.7f, 0.7f, 0.7f),
     override val transform: Transform = Transform(),
+    val castShadows: Boolean = true,
+    val receiveShadows: Boolean = true,
 ) : SceneNode {
     init {
         require(size.x > 0f && size.y > 0f && size.z > 0f) { "Box dimensions must be positive" }
@@ -178,6 +242,8 @@ data class SphereNode(
     val segments: Int = 32,
     val material: Material3D = PbrMaterial(),
     override val transform: Transform = Transform(),
+    val castShadows: Boolean = true,
+    val receiveShadows: Boolean = true,
 ) : SceneNode {
     init {
         require(radius > 0f) { "Sphere radius must be positive" }
@@ -193,6 +259,8 @@ data class PlaneNode(
     val doubleSided: Boolean = true,
     val material: Material3D = PbrMaterial(),
     override val transform: Transform = Transform(),
+    val castShadows: Boolean = true,
+    val receiveShadows: Boolean = true,
 ) : SceneNode {
     init {
         require(width > 0f) { "Plane width must be positive" }
@@ -207,6 +275,8 @@ data class CylinderNode(
     val segments: Int = 32,
     val material: Material3D = PbrMaterial(),
     override val transform: Transform = Transform(),
+    val castShadows: Boolean = true,
+    val receiveShadows: Boolean = true,
 ) : SceneNode {
     init {
         require(radius > 0f) { "Cylinder radius must be positive" }
@@ -271,6 +341,8 @@ data class MeshNode(
     val geometry: Geometry3D,
     val material: Material3D = PbrMaterial(),
     override val transform: Transform = Transform(),
+    val castShadows: Boolean = true,
+    val receiveShadows: Boolean = true,
 ) : SceneNode {
     init {
         require(material !is TexturedMaterial || geometry.uvs != null) {
@@ -284,6 +356,7 @@ data class DirectionalLightNode(
     val intensity: Float,
     val color: Vec3 = Vec3.One,
     override val transform: Transform = Transform(),
+    val shadow: ShadowMap3D? = null,
 ) : SceneNode {
     init {
         require(intensity >= 0f) { "Light intensity cannot be negative" }
@@ -312,6 +385,7 @@ data class SpotLightNode(
     val innerConeRadians: Float = 0.5f,
     val outerConeRadians: Float = 0.6f,
     override val transform: Transform = Transform(),
+    val shadow: ShadowMap3D? = null,
 ) : SceneNode {
     init {
         require(intensity >= 0f && intensity.isFinite()) { "Light intensity must be non-negative" }

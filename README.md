@@ -164,11 +164,44 @@ Generate both files offline with Filament `cmgen -f ktx -x output environment.hd
 conversion is intentionally excluded: preprocessing produces smaller assets and deterministic
 results on Android, Desktop and iOS.
 
+Shadow participation is configured independently from the view-wide technique and the light's
+shadow map:
+
+```kotlin
+FilamentViewport(
+    renderer = renderer,
+    shadows = ShadowTechnique3D.Pcf,
+)
+
+Scene3D(controller) {
+    sphere(key = "caster", castShadows = true, receiveShadows = true)
+    plane(key = "ground", castShadows = false, receiveShadows = true)
+    directionalLight(
+        key = "sun",
+        intensity = 100_000f,
+        shadow = ShadowMap3D(
+            mapSize = 2048,
+            cascades = 2,
+            contactShadows = true,
+            bulbRadius = 0.05f,
+        ),
+    )
+}
+```
+
+`Pcf`, `Pcfd`, `Vsm`, `Dpcf` and `Pcss` are portable view techniques. Directional and spot lights
+can own a `ShadowMap3D`; point-light shadows are deliberately unsupported because Filament does
+not implement the required cubemap shadow maps. Passing `shadows = null` disables the view-wide
+shadow pass.
+
+`Dpcf` and `Pcss` additionally require compatible VSM receiver variants in every material,
+including materials embedded in loaded GLB assets. Use `Pcf` as the portable default when asset
+provenance is unknown.
+
 ## Roadmap
 
-1. Expose portable shadow controls.
-2. Implement an independent Web/Wasm renderer behind the same scene contract.
-3. Stabilize the public API based on cross-backend experience.
+1. Implement an independent Web/Wasm renderer behind the same scene contract.
+2. Stabilize the public API based on cross-backend experience.
 
 ## Running the samples
 

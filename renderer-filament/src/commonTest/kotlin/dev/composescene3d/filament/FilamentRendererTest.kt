@@ -21,6 +21,7 @@ class FilamentRendererTest {
         expectedCapabilities = RendererCapabilities(
             primitiveGeometry = true,
             customGeometry = true,
+            shadows = true,
             physicallyBasedRendering = true,
             skeletalAnimation = true,
         ),

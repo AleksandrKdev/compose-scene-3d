@@ -45,7 +45,7 @@ internal fun FilamentSceneScope.FilamentMesh(renderer: FilamentRenderer, node: M
         }
     }
 
-    val entity = remember(handles, material) {
+    val entity = remember(handles, material, node.castShadows, node.receiveShadows) {
         engine.getEntityManager().create().also { entity ->
             RenderableManager.Builder(1)
                 .geometry(
@@ -56,8 +56,8 @@ internal fun FilamentSceneScope.FilamentMesh(renderer: FilamentRenderer, node: M
                 )
                 .material(0, material)
                 .boundingBox(handles.boundingBox)
-                .castShadows(true)
-                .receiveShadows(true)
+                .castShadows(node.castShadows)
+                .receiveShadows(node.receiveShadows)
                 .build(engine, entity)
         }
     }

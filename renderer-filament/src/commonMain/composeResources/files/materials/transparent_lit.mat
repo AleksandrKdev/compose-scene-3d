@@ -8,7 +8,8 @@ material {
     shadingModel : lit,
     blending : transparent,
     transparency : twoPassesTwoSides,
-    variantFilter : [ skinning, vsm, ssr, stereo ],
+    // Keep the VSM variant: Filament also selects it for DPCF/PCSS shadow receivers.
+    variantFilter : [ skinning, ssr, stereo ],
     parameters : [
         { type : float4, name : baseColor },
         { type : float, name : metallic },

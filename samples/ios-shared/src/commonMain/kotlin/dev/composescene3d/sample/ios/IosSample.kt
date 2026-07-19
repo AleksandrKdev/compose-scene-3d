@@ -25,6 +25,8 @@ import dev.composescene3d.core.EnvironmentMap
 import dev.composescene3d.core.TextureSource
 import dev.composescene3d.core.TexturedMaterial
 import dev.composescene3d.core.Geometry3D
+import dev.composescene3d.core.ShadowMap3D
+import dev.composescene3d.core.ShadowTechnique3D
 import dev.composescene3d.core.Transform
 import dev.composescene3d.core.Vec3
 import dev.composescene3d.filament.FilamentRenderer
@@ -100,6 +102,7 @@ fun IosSample(
             renderer = renderer,
             environment = environment,
             cameraState = cameraState,
+            shadows = ShadowTechnique3D.Pcf,
             zoomSpeed = 0.12f,
             onNodePicked = { selected = it?.value },
         )
@@ -150,9 +153,19 @@ fun IosSample(
                 width = 6f,
                 depth = 5f,
                 material = floorMaterial,
+                castShadows = false,
                 transform = Transform(translation = Vec3(0f, -1.05f, 0f)),
             )
-            directionalLight(key = "sun", intensity = 100_000f)
+            directionalLight(
+                key = "sun",
+                intensity = 100_000f,
+                shadow = ShadowMap3D(
+                    mapSize = 2048,
+                    cascades = 2,
+                    contactShadows = true,
+                    bulbRadius = 0.05f,
+                ),
+            )
             pointLight(
                 key = "warm-fill",
                 intensity = 1_500f,

@@ -4,6 +4,7 @@ package dev.composescene3d.core
 data class RendererCapabilities(
     val primitiveGeometry: Boolean = false,
     val customGeometry: Boolean = false,
+    val shadows: Boolean = false,
     val physicallyBasedRendering: Boolean = false,
     val bloom: Boolean = false,
     val skeletalAnimation: Boolean = false,

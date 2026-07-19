@@ -24,6 +24,7 @@ import dev.composescene3d.core.SceneNode
 import dev.composescene3d.core.SceneRenderer
 import dev.composescene3d.core.SphereNode
 import dev.composescene3d.core.SpotLightNode
+import dev.composescene3d.core.ShadowMap3D
 import dev.composescene3d.core.Transform
 import dev.composescene3d.core.Vec3
 
@@ -35,8 +36,10 @@ class SceneScope internal constructor() {
         source: ModelSource,
         transform: Transform = Transform(),
         visible: Boolean = true,
+        castShadows: Boolean = true,
+        receiveShadows: Boolean = true,
     ) {
-        nodes += ModelNode(NodeKey(key), source, transform, visible)
+        nodes += ModelNode(NodeKey(key), source, transform, visible, castShadows, receiveShadows)
     }
 
     /**
@@ -57,8 +60,10 @@ class SceneScope internal constructor() {
         size: Vec3 = Vec3.One,
         color: Vec3 = Vec3(0.7f, 0.7f, 0.7f),
         transform: Transform = Transform(),
+        castShadows: Boolean = true,
+        receiveShadows: Boolean = true,
     ) {
-        nodes += BoxNode(NodeKey(key), size, color, transform)
+        nodes += BoxNode(NodeKey(key), size, color, transform, castShadows, receiveShadows)
     }
 
     fun sphere(
@@ -68,8 +73,12 @@ class SceneScope internal constructor() {
         segments: Int = 32,
         material: Material3D = PbrMaterial(),
         transform: Transform = Transform(),
+        castShadows: Boolean = true,
+        receiveShadows: Boolean = true,
     ) {
-        nodes += SphereNode(NodeKey(key), radius, rings, segments, material, transform)
+        nodes += SphereNode(
+            NodeKey(key), radius, rings, segments, material, transform, castShadows, receiveShadows,
+        )
     }
 
     fun plane(
@@ -79,8 +88,12 @@ class SceneScope internal constructor() {
         doubleSided: Boolean = true,
         material: Material3D = PbrMaterial(),
         transform: Transform = Transform(),
+        castShadows: Boolean = true,
+        receiveShadows: Boolean = true,
     ) {
-        nodes += PlaneNode(NodeKey(key), width, depth, doubleSided, material, transform)
+        nodes += PlaneNode(
+            NodeKey(key), width, depth, doubleSided, material, transform, castShadows, receiveShadows,
+        )
     }
 
     fun cylinder(
@@ -90,8 +103,12 @@ class SceneScope internal constructor() {
         segments: Int = 32,
         material: Material3D = PbrMaterial(),
         transform: Transform = Transform(),
+        castShadows: Boolean = true,
+        receiveShadows: Boolean = true,
     ) {
-        nodes += CylinderNode(NodeKey(key), radius, height, segments, material, transform)
+        nodes += CylinderNode(
+            NodeKey(key), radius, height, segments, material, transform, castShadows, receiveShadows,
+        )
     }
 
     fun mesh(
@@ -99,8 +116,10 @@ class SceneScope internal constructor() {
         geometry: Geometry3D,
         material: Material3D = PbrMaterial(),
         transform: Transform = Transform(),
+        castShadows: Boolean = true,
+        receiveShadows: Boolean = true,
     ) {
-        nodes += MeshNode(NodeKey(key), geometry, material, transform)
+        nodes += MeshNode(NodeKey(key), geometry, material, transform, castShadows, receiveShadows)
     }
 
     fun directionalLight(
@@ -108,8 +127,9 @@ class SceneScope internal constructor() {
         intensity: Float,
         color: Vec3 = Vec3.One,
         transform: Transform = Transform(),
+        shadow: ShadowMap3D? = null,
     ) {
-        nodes += DirectionalLightNode(NodeKey(key), intensity, color, transform)
+        nodes += DirectionalLightNode(NodeKey(key), intensity, color, transform, shadow)
     }
 
     fun pointLight(
@@ -131,10 +151,11 @@ class SceneScope internal constructor() {
         innerConeRadians: Float = 0.5f,
         outerConeRadians: Float = 0.6f,
         transform: Transform = Transform(),
+        shadow: ShadowMap3D? = null,
     ) {
         nodes += SpotLightNode(
             NodeKey(key), intensity, direction, color, falloff,
-            innerConeRadians, outerConeRadians, transform,
+            innerConeRadians, outerConeRadians, transform, shadow,
         )
     }
 

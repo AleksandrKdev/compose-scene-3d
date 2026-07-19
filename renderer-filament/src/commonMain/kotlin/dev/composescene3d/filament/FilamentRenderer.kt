@@ -40,6 +40,8 @@ import dev.composescene3d.core.RendererCapabilities
 import dev.composescene3d.core.SceneCommand
 import dev.composescene3d.core.SceneNode
 import dev.composescene3d.core.SceneRenderer
+import dev.composescene3d.core.ShadowMap3D
+import dev.composescene3d.core.ShadowTechnique3D
 import dev.composescene3d.core.SphereNode
 import dev.composescene3d.core.SpotLightNode
 import dev.composescene3d.core.TextureSource
@@ -63,6 +65,7 @@ import io.github.erkko68.filament.compose.scene.PointLight
 import io.github.erkko68.filament.compose.scene.Position
 import io.github.erkko68.filament.compose.scene.Scale
 import io.github.erkko68.filament.compose.scene.GltfInstance
+import io.github.erkko68.filament.compose.scene.GltfInstanceScope
 import io.github.erkko68.filament.compose.scene.Group
 import io.github.erkko68.filament.compose.scene.rememberGltfAsset
 import io.github.erkko68.filament.compose.scene.SkyboxSource
@@ -83,6 +86,8 @@ import io.github.erkko68.filament.compose.scene.rememberUnlitColorMaterialInstan
 import io.github.erkko68.filament.compose.scene.rememberTexture
 import io.github.erkko68.filament.compose.scene.SpotCone
 import io.github.erkko68.filament.compose.scene.SpotLight
+import io.github.erkko68.filament.compose.scene.ShadowConfig
+import io.github.erkko68.filament.compose.scene.Shadows
 import io.github.erkko68.filament.utils.Quaternion
 import io.github.erkko68.filament.utils.KTX1Loader
 import io.github.erkko68.filament.Engine
@@ -155,6 +160,7 @@ class FilamentRenderer(
     override val capabilities = RendererCapabilities(
         primitiveGeometry = true,
         customGeometry = true,
+        shadows = true,
         physicallyBasedRendering = true,
         skeletalAnimation = true,
     )
@@ -246,10 +252,11 @@ fun FilamentViewport(
     orbitEnabled: Boolean = true,
     zoomSpeed: Float = 0.12f,
     pickingEnabled: Boolean = true,
+    shadows: ShadowTechnique3D? = ShadowTechnique3D.Pcf,
     onNodePicked: (NodeKey?) -> Unit = {},
 ) = FilamentViewportContent(
     renderer, modifier, backgroundColor, null, cameraState, orbitEnabled, zoomSpeed,
-    pickingEnabled, onNodePicked,
+    pickingEnabled, shadows, onNodePicked,
 )
 
 @Composable
@@ -262,10 +269,11 @@ fun FilamentViewport(
     orbitEnabled: Boolean = true,
     zoomSpeed: Float = 0.12f,
     pickingEnabled: Boolean = true,
+    shadows: ShadowTechnique3D? = ShadowTechnique3D.Pcf,
     onNodePicked: (NodeKey?) -> Unit = {},
 ) = FilamentViewportContent(
     renderer, modifier, backgroundColor, environment, cameraState, orbitEnabled, zoomSpeed,
-    pickingEnabled, onNodePicked,
+    pickingEnabled, shadows, onNodePicked,
 )
 
 @Composable
@@ -278,6 +286,7 @@ private fun FilamentViewportContent(
     orbitEnabled: Boolean,
     zoomSpeed: Float,
     pickingEnabled: Boolean,
+    shadows: ShadowTechnique3D?,
     onNodePicked: (NodeKey?) -> Unit,
 ) {
     val engine = rememberFilamentEngine()
@@ -371,6 +380,7 @@ private fun FilamentViewportContent(
             skyboxState = skyboxState,
             indirectLightState = environmentState.indirectLight,
             cameraState = filamentCameraState,
+            shadows = shadows.toFilamentShadows(),
         ) {
             FilamentNodes(renderer, renderer.nodes)
         }
@@ -500,6 +510,30 @@ private fun yRotationMatrix(radians: Float): FloatArray {
     )
 }
 
+private fun ShadowTechnique3D?.toFilamentShadows(): Shadows? = when (this) {
+    null -> null
+    ShadowTechnique3D.Pcf -> Shadows.Pcf
+    ShadowTechnique3D.Pcfd -> Shadows.Pcfd
+    is ShadowTechnique3D.Vsm -> Shadows.Vsm(
+        highPrecision = highPrecision,
+        lightBleedReduction = lightBleedReduction,
+    )
+    is ShadowTechnique3D.Dpcf -> Shadows.Dpcf(penumbraScale = penumbraScale)
+    is ShadowTechnique3D.Pcss -> Shadows.Pcss(penumbraScale = penumbraScale)
+}
+
+private fun ShadowMap3D.toFilamentShadowConfig() = ShadowConfig(
+    mapSize = mapSize,
+    constantBias = constantBias,
+    normalBias = normalBias,
+    shadowFar = shadowFar,
+    cascades = cascades,
+    contactShadows = contactShadows,
+    contactShadowDistance = contactShadowDistance,
+    contactShadowSteps = contactShadowSteps,
+    bulbRadius = bulbRadius,
+)
+
 internal fun modelsByAssetKey(nodes: Collection<SceneNode>): Map<ModelAssetKey, List<ModelNode>> =
     nodes.filterIsInstance<ModelNode>().groupBy { it.source.assetKey() }
 
@@ -539,9 +573,21 @@ private fun FilamentSceneScope.FilamentModels(
                 ),
                 onCreate = {
                     renderer.registerEntities(model.key, instance.getEntities().toList())
+                    applyShadows(model.castShadows, model.receiveShadows)
                 },
+                onUpdate = { applyShadows(model.castShadows, model.receiveShadows) },
             )
         }
+    }
+}
+
+private fun GltfInstanceScope.applyShadows(cast: Boolean, receive: Boolean) {
+    val renderables = engine.getRenderableManager()
+    instance.getEntities().forEach { entity ->
+        if (!renderables.hasComponent(entity)) return@forEach
+        val renderable = renderables.getInstance(entity)
+        renderables.setCastShadows(renderable, cast)
+        renderables.setReceiveShadows(renderable, receive)
     }
 }
 
@@ -565,6 +611,8 @@ private fun FilamentSceneScope.FilamentBox(renderer: FilamentRenderer, node: Box
             node.transform.scale.z * node.size.z,
         ),
         size = 1f,
+        castShadows = node.castShadows,
+        receiveShadows = node.receiveShadows,
         onCreate = { rendererEntity ->
             // The primitive owns one renderable entity.
             // Registration is replaced, not appended, if Compose recreates this node.
@@ -584,6 +632,8 @@ private fun FilamentSceneScope.FilamentSphere(renderer: FilamentRenderer, node: 
         radius = node.radius,
         rings = node.rings,
         segments = node.segments,
+        castShadows = node.castShadows,
+        receiveShadows = node.receiveShadows,
         onCreate = { renderer.registerEntities(node.key, listOf(it)) },
     )
 }
@@ -598,6 +648,8 @@ private fun FilamentSceneScope.FilamentPlane(renderer: FilamentRenderer, node: P
         width = node.width,
         depth = node.depth,
         doubleSided = node.doubleSided,
+        castShadows = node.castShadows,
+        receiveShadows = node.receiveShadows,
         onCreate = { renderer.registerEntities(node.key, listOf(it)) },
     )
 }
@@ -612,6 +664,8 @@ private fun FilamentSceneScope.FilamentCylinder(renderer: FilamentRenderer, node
         radius = node.radius,
         height = node.height,
         segments = node.segments,
+        castShadows = node.castShadows,
+        receiveShadows = node.receiveShadows,
         onCreate = { renderer.registerEntities(node.key, listOf(it)) },
     )
 }
@@ -796,6 +850,7 @@ private fun FilamentSceneScope.FilamentLight(node: DirectionalLightNode) {
         direction = Direction(0.3f, -1f, -0.5f),
         color = Color(node.color.x, node.color.y, node.color.z),
         intensity = node.intensity,
+        shadow = node.shadow?.toFilamentShadowConfig(),
     )
 }
 
@@ -818,5 +873,6 @@ private fun FilamentSceneScope.FilamentLight(node: SpotLightNode) {
         intensity = node.intensity,
         falloff = node.falloff,
         cone = SpotCone(node.innerConeRadians, node.outerConeRadians),
+        shadow = node.shadow?.toFilamentShadowConfig(),
     )
 }
