@@ -34,6 +34,7 @@ kotlin {
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.ui)
+            implementation(libs.compose.resources)
             implementation(libs.filament.compose)
         }
         commonTest.dependencies {
@@ -41,4 +42,8 @@ kotlin {
             implementation(project(":renderer-testkit"))
         }
     }
+}
+
+compose.resources {
+    packageOfResClass = "dev.composescene3d.filament.resources"
 }

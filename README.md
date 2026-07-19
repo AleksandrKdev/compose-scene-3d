@@ -69,9 +69,22 @@ Scene3D(controller) {
 ```
 
 `Color3D` distinguishes sRGB input from linear-sRGB values and supports RGB/RGBA/ARGB factories
-and named colors. Primitive materials can be `PbrMaterial`, `UnlitMaterial`, `EmissiveMaterial` or
-`TexturedMaterial`. The current standard shaders are opaque; alpha is retained in the shared color
-model for the upcoming transparent material API.
+and named colors. Primitive materials can be `PbrMaterial`, `UnlitMaterial`, `EmissiveMaterial`,
+`TexturedMaterial` or `TransparentMaterial`.
+
+```kotlin
+sphere(
+    key = "glass",
+    material = TransparentMaterial(
+        color = Color3D(0.2f, 0.65f, 1f, alpha = 0.35f),
+        roughness = 0.12f,
+    ),
+)
+```
+
+Transparent colors are converted to linear-sRGB and premultiplied by alpha before reaching the
+shader. The bundled blended material is compiled for all Filament backends with the exact `matc`
+version used by the runtime dependency.
 
 Texture data can come from common resources, URLs or in-memory bytes without exposing a Filament
 type to shared code:
@@ -91,7 +104,7 @@ application-provided `TextureByteLoader`, following the same pattern as `ModelBy
 
 ## Roadmap
 
-1. Add transparent shaders and preprocessed cubemap environment lighting.
+1. Add preprocessed cubemap environment lighting.
 2. Implement an independent Web/Wasm renderer behind the same scene contract.
 3. Stabilize the public API based on cross-backend experience.
 

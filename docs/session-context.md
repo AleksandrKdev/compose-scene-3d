@@ -278,7 +278,8 @@ State: unavailable/offline
 
 ## Current checkpoint (2026-07-18)
 
-- Branch `main` is clean and pushed through commit `945a71e Add portable textured materials`.
+- The last checkpoint commit before the transparent milestone was
+  `945a71e Add portable textured materials`.
 - The preceding feature commits are `fe434a4 Add portable colors materials and local lights` and
   `05ee982 Add shared primitives and PBR materials`.
 - Development version is `0.1.0-alpha03-SNAPSHOT`; Maven Central `0.1.0-alpha02` remains the latest
@@ -286,14 +287,25 @@ State: unavailable/offline
 - Latest verification passed `scene-core`, `scene-compose` and `renderer-filament` JVM tests,
   Android debug APK assembly, Desktop JVM compilation, iOS simulator framework linkage, both iOS
   renderer compilation targets and `checkKotlinAbi`.
-- Next implementation step: add an explicitly blended transparent material using a separately
-  compiled portable Filament shader. Do not pretend alpha works with the current opaque standard
-  shaders.
-- Following step: define a backend-neutral preprocessed cubemap/IBL source and loader. Filament KMP
+- The explicitly blended transparent material is completed in the milestone below.
+- Next step: define a backend-neutral preprocessed cubemap/IBL source and loader. Filament KMP
   does not currently provide a common HDR equirectangular-to-cubemap decoder, so raw HDR loading
   must not be promised by the public API.
 - After materials and IBL are validated on Android, Desktop and iOS, begin the independent Web/Wasm
   renderer behind the same `SceneRenderer` contract.
+
+## Transparent material milestone (2026-07-19)
+
+- Added validated backend-neutral `TransparentMaterial` with color/alpha, metallic, roughness and
+  reflectance.
+- Added a dedicated lit shader using source-over blending and two-pass two-sided transparency.
+- The `.filamat` is compiled with official `matc` 1.72.0, exactly matching Filament KMP
+  `0.1.3-beta04`, for every supported graphics API and platform.
+- The adapter converts sRGB to linear-sRGB and premultiplies RGB by alpha as required by Filament.
+- Android, Desktop and iOS samples contain a translucent blue sphere. Desktop runtime launch loads
+  the material without an engine error or crash.
+- Next milestone is backend-neutral preprocessed cubemap/IBL loading; raw HDR conversion remains
+  deliberately outside the runtime API.
 
 ## Completed local Maven alpha milestone
 
@@ -363,6 +375,6 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Start with the transparent blended-material milestone described in the current checkpoint. Preserve
-the released alpha02 API where practical and do not expose Filament types in public commonMain API.
+Start with the preprocessed cubemap/IBL milestone described in the current checkpoint. Preserve the
+released alpha02 API where practical and do not expose Filament types in public commonMain API.
 ```

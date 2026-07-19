@@ -1,0 +1,28 @@
+// Lit PBR color material with Porter-Duff source-over transparency.
+// Filament requires linear RGB premultiplied by alpha; the adapter performs that conversion.
+// Compile with the matc version matching the runtime:
+// matc -p all -a all -o transparent_lit.filamat transparent_lit.mat
+
+material {
+    name : ComposeScene3DTransparentLit,
+    shadingModel : lit,
+    blending : transparent,
+    transparency : twoPassesTwoSides,
+    variantFilter : [ skinning, vsm, ssr, stereo ],
+    parameters : [
+        { type : float4, name : baseColor },
+        { type : float, name : metallic },
+        { type : float, name : roughness },
+        { type : float, name : reflectance }
+    ]
+}
+
+fragment {
+    void material(inout MaterialInputs material) {
+        prepareMaterial(material);
+        material.baseColor  = materialParams.baseColor;
+        material.metallic   = materialParams.metallic;
+        material.roughness  = materialParams.roughness;
+        material.reflectance = materialParams.reflectance;
+    }
+}

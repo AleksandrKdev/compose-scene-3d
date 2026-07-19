@@ -45,6 +45,9 @@ class PrimitiveTest {
         assertFailsWith<IllegalArgumentException> {
             TexturedMaterial(TextureSource.Resource("grid.png"), roughness = 1.1f)
         }
+        assertFailsWith<IllegalArgumentException> {
+            TransparentMaterial(Color3D.White, reflectance = 1.1f)
+        }
     }
 
     @Test

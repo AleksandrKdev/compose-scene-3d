@@ -107,6 +107,19 @@ data class TexturedMaterial(
     }
 }
 
+data class TransparentMaterial(
+    val color: Color3D,
+    val metallic: Float = 0f,
+    val roughness: Float = 0.5f,
+    val reflectance: Float = 0.5f,
+) : Material3D {
+    init {
+        require(metallic in 0f..1f) { "Metallic must be between 0 and 1" }
+        require(roughness in 0f..1f) { "Roughness must be between 0 and 1" }
+        require(reflectance in 0f..1f) { "Reflectance must be between 0 and 1" }
+    }
+}
+
 data class BoxNode(
     override val key: NodeKey,
     val size: Vec3 = Vec3.One,

@@ -10,6 +10,7 @@ import dev.composescene3d.core.SphereNode
 import dev.composescene3d.core.SpotLightNode
 import dev.composescene3d.core.TextureSource
 import dev.composescene3d.core.TexturedMaterial
+import dev.composescene3d.core.TransparentMaterial
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -54,5 +55,15 @@ class SceneScopeTest {
         }.build()
 
         assertEquals(textured, assertIs<PlaneNode>(scene.nodes.single()).material)
+    }
+
+    @Test
+    fun attachesTransparentMaterialWithoutBackendTypes() {
+        val glass = TransparentMaterial(Color3D(0.2f, 0.7f, 1f, alpha = 0.35f))
+        val scene = SceneScope().apply {
+            sphere("glass", material = glass)
+        }.build()
+
+        assertEquals(glass, assertIs<SphereNode>(scene.nodes.single()).material)
     }
 }

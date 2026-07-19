@@ -657,6 +657,28 @@ final class dev.composescene3d.core/Transform { // dev.composescene3d.core/Trans
     final fun toString(): kotlin/String // dev.composescene3d.core/Transform.toString|toString(){}[0]
 }
 
+final class dev.composescene3d.core/TransparentMaterial : dev.composescene3d.core/Material3D { // dev.composescene3d.core/TransparentMaterial|null[0]
+    constructor <init>(dev.composescene3d.core/Color3D, kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ...) // dev.composescene3d.core/TransparentMaterial.<init>|<init>(dev.composescene3d.core.Color3D;kotlin.Float;kotlin.Float;kotlin.Float){}[0]
+
+    final val color // dev.composescene3d.core/TransparentMaterial.color|{}color[0]
+        final fun <get-color>(): dev.composescene3d.core/Color3D // dev.composescene3d.core/TransparentMaterial.color.<get-color>|<get-color>(){}[0]
+    final val metallic // dev.composescene3d.core/TransparentMaterial.metallic|{}metallic[0]
+        final fun <get-metallic>(): kotlin/Float // dev.composescene3d.core/TransparentMaterial.metallic.<get-metallic>|<get-metallic>(){}[0]
+    final val reflectance // dev.composescene3d.core/TransparentMaterial.reflectance|{}reflectance[0]
+        final fun <get-reflectance>(): kotlin/Float // dev.composescene3d.core/TransparentMaterial.reflectance.<get-reflectance>|<get-reflectance>(){}[0]
+    final val roughness // dev.composescene3d.core/TransparentMaterial.roughness|{}roughness[0]
+        final fun <get-roughness>(): kotlin/Float // dev.composescene3d.core/TransparentMaterial.roughness.<get-roughness>|<get-roughness>(){}[0]
+
+    final fun component1(): dev.composescene3d.core/Color3D // dev.composescene3d.core/TransparentMaterial.component1|component1(){}[0]
+    final fun component2(): kotlin/Float // dev.composescene3d.core/TransparentMaterial.component2|component2(){}[0]
+    final fun component3(): kotlin/Float // dev.composescene3d.core/TransparentMaterial.component3|component3(){}[0]
+    final fun component4(): kotlin/Float // dev.composescene3d.core/TransparentMaterial.component4|component4(){}[0]
+    final fun copy(dev.composescene3d.core/Color3D = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ...): dev.composescene3d.core/TransparentMaterial // dev.composescene3d.core/TransparentMaterial.copy|copy(dev.composescene3d.core.Color3D;kotlin.Float;kotlin.Float;kotlin.Float){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/TransparentMaterial.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/TransparentMaterial.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.composescene3d.core/TransparentMaterial.toString|toString(){}[0]
+}
+
 final class dev.composescene3d.core/UnlitMaterial : dev.composescene3d.core/Material3D { // dev.composescene3d.core/UnlitMaterial|null[0]
     constructor <init>(dev.composescene3d.core/Color3D = ...) // dev.composescene3d.core/UnlitMaterial.<init>|<init>(dev.composescene3d.core.Color3D){}[0]
 

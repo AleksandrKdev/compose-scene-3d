@@ -38,10 +38,12 @@ import dev.composescene3d.core.SphereNode
 import dev.composescene3d.core.SpotLightNode
 import dev.composescene3d.core.TextureSource
 import dev.composescene3d.core.TexturedMaterial
+import dev.composescene3d.core.TransparentMaterial
 import dev.composescene3d.core.EmissiveMaterial
 import dev.composescene3d.core.UnlitMaterial
 import dev.composescene3d.core.assetKey
 import dev.composescene3d.core.Vec3
+import dev.composescene3d.filament.resources.Res
 import io.github.erkko68.filament.compose.FilamentSceneView
 import io.github.erkko68.filament.compose.FilamentSceneScope
 import io.github.erkko68.filament.compose.rememberFilamentViewState
@@ -64,6 +66,8 @@ import io.github.erkko68.filament.compose.scene.primitives.Plane
 import io.github.erkko68.filament.compose.scene.primitives.Sphere
 import io.github.erkko68.filament.compose.scene.rememberColorMaterialInstance
 import io.github.erkko68.filament.compose.scene.rememberEmissiveMaterialInstance
+import io.github.erkko68.filament.compose.scene.rememberMaterial
+import io.github.erkko68.filament.compose.scene.rememberMaterialInstance
 import io.github.erkko68.filament.compose.scene.rememberUnlitColorMaterialInstance
 import io.github.erkko68.filament.compose.scene.rememberTexture
 import io.github.erkko68.filament.compose.scene.rememberTexturedMaterialInstance
@@ -460,6 +464,42 @@ private fun rememberSceneMaterial(renderer: FilamentRenderer, material: Material
                 roughness = material.roughness,
             )
         }
+    }
+    is TransparentMaterial -> rememberTransparentMaterial(material)
+}
+
+@Composable
+private fun rememberTransparentMaterial(material: TransparentMaterial): io.github.erkko68.filament.MaterialInstance {
+    val compiled = rememberMaterial(key = "compose-scene-3d-transparent-lit-v1.72") {
+        Res.readBytes("files/materials/transparent_lit.filamat")
+    }
+    if (compiled == null) {
+        return rememberColorMaterialInstance(
+            color = material.color.toFilamentColor(),
+            metallic = material.metallic,
+            roughness = material.roughness,
+            reflectance = material.reflectance,
+        )
+    }
+
+    val linear = material.color.toLinearSrgb()
+    return rememberMaterialInstance(
+        compiled,
+        linear,
+        material.metallic,
+        material.roughness,
+        material.reflectance,
+    ) {
+        setParameter(
+            "baseColor",
+            linear.red * linear.alpha,
+            linear.green * linear.alpha,
+            linear.blue * linear.alpha,
+            linear.alpha,
+        )
+        setParameter("metallic", material.metallic)
+        setParameter("roughness", material.roughness)
+        setParameter("reflectance", material.reflectance)
     }
 }
 
