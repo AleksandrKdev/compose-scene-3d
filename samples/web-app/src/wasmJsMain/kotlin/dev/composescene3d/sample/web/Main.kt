@@ -26,7 +26,16 @@ import kotlinx.browser.document
 fun main() {
     ComposeViewport(document.body!!) {
         MaterialTheme {
-            val renderer = remember { WebRenderer() }
+            val renderer = remember {
+                WebRenderer(
+                    onModelError = { source, error ->
+                        println("ComposeScene3D model $source failed: ${error.message}")
+                    },
+                    onTextureError = { source, error ->
+                        println("ComposeScene3D texture $source failed: ${error.message}")
+                    },
+                )
+            }
             val controller = rememberSceneController(renderer)
             DisposableEffect(Unit) { onDispose(renderer::close) }
 
@@ -57,6 +66,14 @@ fun main() {
                         key = "duck",
                         source = ModelSource.Resource("duck.glb"),
                         transform = Transform(translation = Vec3(0f, -1f, 0f)),
+                    )
+                    model(
+                        key = "external-gltf",
+                        source = ModelSource.Resource("external-triangle.gltf"),
+                        transform = Transform(
+                            translation = Vec3(0f, 0.6f, -1f),
+                            scale = Vec3(0.45f, 0.45f, 0.45f),
+                        ),
                     )
                     plane(
                         key = "floor",

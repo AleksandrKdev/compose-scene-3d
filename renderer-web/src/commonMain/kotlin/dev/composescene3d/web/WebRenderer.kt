@@ -71,7 +71,10 @@ import org.w3c.dom.HTMLImageElement
  * behind a transparent Compose input surface. This
  * keeps the scene API backend-neutral and reuses the common camera gesture implementation.
  */
-class WebRenderer : SceneRenderer {
+class WebRenderer(
+    private val onModelError: (ModelSource, Throwable) -> Unit = { _, _ -> },
+    private val onTextureError: (TextureSource, Throwable) -> Unit = { _, _ -> },
+) : SceneRenderer {
     internal val nodes = mutableStateMapOf<NodeKey, SceneNode>()
 
     override val capabilities = RendererCapabilities(
@@ -91,6 +94,9 @@ class WebRenderer : SceneRenderer {
     }
 
     override fun close() = nodes.clear()
+
+    internal fun modelError(source: ModelSource, error: Throwable) = onModelError(source, error)
+    internal fun textureError(source: TextureSource, error: Throwable) = onTextureError(source, error)
 }
 
 @Composable
@@ -104,7 +110,7 @@ fun WebViewport(
 ) {
     var viewportHeight by remember { mutableIntStateOf(1) }
     var textureVersion by remember { mutableIntStateOf(0) }
-    val gpuSurface = remember { WebGlSurface { textureVersion++ } }
+    val gpuSurface = remember(renderer) { WebGlSurface(renderer) { textureVersion++ } }
     DisposableEffect(gpuSurface) { onDispose(gpuSurface::close) }
     var surface = modifier
         .onSizeChanged { viewportHeight = it.height.coerceAtLeast(1) }
@@ -224,7 +230,10 @@ private fun Vec3.dot(v: Vec3)=x*v.x+y*v.y+z*v.z
 private fun Vec3.cross(v: Vec3)=Vec3(y*v.z-z*v.y,z*v.x-x*v.z,x*v.y-y*v.x)
 private fun Vec3.normalized(): Vec3 { val l=sqrt(dot(this)); return if(l==0f) Vec3.Zero else this*(1f/l) }
 
-private class WebGlSurface(private val invalidate: () -> Unit) {
+private class WebGlSurface(
+    private val renderer: WebRenderer,
+    private val invalidate: () -> Unit,
+) {
     private val canvas = document.createElement("canvas").unsafeCast<HTMLCanvasElement>()
     private val gl: WebGLRenderingContext
     private val program: WebGLProgram
@@ -236,8 +245,10 @@ private class WebGlSurface(private val invalidate: () -> Unit) {
     private val useTextureUniform: org.khronos.webgl.WebGLUniformLocation?
     private val textureCache = mutableMapOf<String, WebGLTexture>()
     private val loadingTextures = mutableSetOf<String>()
+    private val failedTextures = mutableSetOf<String>()
     private val modelCache = mutableMapOf<String, List<MeshData>>()
     private val loadingModels = mutableSetOf<String>()
+    private val failedModels = mutableSetOf<String>()
     private var width = 1
     private var height = 1
 
@@ -316,6 +327,10 @@ private class WebGlSurface(private val invalidate: () -> Unit) {
         val key = source.assetKey().value
         val texture = textureCache[key]
         if (texture == null) {
+            if (key in failedTextures) {
+                gl.uniform1i(useTextureUniform, 0)
+                return
+            }
             requestTexture(key, source)
             gl.uniform1i(useTextureUniform, 0)
             return
@@ -347,33 +362,54 @@ private class WebGlSurface(private val invalidate: () -> Unit) {
             loadingTextures.remove(key)
             if (source is TextureSource.Bytes) revokeObjectUrl(url)
             invalidate()
-        }, onError = {
+        }, onError = { message ->
             loadingTextures.remove(key)
+            failedTextures += key
             if (source is TextureSource.Bytes) revokeObjectUrl(url)
+            renderer.textureError(source, IllegalStateException(message))
         })
     }
 
     private fun resolveModel(node: ModelNode): List<MeshData>? {
         val key = node.source.assetKey().value
         modelCache[key]?.let { return it }
+        if (key in failedModels) return null
         if (loadingModels.add(key)) {
             val accept: (Uint8Array) -> Unit = { bytes ->
                 runCatching { parseGlb(bytes, key) }
                     .onSuccess { modelCache[key] = it }
+                    .onFailure {
+                        failedModels += key
+                        renderer.modelError(node.source, it)
+                    }
                 loadingModels.remove(key)
                 invalidate()
             }
             when (val source = node.source) {
                 is ModelSource.Bytes -> accept(source.value.toTypedArray())
-                is ModelSource.Resource -> fetchBytes(source.path, accept) {
-                    loadingModels.remove(key)
-                }
-                is ModelSource.Url -> fetchBytes(source.value, accept) {
-                    loadingModels.remove(key)
-                }
+                is ModelSource.Resource -> requestModelUrl(source.path, source, accept, key)
+                is ModelSource.Url -> requestModelUrl(source.value, source, accept, key)
             }
         }
         return null
+    }
+
+    private fun requestModelUrl(
+        url: String,
+        source: ModelSource,
+        accept: (Uint8Array) -> Unit,
+        key: String,
+    ) {
+        val reject: (String) -> Unit = { message ->
+            loadingModels.remove(key)
+            failedModels += key
+            renderer.modelError(source, IllegalStateException(message))
+        }
+        if (url.substringBefore('?').lowercase().endsWith(".gltf")) {
+            loadGltfAsGlb(url, accept, reject)
+        } else {
+            fetchBytes(url, accept, reject)
+        }
     }
 
     private fun createProgram(vertexSource: String, fragmentSource: String): WebGLProgram {
@@ -555,24 +591,67 @@ private external fun webGl2Context(canvas: HTMLCanvasElement): WebGLRenderingCon
 @JsFun("() => window.devicePixelRatio || 1")
 private external fun browserPixelRatio(): Double
 
-@JsFun("(url, onLoad, onError) => { const image = new Image(); image.crossOrigin = 'anonymous'; image.onload = () => onLoad(image); image.onerror = () => onError(); image.src = url; }")
+@JsFun("(url, onLoad, onError) => { const image = new Image(); image.crossOrigin = 'anonymous'; image.onload = () => onLoad(image); image.onerror = () => onError('Unable to decode texture: ' + url); image.src = url; }")
 private external fun loadImage(
     url: String,
     onLoad: (HTMLImageElement) -> Unit,
-    onError: () -> Unit,
+    onError: (String) -> Unit,
 )
 
-@JsFun("(bytes) => URL.createObjectURL(new Blob([bytes], { type: 'image/png' }))")
+@JsFun("""(bytes) => {
+  const png = bytes.length > 8 && bytes[0] === 0x89 && bytes[1] === 0x50;
+  const jpeg = bytes.length > 2 && bytes[0] === 0xff && bytes[1] === 0xd8;
+  const first = new TextDecoder().decode(bytes.subarray(0, Math.min(bytes.length, 256))).trimStart();
+  const type = png ? 'image/png' : jpeg ? 'image/jpeg' : first.startsWith('<svg') || first.startsWith('<?xml') ? 'image/svg+xml' : 'application/octet-stream';
+  return URL.createObjectURL(new Blob([bytes], { type }));
+}""")
 private external fun bytesUrl(bytes: Uint8Array): String
 
 @JsFun("(url) => URL.revokeObjectURL(url)")
 private external fun revokeObjectUrl(url: String)
 
-@JsFun("(url, onLoad, onError) => fetch(url).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.arrayBuffer(); }).then(b => onLoad(new Uint8Array(b))).catch(() => onError())")
+@JsFun("(url, onLoad, onError) => fetch(url).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status + ' for ' + url); return r.arrayBuffer(); }).then(b => onLoad(new Uint8Array(b))).catch(e => onError(String(e)))")
 private external fun fetchBytes(
     url: String,
     onLoad: (Uint8Array) -> Unit,
-    onError: () -> Unit,
+    onError: (String) -> Unit,
+)
+
+@JsFun("""(url, onLoad, onError) => {
+  const align4 = n => (n + 3) & ~3;
+  const documentUrl = new URL(url, document.baseURI).href;
+  const resolve = uri => new URL(uri, documentUrl).href;
+  fetch(documentUrl).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status + ' for ' + documentUrl); return r.json(); }).then(async json => {
+    if (!json.asset || !String(json.asset.version).startsWith('2')) throw new Error('Expected glTF 2.0');
+    if (!json.buffers || json.buffers.length !== 1 || !json.buffers[0].uri) throw new Error('External .gltf currently requires exactly one URI buffer');
+    const response = await fetch(resolve(json.buffers[0].uri));
+    if (!response.ok) throw new Error('Unable to load glTF buffer: HTTP ' + response.status);
+    let bin = new Uint8Array(await response.arrayBuffer());
+    delete json.buffers[0].uri;
+    for (const image of json.images || []) {
+      if (!image.uri) continue;
+      const imageResponse = await fetch(resolve(image.uri));
+      if (!imageResponse.ok) throw new Error('Unable to load glTF image: HTTP ' + imageResponse.status);
+      const imageBytes = new Uint8Array(await imageResponse.arrayBuffer()), start = align4(bin.length), joined = new Uint8Array(start + imageBytes.length);
+      joined.set(bin); joined.set(imageBytes, start); bin = joined;
+      json.bufferViews = json.bufferViews || [];
+      image.bufferView = json.bufferViews.length;
+      json.bufferViews.push({ buffer: 0, byteOffset: start, byteLength: imageBytes.length });
+      delete image.uri;
+    }
+    json.buffers[0].byteLength = bin.length;
+    const encoded = new TextEncoder().encode(JSON.stringify(json)), jsonLength = align4(encoded.length), binLength = align4(bin.length), total = 12 + 8 + jsonLength + 8 + binLength;
+    const glb = new Uint8Array(total), view = new DataView(glb.buffer);
+    view.setUint32(0, 0x46546c67, true); view.setUint32(4, 2, true); view.setUint32(8, total, true);
+    view.setUint32(12, jsonLength, true); view.setUint32(16, 0x4e4f534a, true); glb.fill(0x20, 20, 20 + jsonLength); glb.set(encoded, 20);
+    const binHeader = 20 + jsonLength; view.setUint32(binHeader, binLength, true); view.setUint32(binHeader + 4, 0x004e4942, true); glb.set(bin, binHeader + 8);
+    onLoad(glb);
+  }).catch(e => onError(String(e)));
+}""")
+private external fun loadGltfAsGlb(
+    url: String,
+    onLoad: (Uint8Array) -> Unit,
+    onError: (String) -> Unit,
 )
 
 private const val VERTEX_SHADER = """#version 300 es

@@ -7,7 +7,7 @@
 
 // Library unique name: <io.github.aleksandrkdev:renderer-web>
 final class dev.composescene3d.web/WebRenderer : dev.composescene3d.core/SceneRenderer { // dev.composescene3d.web/WebRenderer|null[0]
-    constructor <init>() // dev.composescene3d.web/WebRenderer.<init>|<init>(){}[0]
+    constructor <init>(kotlin/Function2<dev.composescene3d.core/ModelSource, kotlin/Throwable, kotlin/Unit> = ..., kotlin/Function2<dev.composescene3d.core/TextureSource, kotlin/Throwable, kotlin/Unit> = ...) // dev.composescene3d.web/WebRenderer.<init>|<init>(kotlin.Function2<dev.composescene3d.core.ModelSource,kotlin.Throwable,kotlin.Unit>;kotlin.Function2<dev.composescene3d.core.TextureSource,kotlin.Throwable,kotlin.Unit>){}[0]
 
     final val capabilities // dev.composescene3d.web/WebRenderer.capabilities|{}capabilities[0]
         final fun <get-capabilities>(): dev.composescene3d.core/RendererCapabilities // dev.composescene3d.web/WebRenderer.capabilities.<get-capabilities>|<get-capabilities>(){}[0]

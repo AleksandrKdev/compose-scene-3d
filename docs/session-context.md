@@ -394,9 +394,14 @@ State: unavailable/offline
 - Web GLB 2.0 loading is implemented for `ModelSource.Resource`, `Url` and `Bytes`. It parses
   JSON/BIN chunks, typed and interleaved accessors, triangle meshes, node transforms and embedded
   base-color images into the existing textured GPU batches. The shared 118-KB Duck GLB rendered
-  successfully in headless Chrome. JSON `.gltf`, skins, animation, morphs and sparse accessors are
-  not supported yet, so `skeletalAnimation` remains false.
-- Next milestone: external JSON `.gltf` resources and better loader diagnostics, then Web PBR.
+  successfully in headless Chrome.
+- Web JSON `.gltf` loading supports resource and URL sources containing one external or data-URI
+  buffer plus external images. The loader resolves relative URIs against the model URL, packages
+  the data into the existing GLB parser and reports failures through public `WebRenderer`
+  model/texture error callbacks. A data-buffer/external-SVG test model rendered in headless Chrome.
+  Multiple buffers, skins, animation, morphs and sparse accessors are not supported yet, so
+  `skeletalAnimation` remains false.
+- Next milestone: Web PBR shaders, expanded texture channels and lighting.
 
 ## Completed local Maven alpha milestone
 
@@ -466,7 +471,7 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Continue with external JSON `.gltf` resources and loader diagnostics, then add Web PBR lighting.
+Continue with Web PBR shaders, expanded texture channels and lighting.
 The user explicitly allowed breaking the old empty GroupNode API before alpha03. Do not expose
 backend types in public commonMain API.
 ```

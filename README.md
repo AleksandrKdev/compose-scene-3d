@@ -29,8 +29,8 @@ Source repository: [AleksandrKdev/compose-scene-3d](https://github.com/Aleksandr
 - `renderer-web`: an independent WebGL2 Wasm renderer for primitives, indexed custom meshes,
   nested transforms and the shared orbit/pan/zoom camera. It uses GPU vertex/index buffers and a
   depth buffer. Base-color textures load asynchronously from resources, URLs or encoded bytes and
-  are cached by `TextureAssetKey`. It also loads binary glTF 2.0 (`.glb`) models; JSON `.gltf`, PBR
-  shaders and shadows remain future work.
+  are cached by `TextureAssetKey`. It loads binary (`.glb`) and JSON (`.gltf`) glTF 2.0 models;
+  PBR shaders and shadows remain future work.
 - `renderer-testkit`: an internal backend-neutral conformance harness for retained commands,
   lifecycle behavior and capability declarations. New renderers must pass the same contract.
 - `samples/android-app`, `samples/desktop-app`, `samples/ios-app` and `samples/web-app`:
@@ -158,8 +158,10 @@ remain implemented only by the Filament backend until the Web PBR shader milesto
 
 Web models accept the same `ModelSource.Resource`, `Url` and `Bytes` variants. The current loader
 supports GLB 2.0 JSON/BIN chunks, triangle primitives, indexed or non-indexed accessors, interleaved
-buffer views, node TRS/matrices and embedded base-color images. Sparse accessors, external `.gltf`
-buffers, morph targets, skins and animation are intentionally rejected or ignored for now.
+buffer views, node TRS/matrices and embedded base-color images. Resource and URL sources may also
+be JSON `.gltf` files with one external or data-URI buffer and external images. Loader failures can
+be observed through `WebRenderer(onModelError = ..., onTextureError = ...)`. Multiple buffers,
+sparse accessors, morph targets, skins and animation are intentionally rejected or ignored for now.
 
 For Filament, `TextureSource.Bytes` works with the default renderer. Resource and URL sources use
 an application-provided `TextureByteLoader`, following the same pattern as `ModelByteLoader`.
@@ -217,8 +219,8 @@ provenance is unknown.
 
 ## Roadmap
 
-1. Add JSON `.gltf` with external buffers/images and explicit loader diagnostics on Web.
-2. Add Web PBR shaders, expanded texture channels and lighting.
+1. Add Web PBR shaders, expanded texture channels and lighting.
+2. Add Web shadows and continue glTF feature coverage.
 3. Stabilize the public API based on cross-backend experience.
 
 ## Running the samples
