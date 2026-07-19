@@ -16,7 +16,7 @@ allprojects {
     version = "0.1.0-alpha03-SNAPSHOT"
 }
 
-val publishedModules = setOf("scene-core", "scene-compose", "renderer-filament")
+val publishedModules = setOf("scene-core", "scene-compose", "renderer-filament", "renderer-web")
 val projectUrl = "https://github.com/AleksandrKdev/compose-scene-3d"
 
 subprojects {

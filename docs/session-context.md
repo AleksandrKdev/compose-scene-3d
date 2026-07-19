@@ -382,7 +382,12 @@ State: unavailable/offline
   receiver-only floor. PCSS remains available but requires the VSM receiver variant in every
   loaded GLB material; the bundled Duck asset does not satisfy that requirement on Metal.
 - Desktop runtime with PCF created the shadow map and ran without a Filament error or crash.
-- Next milestone: independent Web/Wasm backend behind the shared scene contract.
+- The first independent Web/Wasm backend is implemented in `renderer-web`. It uses Compose Canvas
+  as a portable depth-sorted triangle rasterizer, supports primitives, custom indexed geometry,
+  nested transforms and shared camera gestures, and deliberately reports GLB/textures/PBR/shadows
+  as unsupported. `samples:web-app` produces a working Wasm browser bundle.
+- Next milestone: replace the Web triangle draw loop with WebGL2 vertex/index buffers and a real
+  depth buffer without changing `SceneRenderer` or the scene DSL.
 
 ## Completed local Maven alpha milestone
 
@@ -452,7 +457,7 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Start with the independent Web/Wasm backend milestone described in the current checkpoint.
+Continue with WebGL2 acceleration for `renderer-web`, then add Web texture and glTF/GLB loading.
 The user explicitly allowed breaking the old empty GroupNode API before alpha03. Do not expose
 backend types in public commonMain API.
 ```

@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
@@ -8,6 +9,7 @@ plugins {
     id("com.vanniktech.maven.publish")
 }
 
+@OptIn(ExperimentalWasmDsl::class)
 kotlin {
     @OptIn(ExperimentalAbiValidation::class)
     abiValidation()
@@ -20,6 +22,7 @@ kotlin {
     jvm()
     iosArm64()
     iosSimulatorArm64()
+    wasmJs { browser() }
 
     sourceSets {
         commonMain.dependencies {

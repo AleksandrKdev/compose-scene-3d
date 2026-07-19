@@ -9,7 +9,8 @@ owned by a renderer implementation rather than by recomposition.
 ## Status
 
 Early architecture prototype with working Filament primitive and GLB rendering on Android,
-Desktop and iOS/Metal. A stable public release is not available yet.
+Desktop and iOS/Metal, plus a portable Compose Canvas renderer for Web/Wasm. A stable public
+release is not available yet.
 
 Current release coordinates: `io.github.aleksandrkdev:*:0.1.0-alpha02`.
 
@@ -25,9 +26,14 @@ Source repository: [AleksandrKdev/compose-scene-3d](https://github.com/Aleksandr
   retaining independent instances and transforms. It provides orbit/pan/zoom interaction and maps
   Filament picking results back to stable `NodeKey` values. Box, sphere, plane and cylinder
   primitives use backend-neutral PBR material parameters.
+- `renderer-web`: an independent Wasm renderer for primitives, indexed custom meshes, nested
+  transforms and the shared orbit/pan/zoom camera. Its current Compose Canvas rasterizer is a
+  functional compatibility backend; GLB, textures, shadows and GPU WebGL2 acceleration remain
+  future work and are reported as unsupported capabilities.
 - `renderer-testkit`: an internal backend-neutral conformance harness for retained commands,
   lifecycle behavior and capability declarations. New renderers must pass the same contract.
-- `samples/android-app`, `samples/desktop-app` and `samples/ios-app`: interactive GLB samples.
+- `samples/android-app`, `samples/desktop-app`, `samples/ios-app` and `samples/web-app`:
+  interactive platform samples.
 
 ## Design principles
 
@@ -200,8 +206,9 @@ provenance is unknown.
 
 ## Roadmap
 
-1. Implement an independent Web/Wasm renderer behind the same scene contract.
-2. Stabilize the public API based on cross-backend experience.
+1. Move `renderer-web` triangle submission from Compose Canvas to WebGL2 with a depth buffer.
+2. Add Web texture loading and glTF/GLB support.
+3. Stabilize the public API based on cross-backend experience.
 
 ## Running the samples
 
@@ -219,6 +226,15 @@ Desktop requires JDK 22+ because Filament uses Project Panama FFM bindings:
 
 iOS: open `samples/ios-app/iosApp.xcodeproj`, choose an arm64 simulator and run the `iosApp` scheme.
 Xcode builds and embeds the Kotlin framework automatically.
+
+Web/Wasm:
+
+```shell
+./gradlew :samples:web-app:wasmJsBrowserDevelopmentRun
+```
+
+The command starts the webpack development server and opens the sample in a browser. Drag to
+orbit, use the mouse wheel to zoom, and use a secondary-button drag to pan.
 
 ## Continuous integration
 
@@ -250,7 +266,7 @@ dependencies {
 
 ## Binary API compatibility
 
-The three published modules keep JVM and KLIB ABI baselines under their `api/` directories.
+The published modules keep JVM and KLIB ABI baselines under their `api/` directories.
 `./gradlew checkKotlinAbi` detects accidental public API changes; intentionally accepted changes
 are recorded with `./gradlew updateKotlinAbi` after reviewing the diff.
 

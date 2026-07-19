@@ -1,0 +1,22 @@
+// Klib ABI Dump
+// Targets: [wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.github.aleksandrkdev:renderer-web>
+final class dev.composescene3d.web/WebRenderer : dev.composescene3d.core/SceneRenderer { // dev.composescene3d.web/WebRenderer|null[0]
+    constructor <init>() // dev.composescene3d.web/WebRenderer.<init>|<init>(){}[0]
+
+    final val capabilities // dev.composescene3d.web/WebRenderer.capabilities|{}capabilities[0]
+        final fun <get-capabilities>(): dev.composescene3d.core/RendererCapabilities // dev.composescene3d.web/WebRenderer.capabilities.<get-capabilities>|<get-capabilities>(){}[0]
+
+    final fun apply(kotlin.collections/List<dev.composescene3d.core/SceneCommand>) // dev.composescene3d.web/WebRenderer.apply|apply(kotlin.collections.List<dev.composescene3d.core.SceneCommand>){}[0]
+    final fun close() // dev.composescene3d.web/WebRenderer.close|close(){}[0]
+}
+
+final val dev.composescene3d.web/dev_composescene3d_web_WebRenderer$stableprop // dev.composescene3d.web/dev_composescene3d_web_WebRenderer$stableprop|#static{}dev_composescene3d_web_WebRenderer$stableprop[0]
+
+final fun dev.composescene3d.web/WebViewport(dev.composescene3d.web/WebRenderer, androidx.compose.ui/Modifier?, dev.composescene3d.core/Color3D?, dev.composescene3d.compose/SceneCameraState?, kotlin/Boolean, kotlin/Float, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int) // dev.composescene3d.web/WebViewport|WebViewport(dev.composescene3d.web.WebRenderer;androidx.compose.ui.Modifier?;dev.composescene3d.core.Color3D?;dev.composescene3d.compose.SceneCameraState?;kotlin.Boolean;kotlin.Float;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){}[0]
+final fun dev.composescene3d.web/dev_composescene3d_web_WebRenderer$stableprop_getter(): kotlin/Int // dev.composescene3d.web/dev_composescene3d_web_WebRenderer$stableprop_getter|dev_composescene3d_web_WebRenderer$stableprop_getter(){}[0]
