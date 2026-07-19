@@ -1,0 +1,63 @@
+// Portable PBR texture material for ComposeScene3D.
+// Metallic-roughness follows glTF packing: roughness in G, metallic in B.
+// Compile with Filament 1.72:
+// matc -p all -a all -o textured_pbr.filamat textured_pbr.mat
+
+material {
+    name : ComposeScene3DTexturedPbr,
+    shadingModel : lit,
+    requires : [ uv0 ],
+    variantFilter : [ skinning, ssr, stereo ],
+    parameters : [
+        { type : sampler2d, name : albedo },
+        { type : sampler2d, name : normalMap },
+        { type : sampler2d, name : metallicRoughnessMap },
+        { type : sampler2d, name : emissiveMap },
+        { type : sampler2d, name : aoMap },
+        { type : float, name : metallicFactor },
+        { type : float, name : roughnessFactor },
+        { type : float, name : normalScale },
+        { type : float3, name : emissiveFactor },
+        { type : float, name : emissiveIntensity },
+        { type : float, name : aoStrength },
+        { type : float, name : hasNormalMap },
+        { type : float, name : hasMetallicRoughnessMap },
+        { type : float, name : hasEmissiveMap },
+        { type : float, name : hasAoMap }
+    ]
+}
+
+fragment {
+    void material(inout MaterialInputs material) {
+        prepareMaterial(material);
+        vec2 uv = getUV0();
+        material.baseColor = texture(materialParams_albedo, uv);
+
+        float metallic = materialParams.metallicFactor;
+        float roughness = materialParams.roughnessFactor;
+        if (materialParams.hasMetallicRoughnessMap > 0.5) {
+            vec4 packed = texture(materialParams_metallicRoughnessMap, uv);
+            roughness *= packed.g;
+            metallic *= packed.b;
+        }
+        material.metallic = metallic;
+        material.roughness = roughness;
+
+        if (materialParams.hasNormalMap > 0.5) {
+            vec3 normal = texture(materialParams_normalMap, uv).xyz * 2.0 - 1.0;
+            normal.xy *= materialParams.normalScale;
+            material.normal = normalize(normal);
+        }
+        if (materialParams.hasEmissiveMap > 0.5) {
+            vec3 emissive = texture(materialParams_emissiveMap, uv).rgb;
+            material.emissive = vec4(
+                emissive * materialParams.emissiveFactor * materialParams.emissiveIntensity,
+                0.0
+            );
+        }
+        if (materialParams.hasAoMap > 0.5) {
+            float ao = texture(materialParams_aoMap, uv).r;
+            material.ambientOcclusion = mix(1.0, ao, materialParams.aoStrength);
+        }
+    }
+}

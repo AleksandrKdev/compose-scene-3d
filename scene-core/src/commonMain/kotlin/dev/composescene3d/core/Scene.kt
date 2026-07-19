@@ -123,10 +123,27 @@ data class TexturedMaterial(
     val baseColorTexture: TextureSource,
     val metallic: Float = 0f,
     val roughness: Float = 0.5f,
+    val normalTexture: TextureSource? = null,
+    val metallicRoughnessTexture: TextureSource? = null,
+    val emissiveTexture: TextureSource? = null,
+    val ambientOcclusionTexture: TextureSource? = null,
+    val normalScale: Float = 1f,
+    val emissiveColor: Color3D = Color3D.White,
+    val emissiveIntensity: Float = 1f,
+    val ambientOcclusionStrength: Float = 1f,
 ) : Material3D {
     init {
         require(metallic in 0f..1f) { "Metallic must be between 0 and 1" }
         require(roughness in 0f..1f) { "Roughness must be between 0 and 1" }
+        require(normalScale >= 0f && normalScale.isFinite()) {
+            "Normal scale must be finite and non-negative"
+        }
+        require(emissiveIntensity >= 0f && emissiveIntensity.isFinite()) {
+            "Emissive intensity must be finite and non-negative"
+        }
+        require(ambientOcclusionStrength in 0f..1f) {
+            "Ambient occlusion strength must be between 0 and 1"
+        }
     }
 }
 

@@ -52,6 +52,10 @@ class SceneScopeTest {
         val textured = TexturedMaterial(
             baseColorTexture = TextureSource.Resource("files/checker.png"),
             roughness = 0.8f,
+            normalTexture = TextureSource.Resource("files/checker-normal.png"),
+            metallicRoughnessTexture = TextureSource.Resource("files/checker-mr.png"),
+            emissiveTexture = TextureSource.Resource("files/checker-emissive.png"),
+            ambientOcclusionTexture = TextureSource.Resource("files/checker-ao.png"),
         )
         val scene = SceneScope().apply {
             plane("textured-plane", material = textured)

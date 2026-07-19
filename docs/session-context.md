@@ -290,8 +290,8 @@ State: unavailable/offline
 - Transparent materials and preprocessed cubemap/IBL loading are completed in the milestones below.
 - Filament KMP does not provide a common HDR equirectangular-to-cubemap decoder, so raw HDR loading
   is deliberately not promised by the public API.
-- The scene graph and portable custom indexed meshes are implemented. The next implementation
-  step is expanded PBR texture channels, followed by shadows.
+- The scene graph, custom indexed meshes and expanded PBR textures are implemented. The next
+  implementation step is portable shadow controls.
 
 ## Transparent material milestone (2026-07-19)
 
@@ -347,7 +347,23 @@ State: unavailable/offline
 - Android, Desktop and iOS samples render a magenta indexed triangle inside a transform group.
 - JVM tests, ABI checks, Android APK and iOS simulator framework builds pass; Desktop runtime
   created the custom GPU mesh and ran without a Filament error or crash.
-- Next milestone: expanded PBR texture channels (normal, metallic-roughness, emissive and AO).
+- The following milestone completes expanded PBR texture channels and moves shadows next.
+
+## Expanded PBR texture milestone (2026-07-19)
+
+- Extended `TexturedMaterial` with optional normal, glTF-packed metallic-roughness, emissive and
+  ambient-occlusion maps plus normal scale, emissive tint/intensity and AO strength.
+- Color maps decode as sRGB; normal and packed data maps remain linear.
+- Added a dedicated Filament 1.72 lit material compiled for every supported backend. It uses the
+  existing asynchronous `TextureByteLoader` and neutral constant-factor behavior for absent maps.
+- Added validation for all material factors and preserved the requirement that textured custom
+  geometry provides UV coordinates.
+- Android, Desktop and iOS samples use the same generated five-map PBR set on the ground plane.
+- Desktop runtime loaded the five-map material and the albedo-only optional-map path without a
+  Filament material error or crash.
+- Extending the `TexturedMaterial` data-class constructor intentionally changes the unreleased
+  alpha03 ABI; ABI snapshots were updated after the API change.
+- Next milestone: backend-neutral shadow controls for meshes, primitives and lights.
 
 ## Completed local Maven alpha milestone
 
@@ -417,7 +433,7 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Start with the expanded PBR texture channels milestone described in the current checkpoint.
+Start with the portable shadow controls milestone described in the current checkpoint.
 The user explicitly allowed breaking the old empty GroupNode API before alpha03. Do not expose
 backend types in public commonMain API.
 ```

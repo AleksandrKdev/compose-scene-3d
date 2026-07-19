@@ -81,14 +81,15 @@ import io.github.erkko68.filament.compose.scene.rememberMaterial
 import io.github.erkko68.filament.compose.scene.rememberMaterialInstance
 import io.github.erkko68.filament.compose.scene.rememberUnlitColorMaterialInstance
 import io.github.erkko68.filament.compose.scene.rememberTexture
-import io.github.erkko68.filament.compose.scene.rememberTexturedMaterialInstance
 import io.github.erkko68.filament.compose.scene.SpotCone
 import io.github.erkko68.filament.compose.scene.SpotLight
 import io.github.erkko68.filament.utils.Quaternion
 import io.github.erkko68.filament.utils.KTX1Loader
 import io.github.erkko68.filament.Engine
 import io.github.erkko68.filament.Texture
+import io.github.erkko68.filament.TextureSampler
 import io.github.erkko68.filament.Renderer
+import io.github.erkko68.filament.utils.TextureLoader
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlin.math.cos
@@ -629,27 +630,94 @@ internal fun rememberSceneMaterial(renderer: FilamentRenderer, material: Materia
         intensity = material.intensity,
     )
     is TexturedMaterial -> {
-        val texture = rememberTexture(
-            key = material.baseColorTexture.assetKey(),
-            onError = { renderer.onTextureError(material.baseColorTexture, it) },
-        ) {
-            renderer.textureByteLoader.load(material.baseColorTexture)
-        }
-        if (texture == null) {
-            rememberColorMaterialInstance(
-                color = Color(0.7f, 0.7f, 0.7f),
-                metallic = material.metallic,
-                roughness = material.roughness,
-            )
-        } else {
-            rememberTexturedMaterialInstance(
-                texture = texture,
-                metallic = material.metallic,
-                roughness = material.roughness,
-            )
-        }
+        rememberPbrTexturedMaterial(renderer, material)
     }
     is TransparentMaterial -> rememberTransparentMaterial(material)
+}
+
+@Composable
+private fun rememberPbrTexturedMaterial(
+    renderer: FilamentRenderer,
+    material: TexturedMaterial,
+): io.github.erkko68.filament.MaterialInstance {
+    val albedo = rememberSceneTexture(renderer, material.baseColorTexture, TextureLoader.TextureType.COLOR)
+    val normal = rememberSceneTexture(renderer, material.normalTexture, TextureLoader.TextureType.NORMAL)
+    val metallicRoughness = rememberSceneTexture(
+        renderer,
+        material.metallicRoughnessTexture,
+        TextureLoader.TextureType.DATA,
+    )
+    val emissive = rememberSceneTexture(renderer, material.emissiveTexture, TextureLoader.TextureType.COLOR)
+    val ambientOcclusion = rememberSceneTexture(
+        renderer,
+        material.ambientOcclusionTexture,
+        TextureLoader.TextureType.DATA,
+    )
+    val compiled = rememberMaterial(key = "compose-scene-3d-textured-pbr-v1.72") {
+        Res.readBytes("files/materials/textured_pbr.filamat")
+    }
+    if (albedo == null || compiled == null) {
+        return rememberColorMaterialInstance(
+            color = Color(0.7f, 0.7f, 0.7f),
+            metallic = material.metallic,
+            roughness = material.roughness,
+        )
+    }
+
+    val sampler = remember {
+        TextureSampler(
+            TextureSampler.MinFilter.LINEAR_MIPMAP_LINEAR,
+            TextureSampler.MagFilter.LINEAR,
+            TextureSampler.WrapMode.REPEAT,
+        )
+    }
+    val emissiveFactor = material.emissiveColor.toLinearSrgb()
+    return rememberMaterialInstance(
+        compiled,
+        albedo,
+        normal,
+        metallicRoughness,
+        emissive,
+        ambientOcclusion,
+        material,
+    ) {
+        setParameter("albedo", albedo, sampler)
+        normal?.let { setParameter("normalMap", it, sampler) }
+        metallicRoughness?.let { setParameter("metallicRoughnessMap", it, sampler) }
+        emissive?.let { setParameter("emissiveMap", it, sampler) }
+        ambientOcclusion?.let { setParameter("aoMap", it, sampler) }
+        setParameter("metallicFactor", material.metallic)
+        setParameter("roughnessFactor", material.roughness)
+        setParameter("normalScale", material.normalScale)
+        setParameter(
+            "emissiveFactor",
+            emissiveFactor.red,
+            emissiveFactor.green,
+            emissiveFactor.blue,
+        )
+        setParameter("emissiveIntensity", material.emissiveIntensity)
+        setParameter("aoStrength", material.ambientOcclusionStrength)
+        setParameter("hasNormalMap", if (normal == null) 0f else 1f)
+        setParameter("hasMetallicRoughnessMap", if (metallicRoughness == null) 0f else 1f)
+        setParameter("hasEmissiveMap", if (emissive == null) 0f else 1f)
+        setParameter("hasAoMap", if (ambientOcclusion == null) 0f else 1f)
+    }
+}
+
+@Composable
+private fun rememberSceneTexture(
+    renderer: FilamentRenderer,
+    source: TextureSource?,
+    type: TextureLoader.TextureType,
+): Texture? {
+    if (source == null) return null
+    return rememberTexture(
+        type = type,
+        key = source.assetKey(),
+        onError = { renderer.onTextureError(source, it) },
+    ) {
+        renderer.textureByteLoader.load(source)
+    }
 }
 
 @Composable

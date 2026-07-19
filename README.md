@@ -126,11 +126,23 @@ type to shared code:
 plane(
     key = "floor",
     material = TexturedMaterial(
-        baseColorTexture = TextureSource.Resource("files/floor.png"),
+        baseColorTexture = TextureSource.Resource("files/floor-albedo.png"),
+        normalTexture = TextureSource.Resource("files/floor-normal.png"),
+        metallicRoughnessTexture = TextureSource.Resource("files/floor-mr.png"),
+        emissiveTexture = TextureSource.Resource("files/floor-emissive.png"),
+        ambientOcclusionTexture = TextureSource.Resource("files/floor-ao.png"),
+        normalScale = 1f,
+        emissiveColor = Color3D.White,
+        emissiveIntensity = 0.5f,
+        ambientOcclusionStrength = 1f,
         roughness = 0.9f,
     ),
 )
 ```
+
+Metallic-roughness maps follow the glTF convention: roughness is read from the green channel and
+metallic from blue. Albedo and emissive maps decode as sRGB; normal, metallic-roughness and AO maps
+remain linear data. Missing optional maps do not consume placeholder application assets.
 
 `TextureSource.Bytes` works with the default renderer. Resource and URL sources use an
 application-provided `TextureByteLoader`, following the same pattern as `ModelByteLoader`.
@@ -154,10 +166,9 @@ results on Android, Desktop and iOS.
 
 ## Roadmap
 
-1. Add normal, metallic-roughness, emissive and ambient-occlusion texture channels.
-2. Expose portable shadow controls.
-3. Implement an independent Web/Wasm renderer behind the same scene contract.
-4. Stabilize the public API based on cross-backend experience.
+1. Expose portable shadow controls.
+2. Implement an independent Web/Wasm renderer behind the same scene contract.
+3. Stabilize the public API based on cross-backend experience.
 
 ## Running the samples
 

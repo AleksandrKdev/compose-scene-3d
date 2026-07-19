@@ -28,6 +28,7 @@ import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.TransparentMaterial
 import dev.composescene3d.core.EnvironmentMap
 import dev.composescene3d.core.TextureSource
+import dev.composescene3d.core.TexturedMaterial
 import dev.composescene3d.core.Geometry3D
 import dev.composescene3d.filament.FilamentRenderer
 import dev.composescene3d.filament.FilamentViewport
@@ -70,6 +71,30 @@ private fun Sample() {
             intensity = 18_000f,
         )
     }
+    val floorMaterial = remember {
+        fun texture(resource: Int, key: String) = TextureSource.Bytes(
+            resources.openRawResource(resource).use { it.readBytes() },
+            cacheKey = key,
+        )
+        TexturedMaterial(
+            baseColorTexture = texture(R.raw.pbr_albedo, "pbr-albedo"),
+            metallic = 0.85f,
+            roughness = 0.8f,
+            normalTexture = texture(R.raw.pbr_normal, "pbr-normal"),
+            metallicRoughnessTexture = texture(R.raw.pbr_metallic_roughness, "pbr-mr"),
+            emissiveTexture = texture(R.raw.pbr_emissive, "pbr-emissive"),
+            ambientOcclusionTexture = texture(R.raw.pbr_ao, "pbr-ao"),
+            emissiveIntensity = 0.35f,
+            ambientOcclusionStrength = 0.8f,
+        )
+    }
+    val albedoOnlyMaterial = floorMaterial.copy(
+        metallic = 0f,
+        normalTexture = null,
+        metallicRoughnessTexture = null,
+        emissiveTexture = null,
+        ambientOcclusionTexture = null,
+    )
     var moved by remember { mutableStateOf(false) }
     var selected by remember { mutableStateOf<String?>(null) }
 
@@ -106,10 +131,7 @@ private fun Sample() {
                 )
                 cylinder(
                     key = "rough-cylinder",
-                    material = PbrMaterial(
-                        baseColor = Color3D(0.25f, 0.85f, 0.4f),
-                        roughness = 0.85f,
-                    ),
+                    material = albedoOnlyMaterial,
                     transform = Transform(translation = Vec3(2f, 0f, 0f)),
                 )
                 sphere(
@@ -132,7 +154,7 @@ private fun Sample() {
                 key = "ground",
                 width = 6f,
                 depth = 5f,
-                material = PbrMaterial(baseColor = Color3D(0.22f, 0.24f, 0.28f), roughness = 1f),
+                material = floorMaterial,
                 transform = Transform(translation = Vec3(0f, -1.05f, 0f)),
             )
             directionalLight(key = "sun", intensity = 100_000f)

@@ -614,16 +614,32 @@ public final class dev/composescene3d/core/TextureSource$Url : dev/composescene3
 }
 
 public final class dev/composescene3d/core/TexturedMaterial : dev/composescene3d/core/Material3D {
-	public fun <init> (Ldev/composescene3d/core/TextureSource;FF)V
-	public synthetic fun <init> (Ldev/composescene3d/core/TextureSource;FFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ldev/composescene3d/core/TextureSource;FFLdev/composescene3d/core/TextureSource;Ldev/composescene3d/core/TextureSource;Ldev/composescene3d/core/TextureSource;Ldev/composescene3d/core/TextureSource;FLdev/composescene3d/core/Color3D;FF)V
+	public synthetic fun <init> (Ldev/composescene3d/core/TextureSource;FFLdev/composescene3d/core/TextureSource;Ldev/composescene3d/core/TextureSource;Ldev/composescene3d/core/TextureSource;Ldev/composescene3d/core/TextureSource;FLdev/composescene3d/core/Color3D;FFILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ldev/composescene3d/core/TextureSource;
+	public final fun component10 ()F
+	public final fun component11 ()F
 	public final fun component2 ()F
 	public final fun component3 ()F
-	public final fun copy (Ldev/composescene3d/core/TextureSource;FF)Ldev/composescene3d/core/TexturedMaterial;
-	public static synthetic fun copy$default (Ldev/composescene3d/core/TexturedMaterial;Ldev/composescene3d/core/TextureSource;FFILjava/lang/Object;)Ldev/composescene3d/core/TexturedMaterial;
+	public final fun component4 ()Ldev/composescene3d/core/TextureSource;
+	public final fun component5 ()Ldev/composescene3d/core/TextureSource;
+	public final fun component6 ()Ldev/composescene3d/core/TextureSource;
+	public final fun component7 ()Ldev/composescene3d/core/TextureSource;
+	public final fun component8 ()F
+	public final fun component9 ()Ldev/composescene3d/core/Color3D;
+	public final fun copy (Ldev/composescene3d/core/TextureSource;FFLdev/composescene3d/core/TextureSource;Ldev/composescene3d/core/TextureSource;Ldev/composescene3d/core/TextureSource;Ldev/composescene3d/core/TextureSource;FLdev/composescene3d/core/Color3D;FF)Ldev/composescene3d/core/TexturedMaterial;
+	public static synthetic fun copy$default (Ldev/composescene3d/core/TexturedMaterial;Ldev/composescene3d/core/TextureSource;FFLdev/composescene3d/core/TextureSource;Ldev/composescene3d/core/TextureSource;Ldev/composescene3d/core/TextureSource;Ldev/composescene3d/core/TextureSource;FLdev/composescene3d/core/Color3D;FFILjava/lang/Object;)Ldev/composescene3d/core/TexturedMaterial;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAmbientOcclusionStrength ()F
+	public final fun getAmbientOcclusionTexture ()Ldev/composescene3d/core/TextureSource;
 	public final fun getBaseColorTexture ()Ldev/composescene3d/core/TextureSource;
+	public final fun getEmissiveColor ()Ldev/composescene3d/core/Color3D;
+	public final fun getEmissiveIntensity ()F
+	public final fun getEmissiveTexture ()Ldev/composescene3d/core/TextureSource;
 	public final fun getMetallic ()F
+	public final fun getMetallicRoughnessTexture ()Ldev/composescene3d/core/TextureSource;
+	public final fun getNormalScale ()F
+	public final fun getNormalTexture ()Ldev/composescene3d/core/TextureSource;
 	public final fun getRoughness ()F
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;

@@ -23,6 +23,7 @@ import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.TransparentMaterial
 import dev.composescene3d.core.EnvironmentMap
 import dev.composescene3d.core.TextureSource
+import dev.composescene3d.core.TexturedMaterial
 import dev.composescene3d.core.Geometry3D
 import dev.composescene3d.core.Transform
 import dev.composescene3d.core.Vec3
@@ -71,6 +72,27 @@ fun IosSample(
             intensity = 18_000f,
         )
     }
+    val floorMaterial = remember {
+        fun texture(name: String) = TextureSource.Resource("files/$name")
+        TexturedMaterial(
+            baseColorTexture = texture("pbr_albedo.png"),
+            metallic = 0.85f,
+            roughness = 0.8f,
+            normalTexture = texture("pbr_normal.png"),
+            metallicRoughnessTexture = texture("pbr_metallic_roughness.png"),
+            emissiveTexture = texture("pbr_emissive.png"),
+            ambientOcclusionTexture = texture("pbr_ao.png"),
+            emissiveIntensity = 0.35f,
+            ambientOcclusionStrength = 0.8f,
+        )
+    }
+    val albedoOnlyMaterial = floorMaterial.copy(
+        metallic = 0f,
+        normalTexture = null,
+        metallicRoughnessTexture = null,
+        emissiveTexture = null,
+        ambientOcclusionTexture = null,
+    )
     var selected by remember { mutableStateOf<String?>(null) }
 
     Box(Modifier.fillMaxSize()) {
@@ -104,10 +126,7 @@ fun IosSample(
                 )
                 cylinder(
                     key = "rough-cylinder",
-                    material = PbrMaterial(
-                        baseColor = Color3D(0.25f, 0.85f, 0.4f),
-                        roughness = 0.85f,
-                    ),
+                    material = albedoOnlyMaterial,
                     transform = Transform(translation = Vec3(2f, 0f, 0f)),
                 )
                 sphere(
@@ -130,7 +149,7 @@ fun IosSample(
                 key = "ground",
                 width = 6f,
                 depth = 5f,
-                material = PbrMaterial(baseColor = Color3D(0.22f, 0.24f, 0.28f), roughness = 1f),
+                material = floorMaterial,
                 transform = Transform(translation = Vec3(0f, -1.05f, 0f)),
             )
             directionalLight(key = "sun", intensity = 100_000f)
