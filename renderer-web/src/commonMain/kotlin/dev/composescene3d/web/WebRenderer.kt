@@ -39,6 +39,7 @@ import dev.composescene3d.core.RendererCapabilities
 import dev.composescene3d.core.SceneCommand
 import dev.composescene3d.core.SceneNode
 import dev.composescene3d.core.SceneRenderer
+import dev.composescene3d.core.ShadowMap3D
 import dev.composescene3d.core.SphereNode
 import dev.composescene3d.core.SpotLightNode
 import dev.composescene3d.core.Transform
@@ -60,6 +61,7 @@ import org.khronos.webgl.Float32Array
 import org.khronos.webgl.Uint32Array
 import org.khronos.webgl.Uint8Array
 import org.khronos.webgl.WebGLBuffer
+import org.khronos.webgl.WebGLFramebuffer
 import org.khronos.webgl.WebGLProgram
 import org.khronos.webgl.WebGLRenderingContext
 import org.khronos.webgl.WebGLShader
@@ -83,6 +85,7 @@ class WebRenderer(
     override val capabilities = RendererCapabilities(
         primitiveGeometry = true,
         customGeometry = true,
+        shadows = true,
         physicallyBasedRendering = true,
     )
 
@@ -281,6 +284,9 @@ private class WebGlSurface(
     private val canvas = document.createElement("canvas").unsafeCast<HTMLCanvasElement>()
     private val gl: WebGLRenderingContext
     private val program: WebGLProgram
+    private val shadowProgram: WebGLProgram
+    private var shadowTarget: WebShadowTarget? = null
+    private var shadowTargetSize = 0
     private val vertexBuffer: WebGLBuffer
     private val indexBuffer: WebGLBuffer
     private val positionAttribute: Int
@@ -310,6 +316,23 @@ private class WebGlSurface(
     private val emissiveColorUniform: org.khronos.webgl.WebGLUniformLocation?
     private val emissiveIntensityUniform: org.khronos.webgl.WebGLUniformLocation?
     private val ambientOcclusionStrengthUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val useShadowUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val receiveShadowUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val shadowTextureUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val shadowBiasUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val shadowCenterUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val shadowRightUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val shadowUpUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val shadowForwardUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val shadowExtentUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val shadowDepthUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val shadowWorldPositionAttribute: Int
+    private val shadowPassCenterUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val shadowPassRightUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val shadowPassUpUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val shadowPassForwardUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val shadowPassExtentUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val shadowPassDepthUniform: org.khronos.webgl.WebGLUniformLocation?
     private val pointLightCountUniform: org.khronos.webgl.WebGLUniformLocation?
     private val pointLightPositionUniforms: List<org.khronos.webgl.WebGLUniformLocation?>
     private val pointLightColorUniforms: List<org.khronos.webgl.WebGLUniformLocation?>
@@ -339,6 +362,7 @@ private class WebGlSurface(
             "ComposeScene3D Web requires WebGL2"
         }
         program = createProgram(VERTEX_SHADER, FRAGMENT_SHADER)
+        shadowProgram = createProgram(SHADOW_VERTEX_SHADER, SHADOW_FRAGMENT_SHADER)
         vertexBuffer = requireNotNull(gl.createBuffer())
         indexBuffer = requireNotNull(gl.createBuffer())
         positionAttribute = gl.getAttribLocation(program, "aPosition")
@@ -368,6 +392,23 @@ private class WebGlSurface(
         emissiveColorUniform = gl.getUniformLocation(program, "uEmissiveColor")
         emissiveIntensityUniform = gl.getUniformLocation(program, "uEmissiveIntensity")
         ambientOcclusionStrengthUniform = gl.getUniformLocation(program, "uAmbientOcclusionStrength")
+        useShadowUniform = gl.getUniformLocation(program, "uUseShadow")
+        receiveShadowUniform = gl.getUniformLocation(program, "uReceiveShadow")
+        shadowTextureUniform = gl.getUniformLocation(program, "uShadowTexture")
+        shadowBiasUniform = gl.getUniformLocation(program, "uShadowBias")
+        shadowCenterUniform = gl.getUniformLocation(program, "uShadowCenter")
+        shadowRightUniform = gl.getUniformLocation(program, "uShadowRight")
+        shadowUpUniform = gl.getUniformLocation(program, "uShadowUp")
+        shadowForwardUniform = gl.getUniformLocation(program, "uShadowForward")
+        shadowExtentUniform = gl.getUniformLocation(program, "uShadowExtent")
+        shadowDepthUniform = gl.getUniformLocation(program, "uShadowDepth")
+        shadowWorldPositionAttribute = gl.getAttribLocation(shadowProgram, "aWorldPosition")
+        shadowPassCenterUniform = gl.getUniformLocation(shadowProgram, "uShadowCenter")
+        shadowPassRightUniform = gl.getUniformLocation(shadowProgram, "uShadowRight")
+        shadowPassUpUniform = gl.getUniformLocation(shadowProgram, "uShadowUp")
+        shadowPassForwardUniform = gl.getUniformLocation(shadowProgram, "uShadowForward")
+        shadowPassExtentUniform = gl.getUniformLocation(shadowProgram, "uShadowExtent")
+        shadowPassDepthUniform = gl.getUniformLocation(shadowProgram, "uShadowDepth")
         pointLightCountUniform = gl.getUniformLocation(program, "uPointLightCount")
         pointLightPositionUniforms = lightUniforms("uPointLightPositions")
         pointLightColorUniforms = lightUniforms("uPointLightColors")
@@ -404,18 +445,33 @@ private class WebGlSurface(
             nodes, camera, width.toFloat(), height.toFloat(),
             resolveModel = { node -> resolveModel(node) },
         )
+        val lights = nodes.webLights()
+        lights.directional.shadow?.let { shadow ->
+            renderShadowMap(batches, camera.target, shadow)
+        }
         gl.viewport(0, 0, canvas.width, canvas.height)
         gl.clearColor(background.red, background.green, background.blue, background.alpha)
         gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT or WebGLRenderingContext.DEPTH_BUFFER_BIT)
         if (batches.isEmpty()) return
 
         gl.useProgram(program)
-        val lights = nodes.webLights()
         val light = lights.directional
+        val shadowEnabled = light.shadow != null
+        val shadowBasis = shadowBasis(camera.target)
         gl.uniform3f(cameraPositionUniform, camera.eye.x, camera.eye.y, camera.eye.z)
         gl.uniform3f(lightDirectionUniform, -0.3f, 1f, 0.5f)
         gl.uniform3f(lightColorUniform, light.color.x, light.color.y, light.color.z)
         gl.uniform1f(lightIntensityUniform, light.intensity)
+        gl.uniform1i(useShadowUniform, if (shadowEnabled) 1 else 0)
+        gl.uniform1f(shadowBiasUniform, light.shadow?.let {
+            it.constantBias + it.normalBias * 0.0005f
+        } ?: 0f)
+        uploadShadowBasis(program = false, shadowBasis)
+        if (shadowEnabled) {
+            gl.activeTexture(WebGLRenderingContext.TEXTURE0 + SHADOW_TEXTURE_UNIT)
+            gl.bindTexture(WebGLRenderingContext.TEXTURE_2D, requireNotNull(shadowTarget).texture)
+            gl.uniform1i(shadowTextureUniform, SHADOW_TEXTURE_UNIT)
+        }
         uploadPointLights(lights.points)
         uploadSpotLights(lights.spots)
         batches.forEach { mesh ->
@@ -440,6 +496,7 @@ private class WebGlSurface(
                 mesh.emissiveColor.red, mesh.emissiveColor.green, mesh.emissiveColor.blue)
             gl.uniform1f(emissiveIntensityUniform, mesh.emissiveIntensity)
             gl.uniform1f(ambientOcclusionStrengthUniform, mesh.ambientOcclusionStrength)
+            gl.uniform1i(receiveShadowUniform, if (mesh.receiveShadows) 1 else 0)
             bindTexture(mesh.baseColorTexture, 0, useTextureUniform, textureUniform)
             bindTexture(mesh.normalTexture, 1, useNormalTextureUniform, normalTextureUniform)
             bindTexture(mesh.metallicRoughnessTexture, 2,
@@ -458,8 +515,62 @@ private class WebGlSurface(
         gl.deleteBuffer(vertexBuffer)
         gl.deleteBuffer(indexBuffer)
         gl.deleteProgram(program)
+        gl.deleteProgram(shadowProgram)
+        shadowTarget?.let { deleteShadowTarget(gl, it) }
         textureCache.values.forEach(gl::deleteTexture)
         canvas.remove()
+    }
+
+    private fun renderShadowMap(
+        batches: List<GpuMesh>,
+        center: Vec3,
+        shadow: ShadowMap3D,
+    ) {
+        val target = ensureShadowTarget(shadow.mapSize)
+        gl.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, target.framebuffer)
+        gl.viewport(0, 0, shadowTargetSize, shadowTargetSize)
+        gl.clear(WebGLRenderingContext.DEPTH_BUFFER_BIT)
+        gl.useProgram(shadowProgram)
+        uploadShadowBasis(program = true, shadowBasis(center))
+        batches.filter(GpuMesh::castShadows).forEach { mesh ->
+            gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, vertexBuffer)
+            gl.bufferData(WebGLRenderingContext.ARRAY_BUFFER,
+                mesh.vertices.toTypedArray(), WebGLRenderingContext.DYNAMIC_DRAW)
+            gl.enableVertexAttribArray(shadowWorldPositionAttribute)
+            gl.vertexAttribPointer(shadowWorldPositionAttribute, 3,
+                WebGLRenderingContext.FLOAT, false, 64, 16)
+            gl.bindBuffer(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER, indexBuffer)
+            gl.bufferData(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER,
+                mesh.indices.toTypedArray(), WebGLRenderingContext.DYNAMIC_DRAW)
+            gl.drawElements(WebGLRenderingContext.TRIANGLES, mesh.indices.size,
+                WebGLRenderingContext.UNSIGNED_INT, 0)
+        }
+        gl.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, null)
+    }
+
+    private fun ensureShadowTarget(requestedSize: Int): WebShadowTarget {
+        val size = requestedSize.coerceAtMost(MAX_WEB_SHADOW_MAP_SIZE)
+        if (shadowTarget == null || shadowTargetSize != size) {
+            shadowTarget?.let { deleteShadowTarget(gl, it) }
+            shadowTarget = createShadowTarget(gl, size)
+            shadowTargetSize = size
+        }
+        return requireNotNull(shadowTarget)
+    }
+
+    private fun uploadShadowBasis(program: Boolean, basis: ShadowBasis) {
+        val centerUniform = if (program) shadowPassCenterUniform else shadowCenterUniform
+        val rightUniform = if (program) shadowPassRightUniform else shadowRightUniform
+        val upUniform = if (program) shadowPassUpUniform else shadowUpUniform
+        val forwardUniform = if (program) shadowPassForwardUniform else shadowForwardUniform
+        val extentUniform = if (program) shadowPassExtentUniform else shadowExtentUniform
+        val depthUniform = if (program) shadowPassDepthUniform else shadowDepthUniform
+        gl.uniform3f(centerUniform, basis.center.x, basis.center.y, basis.center.z)
+        gl.uniform3f(rightUniform, basis.right.x, basis.right.y, basis.right.z)
+        gl.uniform3f(upUniform, basis.up.x, basis.up.y, basis.up.z)
+        gl.uniform3f(forwardUniform, basis.forward.x, basis.forward.y, basis.forward.z)
+        gl.uniform1f(extentUniform, basis.extent)
+        gl.uniform1f(depthUniform, basis.depth)
     }
 
     private fun bindTexture(
@@ -632,9 +743,15 @@ private data class GpuMesh(
     val emissiveColor: Color3D,
     val emissiveIntensity: Float,
     val ambientOcclusionStrength: Float,
+    val castShadows: Boolean,
+    val receiveShadows: Boolean,
 )
 
-private data class WebDirectionalLight(val color: Vec3, val intensity: Float)
+private data class WebDirectionalLight(
+    val color: Vec3,
+    val intensity: Float,
+    val shadow: ShadowMap3D? = null,
+)
 private data class WebPointLight(
     val position: Vec3, val color: Vec3, val intensity: Float, val falloff: Float,
 )
@@ -652,6 +769,20 @@ private data class WebLights(
     val points: MutableList<WebPointLight> = mutableListOf(),
     val spots: MutableList<WebSpotLight> = mutableListOf(),
 )
+private data class ShadowBasis(
+    val center: Vec3,
+    val right: Vec3,
+    val up: Vec3,
+    val forward: Vec3,
+    val extent: Float = 8f,
+    val depth: Float = 12f,
+)
+
+private fun shadowBasis(center: Vec3): ShadowBasis {
+    val forward = Vec3(0.3f, -1f, -0.5f).normalized()
+    val right = forward.cross(Vec3(0f, 1f, 0f)).normalized()
+    return ShadowBasis(center, right, right.cross(forward).normalized(), forward)
+}
 
 private fun Collection<SceneNode>.webLights(): WebLights {
     val result = WebLights()
@@ -662,7 +793,8 @@ private fun Collection<SceneNode>.webLights(): WebLights {
             when (node) {
                 is GroupNode -> visit(node.children, transforms)
                 is DirectionalLightNode -> if (!foundDirectional) {
-                    result.directional = WebDirectionalLight(node.color, node.intensity / 100_000f)
+                    result.directional = WebDirectionalLight(
+                        node.color, node.intensity / 100_000f, node.shadow)
                     foundDirectional = true
                 }
                 is PointLightNode -> if (result.points.size < MAX_WEB_LIGHTS) {
@@ -703,7 +835,12 @@ private fun buildGpuBatches(
     height: Float,
     resolveModel: (ModelNode) -> List<MeshData>?,
 ): List<GpuMesh> = buildList {
-    fun appendMesh(mesh: MeshData, transforms: List<Transform>) {
+    fun appendMesh(
+        mesh: MeshData,
+        transforms: List<Transform>,
+        castShadows: Boolean,
+        receiveShadows: Boolean,
+    ) {
         val vertices = mutableListOf<Float>()
         mesh.positions.forEachIndexed { index, position ->
             val world = transforms.fold(position) { point, transform -> transform.apply(point) }
@@ -736,6 +873,8 @@ private fun buildGpuBatches(
             emissiveColor = mesh.material.emissiveColor(),
             emissiveIntensity = mesh.material.emissiveIntensity(),
             ambientOcclusionStrength = mesh.material.ambientOcclusionStrength(),
+            castShadows = castShadows,
+            receiveShadows = receiveShadows,
         ))
     }
     fun append(node: SceneNode, parents: List<Transform>) {
@@ -746,13 +885,35 @@ private fun buildGpuBatches(
         }
         if (node is ModelNode) {
             if (!node.visible) return
-            resolveModel(node)?.forEach { appendMesh(it, transforms) }
+            resolveModel(node)?.forEach {
+                appendMesh(it, transforms, node.castShadows, node.receiveShadows)
+            }
             return
         }
         val mesh = node.toMesh() ?: return
-        appendMesh(mesh, transforms)
+        appendMesh(mesh, transforms, node.castShadows(), node.receiveShadows())
     }
     nodes.forEach { append(it, emptyList()) }
+}
+
+private fun SceneNode.castShadows() = when (this) {
+    is BoxNode -> castShadows
+    is SphereNode -> castShadows
+    is PlaneNode -> castShadows
+    is CylinderNode -> castShadows
+    is MeshNode -> castShadows
+    is ModelNode -> castShadows
+    else -> false
+}
+
+private fun SceneNode.receiveShadows() = when (this) {
+    is BoxNode -> receiveShadows
+    is SphereNode -> receiveShadows
+    is PlaneNode -> receiveShadows
+    is CylinderNode -> receiveShadows
+    is MeshNode -> receiveShadows
+    is ModelNode -> receiveShadows
+    else -> false
 }
 
 private data class ClipPoint(val x: Float, val y: Float, val z: Float, val w: Float)
@@ -896,6 +1057,32 @@ private fun parseGlb(bytes: Uint8Array, cacheKey: String): List<MeshData> {
 }""")
 private external fun parseGlbData(bytes: Uint8Array): JsArray<JsGlbPrimitive>
 
+private external interface WebShadowTarget : JsAny {
+    val framebuffer: WebGLFramebuffer
+    val texture: WebGLTexture
+}
+
+@JsFun("""(gl, size) => {
+  const texture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT24, size, size, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  const framebuffer = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, texture, 0);
+  gl.drawBuffers([gl.NONE]); gl.readBuffer(gl.NONE);
+  if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) throw new Error('Unable to create Web shadow framebuffer');
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  return { framebuffer, texture };
+}""")
+private external fun createShadowTarget(gl: WebGLRenderingContext, size: Int): WebShadowTarget
+
+@JsFun("(gl, target) => { gl.deleteFramebuffer(target.framebuffer); gl.deleteTexture(target.texture); }")
+private external fun deleteShadowTarget(gl: WebGLRenderingContext, target: WebShadowTarget)
+
 @JsFun("(canvas) => canvas.getContext('webgl2')")
 private external fun webGl2Context(canvas: HTMLCanvasElement): WebGLRenderingContext?
 
@@ -966,6 +1153,33 @@ private external fun loadGltfAsGlb(
 )
 
 private const val MAX_WEB_LIGHTS = 4
+private const val MAX_WEB_SHADOW_MAP_SIZE = 2048
+private const val SHADOW_TEXTURE_UNIT = 5
+
+private const val SHADOW_VERTEX_SHADER = """#version 300 es
+precision highp float;
+in vec3 aWorldPosition;
+uniform vec3 uShadowCenter;
+uniform vec3 uShadowRight;
+uniform vec3 uShadowUp;
+uniform vec3 uShadowForward;
+uniform float uShadowExtent;
+uniform float uShadowDepth;
+void main() {
+    vec3 relative = aWorldPosition - uShadowCenter;
+    gl_Position = vec4(
+        dot(relative, uShadowRight) / uShadowExtent,
+        dot(relative, uShadowUp) / uShadowExtent,
+        dot(relative, uShadowForward) / uShadowDepth,
+        1.0
+    );
+}
+"""
+
+private const val SHADOW_FRAGMENT_SHADER = """#version 300 es
+precision highp float;
+void main() {}
+"""
 
 private const val VERTEX_SHADER = """#version 300 es
 precision highp float;
@@ -1028,6 +1242,16 @@ uniform float uSpotLightIntensities[4];
 uniform float uSpotLightFalloffs[4];
 uniform float uSpotLightInnerCos[4];
 uniform float uSpotLightOuterCos[4];
+uniform sampler2D uShadowTexture;
+uniform bool uUseShadow;
+uniform bool uReceiveShadow;
+uniform float uShadowBias;
+uniform vec3 uShadowCenter;
+uniform vec3 uShadowRight;
+uniform vec3 uShadowUp;
+uniform vec3 uShadowForward;
+uniform float uShadowExtent;
+uniform float uShadowDepth;
 out vec4 outColor;
 
 const float PI = 3.14159265359;
@@ -1080,6 +1304,24 @@ vec3 evaluatePbr(
     return (diffuse + specular) * radiance * nDotL;
 }
 
+float directionalShadow(vec3 worldPosition) {
+    if (!uUseShadow || !uReceiveShadow) return 1.0;
+    vec3 relative = worldPosition - uShadowCenter;
+    vec3 coordinate = vec3(
+        dot(relative, uShadowRight) / (2.0 * uShadowExtent) + 0.5,
+        dot(relative, uShadowUp) / (2.0 * uShadowExtent) + 0.5,
+        dot(relative, uShadowForward) / (2.0 * uShadowDepth) + 0.5
+    );
+    if (any(lessThan(coordinate, vec3(0.0))) || any(greaterThan(coordinate, vec3(1.0)))) return 1.0;
+    float visibility = 0.0;
+    vec2 texel = 1.0 / vec2(textureSize(uShadowTexture, 0));
+    for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {
+        float closest = texture(uShadowTexture, coordinate.xy + vec2(float(x), float(y)) * texel).r;
+        visibility += coordinate.z - uShadowBias <= closest ? 1.0 : 0.0;
+    }
+    return mix(0.28, 1.0, visibility / 9.0);
+}
+
 void main() {
     vec4 base = uUseTexture ? texture(uTexture, vUv) * vColor : vColor;
     if (uUseTexture) base.rgb = pow(base.rgb, vec3(2.2));
@@ -1101,7 +1343,7 @@ void main() {
     float roughness = clamp(uRoughness * metallicRoughness.g, 0.045, 1.0);
     float metallic = clamp(uMetallic * metallicRoughness.b, 0.0, 1.0);
     vec3 direct = evaluatePbr(n, v, l, base.rgb, metallic, roughness, uReflectance,
-        uLightColor * uLightIntensity);
+        uLightColor * uLightIntensity) * directionalShadow(vWorldPosition);
     for (int i = 0; i < 4; i++) {
         if (i >= uPointLightCount) break;
         vec3 offset = uPointLightPositions[i] - vWorldPosition;

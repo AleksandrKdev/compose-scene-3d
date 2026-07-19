@@ -429,8 +429,12 @@ State: unavailable/offline
   spot positions/directions honor nested group transforms; the shader applies inverse-square-like
   distance attenuation, finite falloff and smooth inner/outer spot cones. The sample combines cool
   point fill and a warm spotlight, and the GLSL runtime was verified in headless Chrome.
-- Next milestone: Web directional/spot shadows, then broader glTF coverage and GPU submission
-  optimization.
+- Web now renders one directional depth shadow map with 3x3 PCF, dynamic `mapSize` up to 2048,
+  constant/normal bias and node-level `castShadows`/`receiveShadows`. Shadowing affects direct
+  directional light only, leaving ambient and local lights intact. The sample was verified in
+  headless Chrome without the previous cube acne; its old emissive floor marker was removed.
+- Next milestone: Web spot-light shadows and directional-frustum improvements, then broader glTF
+  coverage and GPU submission optimization.
 
 ## Completed local Maven alpha milestone
 
@@ -500,8 +504,8 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Continue with Web directional and spot shadows, then broader glTF coverage and GPU submission
-optimization.
+Continue with Web spot-light shadows and directional-frustum improvements, then broader glTF
+coverage and GPU submission optimization.
 The user explicitly allowed breaking the old empty GroupNode API before alpha03. Do not expose
 backend types in public commonMain API.
 ```

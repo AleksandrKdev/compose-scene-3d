@@ -14,6 +14,7 @@ import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.Quaternion
+import dev.composescene3d.core.ShadowMap3D
 import dev.composescene3d.core.Transform
 import dev.composescene3d.core.TexturedMaterial
 import dev.composescene3d.core.TextureSource
@@ -45,6 +46,11 @@ fun main() {
                     directionalLight(
                         key = "sun",
                         intensity = 45_000f,
+                        shadow = ShadowMap3D(
+                            mapSize = 1024,
+                            constantBias = 0.0035f,
+                            normalBias = 1f,
+                        ),
                     )
                     pointLight(
                         key = "blue-fill",
@@ -104,14 +110,12 @@ fun main() {
                             baseColorTexture = TextureSource.Resource("checker.svg"),
                             normalTexture = TextureSource.Resource("normal-map.svg"),
                             metallicRoughnessTexture = TextureSource.Resource("metallic-roughness.svg"),
-                            emissiveTexture = TextureSource.Resource("emissive.svg"),
                             ambientOcclusionTexture = TextureSource.Resource("ambient-occlusion.svg"),
                             normalScale = 0.35f,
-                            emissiveColor = Color3D(1f, 0.45f, 0.08f),
-                            emissiveIntensity = 0.25f,
                             ambientOcclusionStrength = 0.65f,
                             roughness = 0.85f,
                         ),
+                        castShadows = false,
                         transform = Transform(translation = Vec3(0f, -1.3f, 0f)),
                     )
                 }

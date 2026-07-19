@@ -30,7 +30,7 @@ Source repository: [AleksandrKdev/compose-scene-3d](https://github.com/Aleksandr
   nested transforms and the shared orbit/pan/zoom camera. It uses GPU vertex/index buffers and a
   depth buffer. Base-color textures load asynchronously from resources, URLs or encoded bytes and
   are cached by `TextureAssetKey`. It loads binary (`.glb`) and JSON (`.gltf`) glTF 2.0 models;
-  PBR shaders and shadows remain future work.
+  its PBR shader supports directional, point and spot lighting plus a directional PCF shadow map.
 - `renderer-testkit`: an internal backend-neutral conformance harness for retained commands,
   lifecycle behavior and capability declarations. New renderers must pass the same contract.
 - `samples/android-app`, `samples/desktop-app`, `samples/ios-app` and `samples/web-app`:
@@ -221,9 +221,14 @@ shadow pass.
 including materials embedded in loaded GLB assets. Use `Pcf` as the portable default when asset
 provenance is unknown.
 
+On Web, the first shadow-enabled directional light currently gets one depth map with 3x3 PCF.
+`mapSize` is honored up to 2048, and node-level `castShadows`/`receiveShadows` flags are supported.
+Cascades, contact shadows, spot-light shadows and the other filtering techniques still fall back
+to this single portable PCF implementation.
+
 ## Roadmap
 
-1. Add Web directional and spot shadows.
+1. Add Web spot-light shadows and improve the directional shadow frustum.
 2. Continue glTF feature coverage and optimize Web GPU resource submission.
 3. Stabilize the public API based on cross-backend experience.
 

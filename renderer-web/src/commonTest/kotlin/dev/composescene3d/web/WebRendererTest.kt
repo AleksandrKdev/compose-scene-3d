@@ -44,6 +44,7 @@ class WebRendererTest {
                 primitiveGeometry = true,
                 customGeometry = true,
                 physicallyBasedRendering = true,
+                shadows = true,
             ),
             WebRenderer().capabilities,
         )
