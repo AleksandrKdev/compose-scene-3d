@@ -44,7 +44,24 @@ fun main() {
                 Scene3D(controller) {
                     directionalLight(
                         key = "sun",
-                        intensity = 120_000f,
+                        intensity = 45_000f,
+                    )
+                    pointLight(
+                        key = "blue-fill",
+                        intensity = 240_000f,
+                        color = Color3D(0.18f, 0.42f, 1f),
+                        falloff = 8f,
+                        transform = Transform(translation = Vec3(-3f, 2.5f, 2f)),
+                    )
+                    spotLight(
+                        key = "warm-spot",
+                        intensity = 280_000f,
+                        direction = Vec3(0f, -1f, -0.35f),
+                        color = Color3D(1f, 0.42f, 0.12f),
+                        falloff = 10f,
+                        innerConeRadians = 0.32f,
+                        outerConeRadians = 0.62f,
+                        transform = Transform(translation = Vec3(3f, 4f, 3f)),
                     )
                     group(
                         key = "assembly",
@@ -91,7 +108,7 @@ fun main() {
                             ambientOcclusionTexture = TextureSource.Resource("ambient-occlusion.svg"),
                             normalScale = 0.35f,
                             emissiveColor = Color3D(1f, 0.45f, 0.08f),
-                            emissiveIntensity = 0.7f,
+                            emissiveIntensity = 0.25f,
                             ambientOcclusionStrength = 0.65f,
                             roughness = 0.85f,
                         ),

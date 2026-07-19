@@ -33,12 +33,14 @@ import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.NodeKey
 import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.core.PlaneNode
+import dev.composescene3d.core.PointLightNode
 import dev.composescene3d.core.Quaternion
 import dev.composescene3d.core.RendererCapabilities
 import dev.composescene3d.core.SceneCommand
 import dev.composescene3d.core.SceneNode
 import dev.composescene3d.core.SceneRenderer
 import dev.composescene3d.core.SphereNode
+import dev.composescene3d.core.SpotLightNode
 import dev.composescene3d.core.Transform
 import dev.composescene3d.core.TransparentMaterial
 import dev.composescene3d.core.TexturedMaterial
@@ -308,6 +310,19 @@ private class WebGlSurface(
     private val emissiveColorUniform: org.khronos.webgl.WebGLUniformLocation?
     private val emissiveIntensityUniform: org.khronos.webgl.WebGLUniformLocation?
     private val ambientOcclusionStrengthUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val pointLightCountUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val pointLightPositionUniforms: List<org.khronos.webgl.WebGLUniformLocation?>
+    private val pointLightColorUniforms: List<org.khronos.webgl.WebGLUniformLocation?>
+    private val pointLightIntensityUniforms: List<org.khronos.webgl.WebGLUniformLocation?>
+    private val pointLightFalloffUniforms: List<org.khronos.webgl.WebGLUniformLocation?>
+    private val spotLightCountUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val spotLightPositionUniforms: List<org.khronos.webgl.WebGLUniformLocation?>
+    private val spotLightDirectionUniforms: List<org.khronos.webgl.WebGLUniformLocation?>
+    private val spotLightColorUniforms: List<org.khronos.webgl.WebGLUniformLocation?>
+    private val spotLightIntensityUniforms: List<org.khronos.webgl.WebGLUniformLocation?>
+    private val spotLightFalloffUniforms: List<org.khronos.webgl.WebGLUniformLocation?>
+    private val spotLightInnerCosUniforms: List<org.khronos.webgl.WebGLUniformLocation?>
+    private val spotLightOuterCosUniforms: List<org.khronos.webgl.WebGLUniformLocation?>
     private val textureCache = mutableMapOf<String, WebGLTexture>()
     private val loadingTextures = mutableSetOf<String>()
     private val failedTextures = mutableSetOf<String>()
@@ -353,6 +368,19 @@ private class WebGlSurface(
         emissiveColorUniform = gl.getUniformLocation(program, "uEmissiveColor")
         emissiveIntensityUniform = gl.getUniformLocation(program, "uEmissiveIntensity")
         ambientOcclusionStrengthUniform = gl.getUniformLocation(program, "uAmbientOcclusionStrength")
+        pointLightCountUniform = gl.getUniformLocation(program, "uPointLightCount")
+        pointLightPositionUniforms = lightUniforms("uPointLightPositions")
+        pointLightColorUniforms = lightUniforms("uPointLightColors")
+        pointLightIntensityUniforms = lightUniforms("uPointLightIntensities")
+        pointLightFalloffUniforms = lightUniforms("uPointLightFalloffs")
+        spotLightCountUniform = gl.getUniformLocation(program, "uSpotLightCount")
+        spotLightPositionUniforms = lightUniforms("uSpotLightPositions")
+        spotLightDirectionUniforms = lightUniforms("uSpotLightDirections")
+        spotLightColorUniforms = lightUniforms("uSpotLightColors")
+        spotLightIntensityUniforms = lightUniforms("uSpotLightIntensities")
+        spotLightFalloffUniforms = lightUniforms("uSpotLightFalloffs")
+        spotLightInnerCosUniforms = lightUniforms("uSpotLightInnerCos")
+        spotLightOuterCosUniforms = lightUniforms("uSpotLightOuterCos")
         gl.enable(WebGLRenderingContext.DEPTH_TEST)
         gl.depthFunc(WebGLRenderingContext.LEQUAL)
     }
@@ -382,11 +410,14 @@ private class WebGlSurface(
         if (batches.isEmpty()) return
 
         gl.useProgram(program)
-        val light = nodes.firstDirectionalLight()
+        val lights = nodes.webLights()
+        val light = lights.directional
         gl.uniform3f(cameraPositionUniform, camera.eye.x, camera.eye.y, camera.eye.z)
         gl.uniform3f(lightDirectionUniform, -0.3f, 1f, 0.5f)
         gl.uniform3f(lightColorUniform, light.color.x, light.color.y, light.color.z)
         gl.uniform1f(lightIntensityUniform, light.intensity)
+        uploadPointLights(lights.points)
+        uploadSpotLights(lights.spots)
         batches.forEach { mesh ->
             gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, vertexBuffer)
             gl.bufferData(WebGLRenderingContext.ARRAY_BUFFER, mesh.vertices.toTypedArray(), WebGLRenderingContext.DYNAMIC_DRAW)
@@ -530,6 +561,35 @@ private class WebGlSurface(
         }
     }
 
+    private fun lightUniforms(name: String) =
+        List(MAX_WEB_LIGHTS) { index -> gl.getUniformLocation(program, "$name[$index]") }
+
+    private fun uploadPointLights(lights: List<WebPointLight>) {
+        gl.uniform1i(pointLightCountUniform, lights.size)
+        lights.forEachIndexed { index, light ->
+            gl.uniform3f(pointLightPositionUniforms[index],
+                light.position.x, light.position.y, light.position.z)
+            gl.uniform3f(pointLightColorUniforms[index], light.color.x, light.color.y, light.color.z)
+            gl.uniform1f(pointLightIntensityUniforms[index], light.intensity)
+            gl.uniform1f(pointLightFalloffUniforms[index], light.falloff)
+        }
+    }
+
+    private fun uploadSpotLights(lights: List<WebSpotLight>) {
+        gl.uniform1i(spotLightCountUniform, lights.size)
+        lights.forEachIndexed { index, light ->
+            gl.uniform3f(spotLightPositionUniforms[index],
+                light.position.x, light.position.y, light.position.z)
+            gl.uniform3f(spotLightDirectionUniforms[index],
+                light.direction.x, light.direction.y, light.direction.z)
+            gl.uniform3f(spotLightColorUniforms[index], light.color.x, light.color.y, light.color.z)
+            gl.uniform1f(spotLightIntensityUniforms[index], light.intensity)
+            gl.uniform1f(spotLightFalloffUniforms[index], light.falloff)
+            gl.uniform1f(spotLightInnerCosUniforms[index], light.innerCos)
+            gl.uniform1f(spotLightOuterCosUniforms[index], light.outerCos)
+        }
+    }
+
     private fun createProgram(vertexSource: String, fragmentSource: String): WebGLProgram {
         val vertex = compileShader(WebGLRenderingContext.VERTEX_SHADER, vertexSource)
         val fragment = compileShader(WebGLRenderingContext.FRAGMENT_SHADER, fragmentSource)
@@ -575,17 +635,65 @@ private data class GpuMesh(
 )
 
 private data class WebDirectionalLight(val color: Vec3, val intensity: Float)
+private data class WebPointLight(
+    val position: Vec3, val color: Vec3, val intensity: Float, val falloff: Float,
+)
+private data class WebSpotLight(
+    val position: Vec3,
+    val direction: Vec3,
+    val color: Vec3,
+    val intensity: Float,
+    val falloff: Float,
+    val innerCos: Float,
+    val outerCos: Float,
+)
+private data class WebLights(
+    var directional: WebDirectionalLight = WebDirectionalLight(Vec3.One, 2f),
+    val points: MutableList<WebPointLight> = mutableListOf(),
+    val spots: MutableList<WebSpotLight> = mutableListOf(),
+)
 
-private fun Collection<SceneNode>.firstDirectionalLight(): WebDirectionalLight {
-    fun find(nodes: Collection<SceneNode>): DirectionalLightNode? {
+private fun Collection<SceneNode>.webLights(): WebLights {
+    val result = WebLights()
+    var foundDirectional = false
+    fun visit(nodes: Collection<SceneNode>, parents: List<Transform>) {
         nodes.forEach { node ->
-            if (node is DirectionalLightNode) return node
-            if (node is GroupNode) find(node.children)?.let { return it }
+            val transforms = listOf(node.transform) + parents
+            when (node) {
+                is GroupNode -> visit(node.children, transforms)
+                is DirectionalLightNode -> if (!foundDirectional) {
+                    result.directional = WebDirectionalLight(node.color, node.intensity / 100_000f)
+                    foundDirectional = true
+                }
+                is PointLightNode -> if (result.points.size < MAX_WEB_LIGHTS) {
+                    val position = transforms.fold(Vec3.Zero) { value, transform ->
+                        transform.apply(value)
+                    }
+                    result.points += WebPointLight(
+                        position, Vec3(node.color.red, node.color.green, node.color.blue),
+                        node.intensity / 100_000f, node.falloff,
+                    )
+                }
+                is SpotLightNode -> if (result.spots.size < MAX_WEB_LIGHTS) {
+                    val position = transforms.fold(Vec3.Zero) { value, transform ->
+                        transform.apply(value)
+                    }
+                    val direction = transforms.fold(node.direction) { value, transform ->
+                        transform.rotation.rotate(value)
+                    }.normalized()
+                    result.spots += WebSpotLight(
+                        position, direction,
+                        Vec3(node.color.red, node.color.green, node.color.blue),
+                        node.intensity / 100_000f, node.falloff,
+                        cos(node.innerConeRadians), cos(node.outerConeRadians),
+                    )
+                }
+                else -> Unit
+            }
         }
-        return null
     }
-    val node = find(this) ?: return WebDirectionalLight(Vec3.One, 2f)
-    return WebDirectionalLight(node.color, node.intensity / 100_000f)
+    visit(this, emptyList())
+    return result
 }
 
 private fun buildGpuBatches(
@@ -848,6 +956,8 @@ private external fun loadGltfAsGlb(
     onError: (String) -> Unit,
 )
 
+private const val MAX_WEB_LIGHTS = 4
+
 private const val VERTEX_SHADER = """#version 300 es
 precision highp float;
 in vec4 aPosition;
@@ -896,6 +1006,19 @@ uniform float uNormalScale;
 uniform vec3 uEmissiveColor;
 uniform float uEmissiveIntensity;
 uniform float uAmbientOcclusionStrength;
+uniform int uPointLightCount;
+uniform vec3 uPointLightPositions[4];
+uniform vec3 uPointLightColors[4];
+uniform float uPointLightIntensities[4];
+uniform float uPointLightFalloffs[4];
+uniform int uSpotLightCount;
+uniform vec3 uSpotLightPositions[4];
+uniform vec3 uSpotLightDirections[4];
+uniform vec3 uSpotLightColors[4];
+uniform float uSpotLightIntensities[4];
+uniform float uSpotLightFalloffs[4];
+uniform float uSpotLightInnerCos[4];
+uniform float uSpotLightOuterCos[4];
 out vec4 outColor;
 
 const float PI = 3.14159265359;
@@ -930,6 +1053,24 @@ mat3 cotangentFrame(vec3 normal, vec3 position, vec2 uv) {
     return mat3(tangent * scale, bitangent * scale, normal);
 }
 
+vec3 evaluatePbr(
+    vec3 n, vec3 v, vec3 l, vec3 baseColor, float metallic, float roughness,
+    float reflectance, vec3 radiance
+) {
+    vec3 h = normalize(v + l);
+    float nDotL = max(dot(n, l), 0.0);
+    float nDotV = max(dot(n, v), 0.0001);
+    float nDotH = max(dot(n, h), 0.0);
+    float hDotV = max(dot(h, v), 0.0);
+    vec3 f0 = mix(vec3(0.16 * reflectance * reflectance), baseColor, metallic);
+    vec3 f = fresnelSchlick(hDotV, f0);
+    float d = distributionGgx(nDotH, roughness);
+    float g = geometrySchlickGgx(nDotV, roughness) * geometrySchlickGgx(nDotL, roughness);
+    vec3 specular = d * g * f / max(4.0 * nDotV * nDotL, 0.0001);
+    vec3 diffuse = (1.0 - f) * (1.0 - metallic) * baseColor / PI;
+    return (diffuse + specular) * radiance * nDotL;
+}
+
 void main() {
     vec4 base = uUseTexture ? texture(uTexture, vUv) * vColor : vColor;
     if (uUseTexture) base.rgb = pow(base.rgb, vec3(2.2));
@@ -946,22 +1087,34 @@ void main() {
     }
     vec3 v = normalize(uCameraPosition - vWorldPosition);
     vec3 l = normalize(uLightDirection);
-    vec3 h = normalize(v + l);
-    float nDotL = max(dot(n, l), 0.0);
-    float nDotV = max(dot(n, v), 0.0001);
-    float nDotH = max(dot(n, h), 0.0);
-    float hDotV = max(dot(h, v), 0.0);
     vec4 metallicRoughness = uUseMetallicRoughnessTexture
         ? texture(uMetallicRoughnessTexture, vUv) : vec4(1.0);
     float roughness = clamp(uRoughness * metallicRoughness.g, 0.045, 1.0);
     float metallic = clamp(uMetallic * metallicRoughness.b, 0.0, 1.0);
-    vec3 f0 = mix(vec3(0.16 * uReflectance * uReflectance), base.rgb, metallic);
-    vec3 f = fresnelSchlick(hDotV, f0);
-    float d = distributionGgx(nDotH, roughness);
-    float g = geometrySchlickGgx(nDotV, roughness) * geometrySchlickGgx(nDotL, roughness);
-    vec3 specular = d * g * f / max(4.0 * nDotV * nDotL, 0.0001);
-    vec3 diffuse = (1.0 - f) * (1.0 - metallic) * base.rgb / PI;
-    vec3 direct = (diffuse + specular) * uLightColor * uLightIntensity * nDotL;
+    vec3 direct = evaluatePbr(n, v, l, base.rgb, metallic, roughness, uReflectance,
+        uLightColor * uLightIntensity);
+    for (int i = 0; i < 4; i++) {
+        if (i >= uPointLightCount) break;
+        vec3 offset = uPointLightPositions[i] - vWorldPosition;
+        float distanceToLight = length(offset);
+        float range = clamp(1.0 - distanceToLight / uPointLightFalloffs[i], 0.0, 1.0);
+        float attenuation = range * range * 20.0 / max(distanceToLight * distanceToLight, 0.25);
+        direct += evaluatePbr(n, v, normalize(offset), base.rgb, metallic, roughness,
+            uReflectance, uPointLightColors[i] * uPointLightIntensities[i] * attenuation);
+    }
+    for (int i = 0; i < 4; i++) {
+        if (i >= uSpotLightCount) break;
+        vec3 offset = uSpotLightPositions[i] - vWorldPosition;
+        float distanceToLight = length(offset);
+        vec3 toLight = normalize(offset);
+        float coneCos = dot(normalize(uSpotLightDirections[i]), -toLight);
+        float cone = smoothstep(uSpotLightOuterCos[i], uSpotLightInnerCos[i], coneCos);
+        float range = clamp(1.0 - distanceToLight / uSpotLightFalloffs[i], 0.0, 1.0);
+        float attenuation = cone * range * range * 20.0 /
+            max(distanceToLight * distanceToLight, 0.25);
+        direct += evaluatePbr(n, v, toLight, base.rgb, metallic, roughness,
+            uReflectance, uSpotLightColors[i] * uSpotLightIntensities[i] * attenuation);
+    }
     float aoSample = uUseAmbientOcclusionTexture ? texture(uAmbientOcclusionTexture, vUv).r : 1.0;
     float ao = mix(1.0, aoSample, uAmbientOcclusionStrength);
     vec3 ambient = base.rgb * (0.06 + 0.04 * (1.0 - roughness)) * ao;

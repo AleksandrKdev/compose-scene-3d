@@ -157,7 +157,8 @@ tone mapping and perspective-correct base-color texture sampling. It consumes th
 mipmaps after browser image decoding, and redraws the viewport when asynchronous loading completes.
 Normal maps use a derivative-based tangent frame, so custom geometry does not need explicit tangent
 attributes. Metallic-roughness (glTF green/blue channels), emissive and AO maps are supported on
-Web as well as Filament.
+Web as well as Filament. Web lighting supports one directional light plus up to four point and four
+spot lights. Positional lights honor nested transforms, distance falloff and spot cone angles.
 
 Web models accept the same `ModelSource.Resource`, `Url` and `Bytes` variants. The current loader
 supports GLB 2.0 JSON/BIN chunks, triangle primitives, indexed or non-indexed accessors, interleaved
@@ -222,8 +223,8 @@ provenance is unknown.
 
 ## Roadmap
 
-1. Add point and spot lights to Web PBR.
-2. Add Web shadows and continue glTF feature coverage.
+1. Add Web directional and spot shadows.
+2. Continue glTF feature coverage and optimize Web GPU resource submission.
 3. Stabilize the public API based on cross-backend experience.
 
 ## Running the samples

@@ -420,7 +420,12 @@ State: unavailable/offline
   derivatives, metallic/roughness follow glTF B/G channels, albedo/emissive are decoded from sRGB,
   and AO strength affects ambient light. The GLB/glTF parser extracts the same channels and scalar
   factors from embedded images. A Web sample with five SVG maps was verified in headless Chrome.
-- Next milestone: Web point and spot lights, then shadows and broader glTF coverage.
+- Web PBR supports the first directional light and up to four point plus four spot lights. Point and
+  spot positions/directions honor nested group transforms; the shader applies inverse-square-like
+  distance attenuation, finite falloff and smooth inner/outer spot cones. The sample combines cool
+  point fill and a warm spotlight, and the GLSL runtime was verified in headless Chrome.
+- Next milestone: Web directional/spot shadows, then broader glTF coverage and GPU submission
+  optimization.
 
 ## Completed local Maven alpha milestone
 
@@ -490,7 +495,8 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Continue Web PBR with point and spot lights, then shadows and broader glTF coverage.
+Continue with Web directional and spot shadows, then broader glTF coverage and GPU submission
+optimization.
 The user explicitly allowed breaking the old empty GroupNode API before alpha03. Do not expose
 backend types in public commonMain API.
 ```
