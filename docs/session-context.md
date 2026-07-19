@@ -401,6 +401,14 @@ State: unavailable/offline
   model/texture error callbacks. A data-buffer/external-SVG test model rendered in headless Chrome.
   Multiple buffers, skins, animation, morphs and sparse accessors are not supported yet, so
   `skeletalAnimation` remains false.
+- Web perspective texture interpolation was fixed in commit `1d5ce93`. Vertex data now carries
+  homogeneous clip-space `x/y/z/w` into the shader instead of pre-divided NDC with `w = 1`, so the
+  GPU applies perspective-correct UV interpolation and checker squares no longer warp across the
+  plane's triangle diagonal while orbiting. Web browser tests and the production bundle pass.
+- The latest external glTF milestone is commit `52b42d7`; the perspective fix is `1d5ce93`.
+  For interactive verification run
+  `./gradlew :samples:web-app:wasmJsBrowserDevelopmentRun --no-configuration-cache` and open
+  `http://localhost:8080/`. At the time this context was saved, that development server was running.
 - Next milestone: Web PBR shaders, expanded texture channels and lighting.
 
 ## Completed local Maven alpha milestone
