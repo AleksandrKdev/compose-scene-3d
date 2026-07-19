@@ -261,10 +261,11 @@ private class WebGlSurface(private val invalidate: () -> Unit) {
     fun place(x: Int, y: Int, width: Int, height: Int) {
         this.width = width.coerceAtLeast(1)
         this.height = height.coerceAtLeast(1)
-        canvas.style.left = "${x}px"
-        canvas.style.top = "${y}px"
-        canvas.style.width = "${this.width}px"
-        canvas.style.height = "${this.height}px"
+        val density = browserPixelRatio().coerceAtLeast(1.0)
+        canvas.style.left = "${x / density}px"
+        canvas.style.top = "${y / density}px"
+        canvas.style.width = "${this.width / density}px"
+        canvas.style.height = "${this.height / density}px"
         if (canvas.width != this.width || canvas.height != this.height) {
             canvas.width = this.width
             canvas.height = this.height
@@ -548,6 +549,9 @@ private external fun parseGlbData(bytes: Uint8Array): JsArray<JsGlbPrimitive>
 
 @JsFun("(canvas) => canvas.getContext('webgl2')")
 private external fun webGl2Context(canvas: HTMLCanvasElement): WebGLRenderingContext?
+
+@JsFun("() => window.devicePixelRatio || 1")
+private external fun browserPixelRatio(): Double
 
 @JsFun("(url, onLoad, onError) => { const image = new Image(); image.crossOrigin = 'anonymous'; image.onload = () => onLoad(image); image.onerror = () => onError(); image.src = url; }")
 private external fun loadImage(
