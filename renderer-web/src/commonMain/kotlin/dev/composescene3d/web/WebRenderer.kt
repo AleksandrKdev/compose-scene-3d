@@ -335,7 +335,9 @@ private class WebGlSurface(private val invalidate: () -> Unit) {
         loadImage(url, onLoad = { image ->
             val texture = requireNotNull(gl.createTexture())
             gl.bindTexture(WebGLRenderingContext.TEXTURE_2D, texture)
-            gl.pixelStorei(WebGLRenderingContext.UNPACK_FLIP_Y_WEBGL, 1)
+            // TextureSource UVs follow glTF's top-left origin. Browser image uploads already map
+            // the first decoded row to v=0, so flipping here corrupts atlased model textures.
+            gl.pixelStorei(WebGLRenderingContext.UNPACK_FLIP_Y_WEBGL, 0)
             gl.texImage2D(WebGLRenderingContext.TEXTURE_2D, 0, WebGLRenderingContext.RGBA,
                 WebGLRenderingContext.RGBA, WebGLRenderingContext.UNSIGNED_BYTE, image)
             gl.generateMipmap(WebGLRenderingContext.TEXTURE_2D)
