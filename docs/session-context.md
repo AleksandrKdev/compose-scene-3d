@@ -439,8 +439,12 @@ State: unavailable/offline
 - The Web directional shadow frustum now fits current world-space mesh bounds instead of using a
   fixed box around the camera target. Padding prevents clipping, the center snaps to shadow texels
   to reduce shimmer, and polygon offset protects the tighter depth range from self-shadow acne.
-- Next milestone: fewer Web GPU buffer uploads and immutable mesh caching, then broader glTF
-  coverage.
+- Web mesh batches now own persistent vertex/index buffer pairs. Each batch uploads once per render
+  and the main, directional-shadow and spot-shadow passes reuse those buffers; previously a fully
+  shadowed scene uploaded the same arrays three times. Surplus buffers are deleted when the batch
+  count shrinks and every remaining buffer is released by `close()`.
+- Next milestone: move camera projection into the Web vertex shader and skip unchanged geometry
+  uploads, then broader glTF coverage.
 
 ## Completed local Maven alpha milestone
 
@@ -510,7 +514,8 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Continue with fewer Web GPU buffer uploads and immutable mesh caching, then broader glTF coverage.
+Continue by moving camera projection into the Web vertex shader and skipping unchanged geometry
+uploads, then broaden glTF coverage.
 The user explicitly allowed breaking the old empty GroupNode API before alpha03. Do not expose
 backend types in public commonMain API.
 ```

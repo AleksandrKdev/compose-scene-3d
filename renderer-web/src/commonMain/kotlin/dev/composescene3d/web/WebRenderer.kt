@@ -289,8 +289,7 @@ private class WebGlSurface(
     private var shadowTargetSize = 0
     private var spotShadowTarget: WebShadowTarget? = null
     private var spotShadowTargetSize = 0
-    private val vertexBuffer: WebGLBuffer
-    private val indexBuffer: WebGLBuffer
+    private val meshBuffers = mutableListOf<WebMeshBuffers>()
     private val positionAttribute: Int
     private val worldPositionAttribute: Int
     private val normalAttribute: Int
@@ -379,8 +378,6 @@ private class WebGlSurface(
         }
         program = createProgram(VERTEX_SHADER, FRAGMENT_SHADER)
         shadowProgram = createProgram(SHADOW_VERTEX_SHADER, SHADOW_FRAGMENT_SHADER)
-        vertexBuffer = requireNotNull(gl.createBuffer())
-        indexBuffer = requireNotNull(gl.createBuffer())
         positionAttribute = gl.getAttribLocation(program, "aPosition")
         worldPositionAttribute = gl.getAttribLocation(program, "aWorldPosition")
         normalAttribute = gl.getAttribLocation(program, "aNormal")
@@ -475,16 +472,17 @@ private class WebGlSurface(
             nodes, camera, width.toFloat(), height.toFloat(),
             resolveModel = { node -> resolveModel(node) },
         )
+        val preparedMeshes = prepareMeshes(batches)
         val lights = nodes.webLights()
         val directionalProjection = lights.directional.shadow?.let { shadow ->
             fittedDirectionalShadowProjection(batches, camera.target, shadow.mapSize)
         } ?: directionalShadowProjection(camera.target)
         lights.directional.shadow?.let { shadow ->
-            renderShadowMap(batches, directionalProjection, shadow, spot = false)
+            renderShadowMap(preparedMeshes, directionalProjection, shadow, spot = false)
         }
         val shadowSpot = lights.spots.firstOrNull { it.shadow != null }
         shadowSpot?.shadow?.let { shadow ->
-            renderShadowMap(batches, spotShadowProjection(shadowSpot), shadow, spot = true)
+            renderShadowMap(preparedMeshes, spotShadowProjection(shadowSpot), shadow, spot = true)
         }
         gl.viewport(0, 0, canvas.width, canvas.height)
         gl.clearColor(background.red, background.green, background.blue, background.alpha)
@@ -531,9 +529,9 @@ private class WebGlSurface(
         }
         uploadPointLights(lights.points)
         uploadSpotLights(lights.spots)
-        batches.forEach { mesh ->
-            gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, vertexBuffer)
-            gl.bufferData(WebGLRenderingContext.ARRAY_BUFFER, mesh.vertices.toTypedArray(), WebGLRenderingContext.DYNAMIC_DRAW)
+        preparedMeshes.forEach { prepared ->
+            val mesh = prepared.mesh
+            gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, prepared.buffers.vertex)
             gl.enableVertexAttribArray(positionAttribute)
             gl.vertexAttribPointer(positionAttribute, 4, WebGLRenderingContext.FLOAT, false, 64, 0)
             gl.enableVertexAttribArray(worldPositionAttribute)
@@ -561,16 +559,17 @@ private class WebGlSurface(
             bindTexture(mesh.emissiveTexture, 3, useEmissiveTextureUniform, emissiveTextureUniform)
             bindTexture(mesh.ambientOcclusionTexture, 4,
                 useAmbientOcclusionTextureUniform, ambientOcclusionTextureUniform)
-            gl.bindBuffer(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER, indexBuffer)
-            gl.bufferData(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER, mesh.indices.toTypedArray(), WebGLRenderingContext.DYNAMIC_DRAW)
+            gl.bindBuffer(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER, prepared.buffers.index)
             gl.drawElements(WebGLRenderingContext.TRIANGLES, mesh.indices.size,
                 WebGLRenderingContext.UNSIGNED_INT, 0)
         }
     }
 
     fun close() {
-        gl.deleteBuffer(vertexBuffer)
-        gl.deleteBuffer(indexBuffer)
+        meshBuffers.forEach { buffers ->
+            gl.deleteBuffer(buffers.vertex)
+            gl.deleteBuffer(buffers.index)
+        }
         gl.deleteProgram(program)
         gl.deleteProgram(shadowProgram)
         shadowTarget?.let { deleteShadowTarget(gl, it) }
@@ -580,7 +579,7 @@ private class WebGlSurface(
     }
 
     private fun renderShadowMap(
-        batches: List<GpuMesh>,
+        batches: List<PreparedGpuMesh>,
         projection: ShadowBasis,
         shadow: ShadowMap3D,
         spot: Boolean,
@@ -594,21 +593,42 @@ private class WebGlSurface(
         uploadShadowBasis(program = true, projection)
         gl.enable(WebGLRenderingContext.POLYGON_OFFSET_FILL)
         gl.polygonOffset(SHADOW_POLYGON_OFFSET_FACTOR, SHADOW_POLYGON_OFFSET_UNITS)
-        batches.filter(GpuMesh::castShadows).forEach { mesh ->
-            gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, vertexBuffer)
-            gl.bufferData(WebGLRenderingContext.ARRAY_BUFFER,
-                mesh.vertices.toTypedArray(), WebGLRenderingContext.DYNAMIC_DRAW)
+        batches.filter { it.mesh.castShadows }.forEach { prepared ->
+            val mesh = prepared.mesh
+            gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, prepared.buffers.vertex)
             gl.enableVertexAttribArray(shadowWorldPositionAttribute)
             gl.vertexAttribPointer(shadowWorldPositionAttribute, 3,
                 WebGLRenderingContext.FLOAT, false, 64, 16)
-            gl.bindBuffer(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER, indexBuffer)
-            gl.bufferData(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER,
-                mesh.indices.toTypedArray(), WebGLRenderingContext.DYNAMIC_DRAW)
+            gl.bindBuffer(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER, prepared.buffers.index)
             gl.drawElements(WebGLRenderingContext.TRIANGLES, mesh.indices.size,
                 WebGLRenderingContext.UNSIGNED_INT, 0)
         }
         gl.disable(WebGLRenderingContext.POLYGON_OFFSET_FILL)
         gl.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, null)
+    }
+
+    private fun prepareMeshes(meshes: List<GpuMesh>): List<PreparedGpuMesh> {
+        while (meshBuffers.size < meshes.size) {
+            meshBuffers += WebMeshBuffers(
+                vertex = requireNotNull(gl.createBuffer()),
+                index = requireNotNull(gl.createBuffer()),
+            )
+        }
+        while (meshBuffers.size > meshes.size) {
+            val buffers = meshBuffers.removeAt(meshBuffers.lastIndex)
+            gl.deleteBuffer(buffers.vertex)
+            gl.deleteBuffer(buffers.index)
+        }
+        return meshes.mapIndexed { index, mesh ->
+            val buffers = meshBuffers[index]
+            gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, buffers.vertex)
+            gl.bufferData(WebGLRenderingContext.ARRAY_BUFFER,
+                mesh.vertices.toTypedArray(), WebGLRenderingContext.DYNAMIC_DRAW)
+            gl.bindBuffer(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER, buffers.index)
+            gl.bufferData(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER,
+                mesh.indices.toTypedArray(), WebGLRenderingContext.DYNAMIC_DRAW)
+            PreparedGpuMesh(mesh, buffers)
+        }
     }
 
     private fun ensureShadowTarget(requestedSize: Int, spot: Boolean): WebShadowTarget {
@@ -821,6 +841,16 @@ private data class GpuMesh(
     val ambientOcclusionStrength: Float,
     val castShadows: Boolean,
     val receiveShadows: Boolean,
+)
+
+private data class WebMeshBuffers(
+    val vertex: WebGLBuffer,
+    val index: WebGLBuffer,
+)
+
+private data class PreparedGpuMesh(
+    val mesh: GpuMesh,
+    val buffers: WebMeshBuffers,
 )
 
 private data class WebDirectionalLight(
