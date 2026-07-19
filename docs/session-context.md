@@ -191,7 +191,7 @@ Target: arm64-apple-ios18.5
 ** BUILD SUCCEEDED **
 ```
 
-## Next milestone
+## Remaining physical-device verification
 
 Harden the iOS integration:
 
@@ -287,12 +287,11 @@ State: unavailable/offline
 - Latest verification passed `scene-core`, `scene-compose` and `renderer-filament` JVM tests,
   Android debug APK assembly, Desktop JVM compilation, iOS simulator framework linkage, both iOS
   renderer compilation targets and `checkKotlinAbi`.
-- The explicitly blended transparent material is completed in the milestone below.
-- Next step: define a backend-neutral preprocessed cubemap/IBL source and loader. Filament KMP
-  does not currently provide a common HDR equirectangular-to-cubemap decoder, so raw HDR loading
-  must not be promised by the public API.
-- After materials and IBL are validated on Android, Desktop and iOS, begin the independent Web/Wasm
-  renderer behind the same `SceneRenderer` contract.
+- Transparent materials and preprocessed cubemap/IBL loading are completed in the milestones below.
+- Filament KMP does not provide a common HDR equirectangular-to-cubemap decoder, so raw HDR loading
+  is deliberately not promised by the public API.
+- Next implementation step is the independent Web/Wasm renderer behind the same `SceneRenderer`
+  contract.
 
 ## Transparent material milestone (2026-07-19)
 
@@ -304,8 +303,25 @@ State: unavailable/offline
 - The adapter converts sRGB to linear-sRGB and premultiplies RGB by alpha as required by Filament.
 - Android, Desktop and iOS samples contain a translucent blue sphere. Desktop runtime launch loads
   the material without an engine error or crash.
-- Next milestone is backend-neutral preprocessed cubemap/IBL loading; raw HDR conversion remains
-  deliberately outside the runtime API.
+- The following environment milestone completes backend-neutral preprocessed cubemap/IBL loading;
+  raw HDR conversion remains deliberately outside the runtime API.
+
+## Environment lighting milestone (2026-07-19)
+
+- Added validated backend-neutral `EnvironmentMap` with reflection and optional skybox
+  `TextureSource`s, IBL/skybox intensity and Y rotation.
+- Added a binary-compatible `FilamentViewport(renderer, environment, ...)` overload; the released
+  viewport signature remains unchanged.
+- Filament asynchronously loads KTX1 cubemaps through the existing `TextureByteLoader`, extracts
+  third-order spherical harmonics, drives diffuse irradiance/specular reflections, and optionally
+  displays a separate skybox cubemap.
+- Native textures are disposed with composition; invalid resources use the existing texture error
+  callback.
+- Added 64px CC0 Lightroom sample cubemaps generated with official Filament 1.72 `cmgen` to Android,
+  Desktop and iOS samples, plus provenance and reproduction instructions.
+- Android APK, Desktop, iOS simulator framework and JVM tests compile successfully. Desktop runtime
+  launch decoded the KTX assets and ran without an engine error or crash.
+- Next major milestone: independent Web/Wasm backend behind the shared `SceneRenderer` contract.
 
 ## Completed local Maven alpha milestone
 
@@ -375,6 +391,7 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Start with the preprocessed cubemap/IBL milestone described in the current checkpoint. Preserve the
-released alpha02 API where practical and do not expose Filament types in public commonMain API.
+Start with the independent Web/Wasm renderer milestone described in the current checkpoint.
+Preserve the released alpha02 API where practical and do not expose backend types in public
+commonMain API.
 ```

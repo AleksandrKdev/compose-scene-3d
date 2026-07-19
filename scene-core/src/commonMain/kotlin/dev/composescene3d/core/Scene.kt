@@ -40,6 +40,24 @@ fun TextureSource.assetKey(): TextureAssetKey = when (this) {
     is TextureSource.Bytes -> TextureAssetKey("bytes:$cacheKey")
 }
 
+data class EnvironmentMap(
+    val reflections: TextureSource,
+    val skybox: TextureSource? = null,
+    val intensity: Float = 30_000f,
+    val skyboxIntensity: Float = 1f,
+    val rotationYRadians: Float = 0f,
+) {
+    init {
+        require(intensity >= 0f && intensity.isFinite()) {
+            "Environment intensity must be finite and non-negative"
+        }
+        require(skyboxIntensity >= 0f && skyboxIntensity.isFinite()) {
+            "Skybox intensity must be finite and non-negative"
+        }
+        require(rotationYRadians.isFinite()) { "Environment rotation must be finite" }
+    }
+}
+
 @JvmInline
 value class ModelAssetKey(val value: String)
 

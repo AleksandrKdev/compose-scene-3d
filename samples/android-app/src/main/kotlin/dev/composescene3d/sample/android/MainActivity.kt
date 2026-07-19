@@ -26,6 +26,8 @@ import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.TransparentMaterial
+import dev.composescene3d.core.EnvironmentMap
+import dev.composescene3d.core.TextureSource
 import dev.composescene3d.filament.FilamentRenderer
 import dev.composescene3d.filament.FilamentViewport
 
@@ -47,12 +49,26 @@ private fun Sample() {
     val duckBytes = remember {
         resources.openRawResource(R.raw.duck).use { it.readBytes() }
     }
+    val environment = remember {
+        EnvironmentMap(
+            reflections = TextureSource.Bytes(
+                resources.openRawResource(R.raw.lightroom_ibl).use { it.readBytes() },
+                cacheKey = "lightroom-ibl",
+            ),
+            skybox = TextureSource.Bytes(
+                resources.openRawResource(R.raw.lightroom_skybox).use { it.readBytes() },
+                cacheKey = "lightroom-skybox",
+            ),
+            intensity = 18_000f,
+        )
+    }
     var moved by remember { mutableStateOf(false) }
     var selected by remember { mutableStateOf<String?>(null) }
 
     Box(Modifier.fillMaxSize()) {
         FilamentViewport(
             renderer = renderer,
+            environment = environment,
             cameraState = camera,
             onNodePicked = { selected = it?.value },
         )

@@ -367,6 +367,31 @@ final class dev.composescene3d.core/EmissiveMaterial : dev.composescene3d.core/M
     final fun toString(): kotlin/String // dev.composescene3d.core/EmissiveMaterial.toString|toString(){}[0]
 }
 
+final class dev.composescene3d.core/EnvironmentMap { // dev.composescene3d.core/EnvironmentMap|null[0]
+    constructor <init>(dev.composescene3d.core/TextureSource, dev.composescene3d.core/TextureSource? = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ...) // dev.composescene3d.core/EnvironmentMap.<init>|<init>(dev.composescene3d.core.TextureSource;dev.composescene3d.core.TextureSource?;kotlin.Float;kotlin.Float;kotlin.Float){}[0]
+
+    final val intensity // dev.composescene3d.core/EnvironmentMap.intensity|{}intensity[0]
+        final fun <get-intensity>(): kotlin/Float // dev.composescene3d.core/EnvironmentMap.intensity.<get-intensity>|<get-intensity>(){}[0]
+    final val reflections // dev.composescene3d.core/EnvironmentMap.reflections|{}reflections[0]
+        final fun <get-reflections>(): dev.composescene3d.core/TextureSource // dev.composescene3d.core/EnvironmentMap.reflections.<get-reflections>|<get-reflections>(){}[0]
+    final val rotationYRadians // dev.composescene3d.core/EnvironmentMap.rotationYRadians|{}rotationYRadians[0]
+        final fun <get-rotationYRadians>(): kotlin/Float // dev.composescene3d.core/EnvironmentMap.rotationYRadians.<get-rotationYRadians>|<get-rotationYRadians>(){}[0]
+    final val skybox // dev.composescene3d.core/EnvironmentMap.skybox|{}skybox[0]
+        final fun <get-skybox>(): dev.composescene3d.core/TextureSource? // dev.composescene3d.core/EnvironmentMap.skybox.<get-skybox>|<get-skybox>(){}[0]
+    final val skyboxIntensity // dev.composescene3d.core/EnvironmentMap.skyboxIntensity|{}skyboxIntensity[0]
+        final fun <get-skyboxIntensity>(): kotlin/Float // dev.composescene3d.core/EnvironmentMap.skyboxIntensity.<get-skyboxIntensity>|<get-skyboxIntensity>(){}[0]
+
+    final fun component1(): dev.composescene3d.core/TextureSource // dev.composescene3d.core/EnvironmentMap.component1|component1(){}[0]
+    final fun component2(): dev.composescene3d.core/TextureSource? // dev.composescene3d.core/EnvironmentMap.component2|component2(){}[0]
+    final fun component3(): kotlin/Float // dev.composescene3d.core/EnvironmentMap.component3|component3(){}[0]
+    final fun component4(): kotlin/Float // dev.composescene3d.core/EnvironmentMap.component4|component4(){}[0]
+    final fun component5(): kotlin/Float // dev.composescene3d.core/EnvironmentMap.component5|component5(){}[0]
+    final fun copy(dev.composescene3d.core/TextureSource = ..., dev.composescene3d.core/TextureSource? = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ...): dev.composescene3d.core/EnvironmentMap // dev.composescene3d.core/EnvironmentMap.copy|copy(dev.composescene3d.core.TextureSource;dev.composescene3d.core.TextureSource?;kotlin.Float;kotlin.Float;kotlin.Float){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/EnvironmentMap.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/EnvironmentMap.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.composescene3d.core/EnvironmentMap.toString|toString(){}[0]
+}
+
 final class dev.composescene3d.core/GroupNode : dev.composescene3d.core/SceneNode { // dev.composescene3d.core/GroupNode|null[0]
     constructor <init>(dev.composescene3d.core/NodeKey, dev.composescene3d.core/Transform = ...) // dev.composescene3d.core/GroupNode.<init>|<init>(dev.composescene3d.core.NodeKey;dev.composescene3d.core.Transform){}[0]
 

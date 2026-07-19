@@ -12,6 +12,7 @@ public final class dev/composescene3d/filament/FilamentRenderer : dev/composesce
 
 public final class dev/composescene3d/filament/FilamentRendererKt {
 	public static final fun FilamentViewport (Ldev/composescene3d/filament/FilamentRenderer;Landroidx/compose/ui/Modifier;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/compose/SceneCameraState;ZFZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun FilamentViewport (Ldev/composescene3d/filament/FilamentRenderer;Ldev/composescene3d/core/EnvironmentMap;Landroidx/compose/ui/Modifier;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/compose/SceneCameraState;ZFZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public abstract interface class dev/composescene3d/filament/ModelByteLoader {

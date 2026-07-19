@@ -102,10 +102,27 @@ plane(
 `TextureSource.Bytes` works with the default renderer. Resource and URL sources use an
 application-provided `TextureByteLoader`, following the same pattern as `ModelByteLoader`.
 
+Preprocessed KTX1 cubemaps provide specular reflections, diffuse spherical-harmonic irradiance and
+an optional visible skybox:
+
+```kotlin
+val environment = EnvironmentMap(
+    reflections = TextureSource.Resource("files/studio_ibl.ktx"),
+    skybox = TextureSource.Resource("files/studio_skybox.ktx"),
+    intensity = 18_000f,
+)
+
+FilamentViewport(renderer = renderer, environment = environment)
+```
+
+Generate both files offline with Filament `cmgen -f ktx -x output environment.hdr`. Runtime HDR
+conversion is intentionally excluded: preprocessing produces smaller assets and deterministic
+results on Android, Desktop and iOS.
+
 ## Roadmap
 
-1. Add preprocessed cubemap environment lighting.
-2. Implement an independent Web/Wasm renderer behind the same scene contract.
+1. Implement an independent Web/Wasm renderer behind the same scene contract.
+2. Add normal and metallic-roughness texture channels based on cross-backend capability results.
 3. Stabilize the public API based on cross-backend experience.
 
 ## Running the samples

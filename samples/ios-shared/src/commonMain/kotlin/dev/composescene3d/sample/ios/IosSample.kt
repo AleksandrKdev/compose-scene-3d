@@ -21,11 +21,14 @@ import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.TransparentMaterial
+import dev.composescene3d.core.EnvironmentMap
+import dev.composescene3d.core.TextureSource
 import dev.composescene3d.core.Transform
 import dev.composescene3d.core.Vec3
 import dev.composescene3d.filament.FilamentRenderer
 import dev.composescene3d.filament.FilamentViewport
 import dev.composescene3d.filament.ModelByteLoader
+import dev.composescene3d.filament.TextureByteLoader
 import dev.composescene3d.sample.ios.resources.Res
 
 @Composable
@@ -36,6 +39,13 @@ fun IosSample(
 ) {
     val renderer = remember {
         FilamentRenderer(
+            textureByteLoader = TextureByteLoader { source ->
+                when (source) {
+                    is TextureSource.Resource -> Res.readBytes(source.path)
+                    is TextureSource.Bytes -> source.value
+                    is TextureSource.Url -> error("URL loading is not enabled in the iOS sample")
+                }
+            },
             modelByteLoader = ModelByteLoader { source ->
                 when (source) {
                     is ModelSource.Resource -> Res.readBytes(source.path)
@@ -46,11 +56,19 @@ fun IosSample(
         )
     }
     val controller = rememberSceneController(renderer)
+    val environment = remember {
+        EnvironmentMap(
+            reflections = TextureSource.Resource("files/lightroom_ibl.ktx"),
+            skybox = TextureSource.Resource("files/lightroom_skybox.ktx"),
+            intensity = 18_000f,
+        )
+    }
     var selected by remember { mutableStateOf<String?>(null) }
 
     Box(Modifier.fillMaxSize()) {
         FilamentViewport(
             renderer = renderer,
+            environment = environment,
             cameraState = cameraState,
             zoomSpeed = 0.12f,
             onNodePicked = { selected = it?.value },

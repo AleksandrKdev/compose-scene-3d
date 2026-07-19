@@ -5,6 +5,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.key
@@ -40,6 +43,7 @@ import dev.composescene3d.core.TextureSource
 import dev.composescene3d.core.TexturedMaterial
 import dev.composescene3d.core.TransparentMaterial
 import dev.composescene3d.core.EmissiveMaterial
+import dev.composescene3d.core.EnvironmentMap
 import dev.composescene3d.core.UnlitMaterial
 import dev.composescene3d.core.assetKey
 import dev.composescene3d.core.Vec3
@@ -47,6 +51,7 @@ import dev.composescene3d.filament.resources.Res
 import io.github.erkko68.filament.compose.FilamentSceneView
 import io.github.erkko68.filament.compose.FilamentSceneScope
 import io.github.erkko68.filament.compose.rememberFilamentViewState
+import io.github.erkko68.filament.compose.rememberFilamentEngine
 import io.github.erkko68.filament.compose.pickOnTap
 import io.github.erkko68.filament.compose.scene.Color
 import io.github.erkko68.filament.compose.scene.Direction
@@ -59,6 +64,8 @@ import io.github.erkko68.filament.compose.scene.rememberGltfAsset
 import io.github.erkko68.filament.compose.scene.SkyboxSource
 import io.github.erkko68.filament.compose.scene.rememberSkyboxState
 import io.github.erkko68.filament.compose.scene.rememberCameraState
+import io.github.erkko68.filament.compose.scene.rememberIndirectLightState
+import io.github.erkko68.filament.compose.scene.SphericalHarmonics
 import io.github.erkko68.filament.compose.scene.Projection
 import io.github.erkko68.filament.compose.scene.primitives.Cube
 import io.github.erkko68.filament.compose.scene.primitives.Cylinder
@@ -74,9 +81,14 @@ import io.github.erkko68.filament.compose.scene.rememberTexturedMaterialInstance
 import io.github.erkko68.filament.compose.scene.SpotCone
 import io.github.erkko68.filament.compose.scene.SpotLight
 import io.github.erkko68.filament.utils.Quaternion
+import io.github.erkko68.filament.utils.KTX1Loader
+import io.github.erkko68.filament.Engine
+import io.github.erkko68.filament.Texture
 import io.github.erkko68.filament.Renderer
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlin.math.cos
+import kotlin.math.sin
 
 fun interface ModelByteLoader {
     suspend fun load(source: ModelSource): ByteArray
@@ -207,7 +219,40 @@ fun FilamentViewport(
     zoomSpeed: Float = 0.12f,
     pickingEnabled: Boolean = true,
     onNodePicked: (NodeKey?) -> Unit = {},
+) = FilamentViewportContent(
+    renderer, modifier, backgroundColor, null, cameraState, orbitEnabled, zoomSpeed,
+    pickingEnabled, onNodePicked,
+)
+
+@Composable
+fun FilamentViewport(
+    renderer: FilamentRenderer,
+    environment: EnvironmentMap,
+    modifier: Modifier = Modifier.fillMaxSize(),
+    backgroundColor: Vec3 = Vec3(0.04f, 0.05f, 0.07f),
+    cameraState: SceneCameraState = rememberSceneCameraState(),
+    orbitEnabled: Boolean = true,
+    zoomSpeed: Float = 0.12f,
+    pickingEnabled: Boolean = true,
+    onNodePicked: (NodeKey?) -> Unit = {},
+) = FilamentViewportContent(
+    renderer, modifier, backgroundColor, environment, cameraState, orbitEnabled, zoomSpeed,
+    pickingEnabled, onNodePicked,
+)
+
+@Composable
+private fun FilamentViewportContent(
+    renderer: FilamentRenderer,
+    modifier: Modifier,
+    backgroundColor: Vec3,
+    environment: EnvironmentMap?,
+    cameraState: SceneCameraState,
+    orbitEnabled: Boolean,
+    zoomSpeed: Float,
+    pickingEnabled: Boolean,
+    onNodePicked: (NodeKey?) -> Unit,
 ) {
+    val engine = rememberFilamentEngine()
     val viewState = rememberFilamentViewState()
     val filamentCameraState = rememberCameraState(
         eye = Position(cameraState.eye.x, cameraState.eye.y, cameraState.eye.z),
@@ -222,6 +267,13 @@ fun FilamentViewport(
             Color(backgroundColor.x, backgroundColor.y, backgroundColor.z)
         )
     )
+    val environmentState = rememberEnvironmentState(renderer, engine, environment)
+
+    SideEffect {
+        skyboxState.source = environmentState.skybox?.let(SkyboxSource::Cubemap)
+            ?: SkyboxSource.Color(Color(backgroundColor.x, backgroundColor.y, backgroundColor.z))
+        skyboxState.intensity = environment?.skyboxIntensity ?: 1f
+    }
     val filamentRenderer = viewState.renderer
 
     LaunchedEffect(cameraState) {
@@ -286,8 +338,10 @@ fun FilamentViewport(
     Box(containerModifier) {
         FilamentSceneView(
             modifier = surfaceModifier,
+            engine = engine,
             viewState = viewState,
             skyboxState = skyboxState,
+            indirectLightState = environmentState.indirectLight,
             cameraState = filamentCameraState,
         ) {
             val modelGroups = modelsByAssetKey(renderer.nodes)
@@ -313,6 +367,91 @@ fun FilamentViewport(
             }
         }
     }
+}
+
+private data class EnvironmentState(
+    val skybox: Texture?,
+    val indirectLight: io.github.erkko68.filament.compose.scene.IndirectLightState?,
+)
+
+@Composable
+private fun rememberEnvironmentState(
+    renderer: FilamentRenderer,
+    engine: Engine,
+    environment: EnvironmentMap?,
+): EnvironmentState {
+    if (environment == null) return EnvironmentState(null, null)
+
+    val reflectionsBytes = rememberTextureBytes(renderer, environment.reflections)
+    val skyboxBytes = environment.skybox?.let { rememberTextureBytes(renderer, it) }
+    val reflections = rememberKtxCubemap(renderer, engine, environment.reflections, reflectionsBytes)
+    val skybox = environment.skybox?.let {
+        rememberKtxCubemap(renderer, engine, it, skyboxBytes)
+    }
+    val coefficients = remember(reflectionsBytes) {
+        reflectionsBytes?.let(KTX1Loader::getSphericalHarmonics)
+    }
+    val indirectLight = rememberIndirectLightState()
+    val rotation = remember(environment.rotationYRadians) {
+        yRotationMatrix(environment.rotationYRadians)
+    }
+
+    SideEffect {
+        indirectLight.reflections = reflections
+        indirectLight.irradianceSh = coefficients?.let { SphericalHarmonics(3, it) }
+        indirectLight.intensity = environment.intensity
+        indirectLight.rotation = rotation
+    }
+    return EnvironmentState(skybox, indirectLight)
+}
+
+@Composable
+private fun rememberTextureBytes(
+    renderer: FilamentRenderer,
+    source: TextureSource,
+): ByteArray? {
+    val bytes by produceState<ByteArray?>(null, source.assetKey()) {
+        value = try {
+            renderer.textureByteLoader.load(source)
+        } catch (error: Throwable) {
+            renderer.onTextureError(source, error)
+            null
+        }
+    }
+    return bytes
+}
+
+@Composable
+private fun rememberKtxCubemap(
+    renderer: FilamentRenderer,
+    engine: Engine,
+    source: TextureSource,
+    bytes: ByteArray?,
+): Texture? {
+    val texture = remember(engine, bytes) {
+        bytes?.let {
+            KTX1Loader.createTexture(engine, it, KTX1Loader.Options().apply { srgb = false })
+        }
+    }
+    LaunchedEffect(bytes, texture) {
+        if (bytes != null && texture == null) {
+            renderer.onTextureError(source, IllegalArgumentException("Invalid KTX1 cubemap"))
+        }
+    }
+    DisposableEffect(engine, texture) {
+        onDispose { texture?.let(engine::destroyTexture) }
+    }
+    return texture
+}
+
+private fun yRotationMatrix(radians: Float): FloatArray {
+    val cosine = cos(radians)
+    val sine = sin(radians)
+    return floatArrayOf(
+        cosine, 0f, -sine,
+        0f, 1f, 0f,
+        sine, 0f, cosine,
+    )
 }
 
 internal fun modelsByAssetKey(nodes: Collection<SceneNode>): Map<ModelAssetKey, List<ModelNode>> =

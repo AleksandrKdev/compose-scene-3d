@@ -64,6 +64,19 @@ class PrimitiveTest {
     }
 
     @Test
+    fun validatesEnvironmentConfiguration() {
+        val source = TextureSource.Resource("files/studio_ibl.ktx")
+
+        assertFailsWith<IllegalArgumentException> {
+            EnvironmentMap(source, intensity = -1f)
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EnvironmentMap(source, rotationYRadians = Float.NaN)
+        }
+        assertEquals(source, EnvironmentMap(source).reflections)
+    }
+
+    @Test
     fun validatesPrimitiveGeometry() {
         assertFailsWith<IllegalArgumentException> { SphereNode(NodeKey("sphere"), radius = 0f) }
         assertFailsWith<IllegalArgumentException> { PlaneNode(NodeKey("plane"), depth = 0f) }
