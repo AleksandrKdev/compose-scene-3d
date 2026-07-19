@@ -387,7 +387,12 @@ State: unavailable/offline
   transforms and shared camera gestures, and deliberately reports GLB/textures/PBR/shadows as
   unsupported. The browser entry point explicitly loads `web-app.js`, and a headless Chrome
   runtime screenshot verified the rendered cube, sphere and plane.
-- Next milestone: Web texture loading and glTF/GLB support, followed by Web PBR lighting.
+- Web base-color texture loading is complete for `TextureSource.Resource`, `Url` and `Bytes`.
+  The renderer submits one GPU batch per mesh, includes UVs in the interleaved vertex buffer,
+  caches WebGL textures by portable asset key, generates mipmaps and invalidates Compose after
+  asynchronous browser image decoding. A checker-textured plane was verified in headless Chrome.
+- Next milestone: parse Web glTF/GLB into these textured GPU batches, then implement expanded PBR
+  texture channels and lighting.
 
 ## Completed local Maven alpha milestone
 
@@ -457,7 +462,7 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Continue with Web texture and glTF/GLB loading, then add Web PBR lighting.
+Continue with Web glTF/GLB loading on top of the textured GPU batches, then add Web PBR lighting.
 The user explicitly allowed breaking the old empty GroupNode API before alpha03. Do not expose
 backend types in public commonMain API.
 ```

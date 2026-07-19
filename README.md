@@ -28,8 +28,8 @@ Source repository: [AleksandrKdev/compose-scene-3d](https://github.com/Aleksandr
   primitives use backend-neutral PBR material parameters.
 - `renderer-web`: an independent WebGL2 Wasm renderer for primitives, indexed custom meshes,
   nested transforms and the shared orbit/pan/zoom camera. It uses GPU vertex/index buffers and a
-  depth buffer; GLB, textures, PBR shaders and shadows remain future work and are reported as
-  unsupported capabilities.
+  depth buffer. Base-color textures load asynchronously from resources, URLs or encoded bytes and
+  are cached by `TextureAssetKey`; GLB, PBR shaders and shadows remain future work.
 - `renderer-testkit`: an internal backend-neutral conformance harness for retained commands,
   lifecycle behavior and capability declarations. New renderers must pass the same contract.
 - `samples/android-app`, `samples/desktop-app`, `samples/ios-app` and `samples/web-app`:
@@ -150,8 +150,13 @@ Metallic-roughness maps follow the glTF convention: roughness is read from the g
 metallic from blue. Albedo and emissive maps decode as sRGB; normal, metallic-roughness and AO maps
 remain linear data. Missing optional maps do not consume placeholder application assets.
 
-`TextureSource.Bytes` works with the default renderer. Resource and URL sources use an
-application-provided `TextureByteLoader`, following the same pattern as `ModelByteLoader`.
+The WebGL2 backend currently consumes `baseColorTexture` and mesh UV coordinates. It supports all
+three `TextureSource` variants, generates mipmaps after browser image decoding, and redraws the
+viewport when asynchronous loading completes. Normal, metallic-roughness, emissive and AO maps
+remain implemented only by the Filament backend until the Web PBR shader milestone.
+
+For Filament, `TextureSource.Bytes` works with the default renderer. Resource and URL sources use
+an application-provided `TextureByteLoader`, following the same pattern as `ModelByteLoader`.
 
 Preprocessed KTX1 cubemaps provide specular reflections, diffuse spherical-harmonic irradiance and
 an optional visible skybox:
@@ -206,8 +211,8 @@ provenance is unknown.
 
 ## Roadmap
 
-1. Add Web texture loading and glTF/GLB support.
-2. Add Web PBR shaders and lighting.
+1. Add Web glTF/GLB loading on top of the new textured mesh batches.
+2. Add Web PBR shaders, expanded texture channels and lighting.
 3. Stabilize the public API based on cross-backend experience.
 
 ## Running the samples

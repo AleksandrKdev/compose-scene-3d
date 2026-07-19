@@ -38,6 +38,9 @@ import dev.composescene3d.core.SceneRenderer
 import dev.composescene3d.core.SphereNode
 import dev.composescene3d.core.Transform
 import dev.composescene3d.core.TransparentMaterial
+import dev.composescene3d.core.TexturedMaterial
+import dev.composescene3d.core.TextureSource
+import dev.composescene3d.core.assetKey
 import dev.composescene3d.core.UnlitMaterial
 import dev.composescene3d.core.Vec3
 import kotlin.math.PI
@@ -49,12 +52,15 @@ import kotlin.js.unsafeCast
 import kotlinx.browser.document
 import org.khronos.webgl.Float32Array
 import org.khronos.webgl.Uint32Array
+import org.khronos.webgl.Uint8Array
 import org.khronos.webgl.WebGLBuffer
 import org.khronos.webgl.WebGLProgram
 import org.khronos.webgl.WebGLRenderingContext
 import org.khronos.webgl.WebGLShader
+import org.khronos.webgl.WebGLTexture
 import org.khronos.webgl.set
 import org.w3c.dom.HTMLCanvasElement
+import org.w3c.dom.HTMLImageElement
 
 /**
  * Browser renderer with no Filament dependency. It uses WebGL2 while retaining the browser canvas
@@ -93,7 +99,8 @@ fun WebViewport(
     zoomSpeed: Float = 0.12f,
 ) {
     var viewportHeight by remember { mutableIntStateOf(1) }
-    val gpuSurface = remember { WebGlSurface() }
+    var textureVersion by remember { mutableIntStateOf(0) }
+    val gpuSurface = remember { WebGlSurface { textureVersion++ } }
     DisposableEffect(gpuSurface) { onDispose(gpuSurface::close) }
     var surface = modifier
         .onSizeChanged { viewportHeight = it.height.coerceAtLeast(1) }
@@ -108,6 +115,7 @@ fun WebViewport(
         surface = surface.sceneCameraGestures(cameraState, { viewportHeight }, zoomSpeed = zoomSpeed)
     }
     Canvas(surface) {
+        textureVersion
         gpuSurface.render(renderer.nodes.values, cameraState, backgroundColor)
     }
 }
@@ -116,13 +124,15 @@ private data class MeshData(
     val positions: List<Vec3>,
     val indices: List<Int>,
     val normals: List<Vec3>,
+    val uvs: FloatArray?,
     val material: Material3D,
 )
 
 private fun SceneNode.toMesh(): MeshData? = when (this) {
     is BoxNode -> boxMesh(size, UnlitMaterial(Color3D(color.x, color.y, color.z)))
     is MeshNode -> MeshData(
-        geometry.positions.toVec3List(), geometry.indices.toList(), geometry.normals.toVec3List(), material,
+        geometry.positions.toVec3List(), geometry.indices.toList(), geometry.normals.toVec3List(),
+        geometry.uvs, material,
     )
     is PlaneNode -> planeMesh(width, depth, material)
     is SphereNode -> sphereMesh(radius, rings, segments, material)
@@ -137,13 +147,14 @@ private fun boxMesh(size: Vec3, material: Material3D): MeshData {
     val i = listOf(0,2,1,0,3,2, 4,5,6,4,6,7, 0,1,5,0,5,4,
         3,7,6,3,6,2, 1,2,6,1,6,5, 0,4,7,0,7,3)
     val n = p.map(Vec3::normalized)
-    return MeshData(p, i, n, material)
+    return MeshData(p, i, n, null, material)
 }
 
 private fun planeMesh(width: Float, depth: Float, material: Material3D) = MeshData(
     listOf(Vec3(-width/2,0f,-depth/2), Vec3(width/2,0f,-depth/2),
         Vec3(width/2,0f,depth/2), Vec3(-width/2,0f,depth/2)),
-    listOf(0,2,1,0,3,2), List(4) { Vec3(0f,1f,0f) }, material,
+    listOf(0,2,1,0,3,2), List(4) { Vec3(0f,1f,0f) },
+    floatArrayOf(0f,0f, 1f,0f, 1f,1f, 0f,1f), material,
 )
 
 private fun sphereMesh(radius: Float, rings: Int, segments: Int, material: Material3D): MeshData {
@@ -160,7 +171,12 @@ private fun sphereMesh(radius: Float, rings: Int, segments: Int, material: Mater
         val a = ring * (segments + 1) + segment; val b = a + segments + 1
         i += listOf(a,b,a+1, a+1,b,b+1)
     }
-    return MeshData(p, i, p.map { it.normalized() }, material)
+    val uvs = FloatArray(p.size * 2)
+    for (ring in 0..rings) for (segment in 0..segments) {
+        val index = ring * (segments + 1) + segment
+        uvs[index*2] = segment.toFloat()/segments; uvs[index*2+1] = 1f-ring.toFloat()/rings
+    }
+    return MeshData(p, i, p.map { it.normalized() }, uvs, material)
 }
 
 private fun cylinderMesh(radius: Float, height: Float, segments: Int, material: Material3D): MeshData {
@@ -171,7 +187,12 @@ private fun cylinderMesh(radius: Float, height: Float, segments: Int, material: 
     }
     val i = mutableListOf<Int>()
     for (s in 0 until segments) { val a=s; val b=s+segments+1; i += listOf(a,b,a+1,a+1,b,b+1) }
-    return MeshData(p, i, n, material)
+    val uvs = FloatArray(p.size * 2)
+    for (row in 0..1) for (s in 0..segments) {
+        val index = row * (segments + 1) + s
+        uvs[index*2] = s.toFloat()/segments; uvs[index*2+1] = row.toFloat()
+    }
+    return MeshData(p, i, n, uvs, material)
 }
 
 private fun FloatArray.toVec3List() = asList().chunked(3).map { Vec3(it[0], it[1], it[2]) }
@@ -199,7 +220,7 @@ private fun Vec3.dot(v: Vec3)=x*v.x+y*v.y+z*v.z
 private fun Vec3.cross(v: Vec3)=Vec3(y*v.z-z*v.y,z*v.x-x*v.z,x*v.y-y*v.x)
 private fun Vec3.normalized(): Vec3 { val l=sqrt(dot(this)); return if(l==0f) Vec3.Zero else this*(1f/l) }
 
-private class WebGlSurface {
+private class WebGlSurface(private val invalidate: () -> Unit) {
     private val canvas = document.createElement("canvas").unsafeCast<HTMLCanvasElement>()
     private val gl: WebGLRenderingContext
     private val program: WebGLProgram
@@ -207,6 +228,10 @@ private class WebGlSurface {
     private val indexBuffer: WebGLBuffer
     private val positionAttribute: Int
     private val colorAttribute: Int
+    private val uvAttribute: Int
+    private val useTextureUniform: org.khronos.webgl.WebGLUniformLocation?
+    private val textureCache = mutableMapOf<String, WebGLTexture>()
+    private val loadingTextures = mutableSetOf<String>()
     private var width = 1
     private var height = 1
 
@@ -221,6 +246,8 @@ private class WebGlSurface {
         indexBuffer = requireNotNull(gl.createBuffer())
         positionAttribute = gl.getAttribLocation(program, "aPosition")
         colorAttribute = gl.getAttribLocation(program, "aColor")
+        uvAttribute = gl.getAttribLocation(program, "aUv")
+        useTextureUniform = gl.getUniformLocation(program, "uUseTexture")
         gl.enable(WebGLRenderingContext.DEPTH_TEST)
         gl.depthFunc(WebGLRenderingContext.LEQUAL)
     }
@@ -239,32 +266,79 @@ private class WebGlSurface {
     }
 
     fun render(nodes: Collection<SceneNode>, camera: SceneCameraState, background: Color3D) {
-        val mesh = buildGpuMesh(nodes, camera, width.toFloat(), height.toFloat())
+        val batches = buildGpuBatches(nodes, camera, width.toFloat(), height.toFloat())
         gl.viewport(0, 0, canvas.width, canvas.height)
         gl.clearColor(background.red, background.green, background.blue, background.alpha)
         gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT or WebGLRenderingContext.DEPTH_BUFFER_BIT)
-        if (mesh.indices.isEmpty()) return
+        if (batches.isEmpty()) return
 
         gl.useProgram(program)
-        gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, vertexBuffer)
-        gl.bufferData(WebGLRenderingContext.ARRAY_BUFFER, mesh.vertices.toTypedArray(), WebGLRenderingContext.DYNAMIC_DRAW)
-        gl.enableVertexAttribArray(positionAttribute)
-        gl.vertexAttribPointer(positionAttribute, 3, WebGLRenderingContext.FLOAT, false, 28, 0)
-        gl.enableVertexAttribArray(colorAttribute)
-        gl.vertexAttribPointer(colorAttribute, 4, WebGLRenderingContext.FLOAT, false, 28, 12)
-        gl.bindBuffer(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER, indexBuffer)
-        gl.bufferData(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER, mesh.indices.toTypedArray(), WebGLRenderingContext.DYNAMIC_DRAW)
-        gl.drawElements(
-            WebGLRenderingContext.TRIANGLES, mesh.indices.size,
-            WebGLRenderingContext.UNSIGNED_INT, 0,
-        )
+        batches.forEach { mesh ->
+            gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, vertexBuffer)
+            gl.bufferData(WebGLRenderingContext.ARRAY_BUFFER, mesh.vertices.toTypedArray(), WebGLRenderingContext.DYNAMIC_DRAW)
+            gl.enableVertexAttribArray(positionAttribute)
+            gl.vertexAttribPointer(positionAttribute, 3, WebGLRenderingContext.FLOAT, false, 36, 0)
+            gl.enableVertexAttribArray(colorAttribute)
+            gl.vertexAttribPointer(colorAttribute, 4, WebGLRenderingContext.FLOAT, false, 36, 12)
+            gl.enableVertexAttribArray(uvAttribute)
+            gl.vertexAttribPointer(uvAttribute, 2, WebGLRenderingContext.FLOAT, false, 36, 28)
+            bindTexture(mesh.texture)
+            gl.bindBuffer(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER, indexBuffer)
+            gl.bufferData(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER, mesh.indices.toTypedArray(), WebGLRenderingContext.DYNAMIC_DRAW)
+            gl.drawElements(WebGLRenderingContext.TRIANGLES, mesh.indices.size,
+                WebGLRenderingContext.UNSIGNED_INT, 0)
+        }
     }
 
     fun close() {
         gl.deleteBuffer(vertexBuffer)
         gl.deleteBuffer(indexBuffer)
         gl.deleteProgram(program)
+        textureCache.values.forEach(gl::deleteTexture)
         canvas.remove()
+    }
+
+    private fun bindTexture(source: TextureSource?) {
+        if (source == null) {
+            gl.uniform1i(useTextureUniform, 0)
+            return
+        }
+        val key = source.assetKey().value
+        val texture = textureCache[key]
+        if (texture == null) {
+            requestTexture(key, source)
+            gl.uniform1i(useTextureUniform, 0)
+            return
+        }
+        gl.activeTexture(WebGLRenderingContext.TEXTURE0)
+        gl.bindTexture(WebGLRenderingContext.TEXTURE_2D, texture)
+        gl.uniform1i(useTextureUniform, 1)
+    }
+
+    private fun requestTexture(key: String, source: TextureSource) {
+        if (!loadingTextures.add(key)) return
+        val url = when (source) {
+            is TextureSource.Url -> source.value
+            is TextureSource.Resource -> source.path
+            is TextureSource.Bytes -> bytesUrl(source.value.toTypedArray())
+        }
+        loadImage(url, onLoad = { image ->
+            val texture = requireNotNull(gl.createTexture())
+            gl.bindTexture(WebGLRenderingContext.TEXTURE_2D, texture)
+            gl.pixelStorei(WebGLRenderingContext.UNPACK_FLIP_Y_WEBGL, 1)
+            gl.texImage2D(WebGLRenderingContext.TEXTURE_2D, 0, WebGLRenderingContext.RGBA,
+                WebGLRenderingContext.RGBA, WebGLRenderingContext.UNSIGNED_BYTE, image)
+            gl.generateMipmap(WebGLRenderingContext.TEXTURE_2D)
+            gl.texParameteri(WebGLRenderingContext.TEXTURE_2D,
+                WebGLRenderingContext.TEXTURE_MIN_FILTER, WebGLRenderingContext.LINEAR_MIPMAP_LINEAR)
+            textureCache[key] = texture
+            loadingTextures.remove(key)
+            if (source is TextureSource.Bytes) revokeObjectUrl(url)
+            invalidate()
+        }, onError = {
+            loadingTextures.remove(key)
+            if (source is TextureSource.Bytes) revokeObjectUrl(url)
+        })
     }
 
     private fun createProgram(vertexSource: String, fragmentSource: String): WebGLProgram {
@@ -293,16 +367,18 @@ private class WebGlSurface {
     }
 }
 
-private data class GpuMesh(val vertices: FloatArray, val indices: IntArray)
+private data class GpuMesh(
+    val vertices: FloatArray,
+    val indices: IntArray,
+    val texture: TextureSource?,
+)
 
-private fun buildGpuMesh(
+private fun buildGpuBatches(
     nodes: Collection<SceneNode>,
     camera: SceneCameraState,
     width: Float,
     height: Float,
-): GpuMesh {
-    val vertices = mutableListOf<Float>()
-    val indices = mutableListOf<Int>()
+): List<GpuMesh> = buildList {
     fun append(node: SceneNode, parents: List<Transform>) {
         val transforms = listOf(node.transform) + parents
         if (node is GroupNode) {
@@ -310,7 +386,7 @@ private fun buildGpuMesh(
             return
         }
         val mesh = node.toMesh() ?: return
-        val baseIndex = vertices.size / 7
+        val vertices = mutableListOf<Float>()
         mesh.positions.forEachIndexed { index, position ->
             val world = transforms.fold(position) { point, transform -> transform.apply(point) }
             val clip = camera.projectClip(world, width, height) ?: Vec3(2f, 2f, 1f)
@@ -320,12 +396,14 @@ private fun buildGpuMesh(
             val light = (0.2f + 0.8f * normal.dot(Vec3(0.35f, 0.8f, 0.45f).normalized()))
                 .coerceIn(0.15f, 1f)
             val color = mesh.material.color(light)
-            vertices += listOf(clip.x, clip.y, clip.z, color.red, color.green, color.blue, color.alpha)
+            val uv = mesh.uvs
+            vertices += listOf(clip.x, clip.y, clip.z, color.red, color.green, color.blue, color.alpha,
+                uv?.get(index*2) ?: 0f, uv?.get(index*2+1) ?: 0f)
         }
-        indices += mesh.indices.map { it + baseIndex }
+        add(GpuMesh(vertices.toFloatArray(), mesh.indices.toIntArray(),
+            (mesh.material as? TexturedMaterial)?.baseColorTexture))
     }
     nodes.forEach { append(it, emptyList()) }
-    return GpuMesh(vertices.toFloatArray(), indices.toIntArray())
 }
 
 private fun SceneCameraState.projectClip(point: Vec3, width: Float, height: Float): Vec3? {
@@ -360,26 +438,48 @@ private fun FloatArray.toTypedArray() = Float32Array(size).also { result ->
 private fun IntArray.toTypedArray() = Uint32Array(size).also { result ->
     forEachIndexed { index, value -> result[index] = value }
 }
+private fun ByteArray.toTypedArray() = Uint8Array(size).also { result ->
+    forEachIndexed { index, value -> result[index] = value }
+}
 
 @JsFun("(canvas) => canvas.getContext('webgl2')")
 private external fun webGl2Context(canvas: HTMLCanvasElement): WebGLRenderingContext?
+
+@JsFun("(url, onLoad, onError) => { const image = new Image(); image.crossOrigin = 'anonymous'; image.onload = () => onLoad(image); image.onerror = () => onError(); image.src = url; }")
+private external fun loadImage(
+    url: String,
+    onLoad: (HTMLImageElement) -> Unit,
+    onError: () -> Unit,
+)
+
+@JsFun("(bytes) => URL.createObjectURL(new Blob([bytes], { type: 'image/png' }))")
+private external fun bytesUrl(bytes: Uint8Array): String
+
+@JsFun("(url) => URL.revokeObjectURL(url)")
+private external fun revokeObjectUrl(url: String)
 
 private const val VERTEX_SHADER = """#version 300 es
 precision highp float;
 in vec3 aPosition;
 in vec4 aColor;
+in vec2 aUv;
 out vec4 vColor;
+out vec2 vUv;
 void main() {
     gl_Position = vec4(aPosition, 1.0);
     vColor = aColor;
+    vUv = aUv;
 }
 """
 
 private const val FRAGMENT_SHADER = """#version 300 es
 precision mediump float;
 in vec4 vColor;
+in vec2 vUv;
+uniform sampler2D uTexture;
+uniform bool uUseTexture;
 out vec4 outColor;
 void main() {
-    outColor = vColor;
+    outColor = uUseTexture ? texture(uTexture, vUv) * vColor : vColor;
 }
 """

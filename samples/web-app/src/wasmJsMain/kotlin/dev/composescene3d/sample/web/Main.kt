@@ -14,6 +14,8 @@ import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.core.Quaternion
 import dev.composescene3d.core.Transform
+import dev.composescene3d.core.TexturedMaterial
+import dev.composescene3d.core.TextureSource
 import dev.composescene3d.core.Vec3
 import dev.composescene3d.web.WebRenderer
 import dev.composescene3d.web.WebViewport
@@ -54,7 +56,10 @@ fun main() {
                         key = "floor",
                         width = 10f,
                         depth = 10f,
-                        material = PbrMaterial(baseColor = Color3D(0.24f, 0.27f, 0.32f)),
+                        material = TexturedMaterial(
+                            baseColorTexture = TextureSource.Resource("checker.svg"),
+                            roughness = 0.85f,
+                        ),
                         transform = Transform(translation = Vec3(0f, -1.3f, 0f)),
                     )
                 }
