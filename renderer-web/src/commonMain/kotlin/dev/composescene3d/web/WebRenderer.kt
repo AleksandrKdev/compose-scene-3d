@@ -771,9 +771,13 @@ private fun SceneCameraState.projectClip(point: Vec3, width: Float, height: Floa
             val near = value.near.toFloat()
             val far = value.far.toFloat()
             if (z <= near || z >= far) return null
-            val depth = ((z - near) / (far - near)) * 2f - 1f
             val scale = (1.0 / tan(value.verticalFovDegrees * PI / 360.0)).toFloat()
-            return ClipPoint(x * scale / aspect, y * scale, depth * z, z)
+            return ClipPoint(
+                x * scale / aspect,
+                y * scale,
+                perspectiveClipDepth(z, near, far),
+                z,
+            )
         }
         is CameraProjection.Orthographic -> {
             val near = value.near.toFloat()
@@ -784,6 +788,11 @@ private fun SceneCameraState.projectClip(point: Vec3, width: Float, height: Floa
             return ClipPoint(x * scale / aspect, y * scale, depth, 1f)
         }
     }
+}
+
+internal fun perspectiveClipDepth(z: Float, near: Float, far: Float): Float {
+    require(near > 0f && far > near)
+    return ((far + near) * z - 2f * far * near) / (far - near)
 }
 
 private fun FloatArray.toTypedArray() = Float32Array(size).also { result ->

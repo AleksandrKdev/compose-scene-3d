@@ -405,6 +405,11 @@ State: unavailable/offline
   homogeneous clip-space `x/y/z/w` into the shader instead of pre-divided NDC with `w = 1`, so the
   GPU applies perspective-correct UV interpolation and checker squares no longer warp across the
   plane's triangle diagonal while orbiting. Web browser tests and the production bundle pass.
+- Web perspective depth uses the standard homogeneous projection `clip.z = A*z + B`, followed by
+  the GPU divide by `w = z`. The earlier temporary linear-NDC calculation made depth vary
+  incorrectly across the floor's large triangles, causing the plane to appear in front of the
+  sphere, cube and Duck at low orbit angles. A regression test covers near/far mapping and linear
+  clip-space depth.
 - The latest external glTF milestone is commit `52b42d7`; the perspective fix is `1d5ce93`.
   For interactive verification run
   `./gradlew :samples:web-app:wasmJsBrowserDevelopmentRun --no-configuration-cache` and open

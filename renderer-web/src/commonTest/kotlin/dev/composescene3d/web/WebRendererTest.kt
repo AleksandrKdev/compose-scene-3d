@@ -10,6 +10,20 @@ import kotlin.test.assertTrue
 
 class WebRendererTest {
     @Test
+    fun perspectiveDepthUsesHomogeneousClipCoordinates() {
+        val near = 0.1f
+        val far = 100f
+
+        assertEquals(-near, perspectiveClipDepth(near, near, far), 0.00001f)
+        assertEquals(far, perspectiveClipDepth(far, near, far), 0.0001f)
+        val first = perspectiveClipDepth(10f, near, far)
+        val middle = perspectiveClipDepth(20f, near, far)
+        val last = perspectiveClipDepth(30f, near, far)
+        assertEquals(last - middle, middle - first, 0.0001f)
+        assertTrue(middle / 20f > first / 10f)
+    }
+
+    @Test
     fun retainsUpdatesAndRemovesNodes() {
         val renderer = WebRenderer()
         val first = BoxNode(NodeKey("box"))
