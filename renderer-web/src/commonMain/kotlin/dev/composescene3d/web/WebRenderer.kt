@@ -374,6 +374,10 @@ private class WebGlSurface(
     private val modelCache = mutableMapOf<String, List<MeshData>>()
     private val loadingModels = mutableSetOf<String>()
     private val failedModels = mutableSetOf<String>()
+    private var modelRevision = 0
+    private var cachedSceneNodes: List<SceneNode>? = null
+    private var cachedModelRevision = -1
+    private var cachedBatches = emptyList<GpuMesh>()
     private var width = 1
     private var height = 1
 
@@ -482,10 +486,16 @@ private class WebGlSurface(
     }
 
     fun render(nodes: Collection<SceneNode>, camera: SceneCameraState, background: Color3D) {
-        val batches = buildGpuBatches(
-            nodes,
-            resolveModel = { node -> resolveModel(node) },
-        )
+        val sceneNodes = nodes.toList()
+        val batches = if (cachedSceneNodes == sceneNodes && cachedModelRevision == modelRevision) {
+            cachedBatches
+        } else {
+            buildGpuBatches(sceneNodes, resolveModel = { node -> resolveModel(node) }).also {
+                cachedSceneNodes = sceneNodes
+                cachedModelRevision = modelRevision
+                cachedBatches = it
+            }
+        }
         val preparedMeshes = prepareMeshes(batches)
         val lights = nodes.webLights()
         val directionalProjection = lights.directional.shadow?.let { shadow ->
@@ -583,6 +593,8 @@ private class WebGlSurface(
             gl.deleteBuffer(buffers.vertex)
             gl.deleteBuffer(buffers.index)
         }
+        cachedSceneNodes = null
+        cachedBatches = emptyList()
         gl.deleteProgram(program)
         gl.deleteProgram(shadowProgram)
         shadowTarget?.let { deleteShadowTarget(gl, it) }
@@ -780,7 +792,10 @@ private class WebGlSurface(
         if (loadingModels.add(key)) {
             val accept: (Uint8Array) -> Unit = { bytes ->
                 runCatching { parseGlb(bytes, key) }
-                    .onSuccess { modelCache[key] = it }
+                    .onSuccess {
+                        modelCache[key] = it
+                        modelRevision++
+                    }
                     .onFailure {
                         failedModels += key
                         renderer.modelError(node.source, it)
@@ -794,7 +809,7 @@ private class WebGlSurface(
                 is ModelSource.Url -> requestModelUrl(source.value, source, accept, key)
             }
         }
-        return null
+        return modelCache[key]
     }
 
     private fun requestModelUrl(

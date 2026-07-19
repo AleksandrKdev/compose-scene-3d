@@ -447,8 +447,11 @@ State: unavailable/offline
   cameras. CPU batches contain stable world-space data, and buffer content hashes suppress
   `bufferData` calls during orbit, pan and zoom when geometry is unchanged. Projection uniforms are
   the only camera-dependent GPU update.
-- Next milestone: cache CPU-side Web mesh batches to avoid rebuilding unchanged arrays, then
-  broader glTF coverage.
+- CPU-side Web `GpuMesh` batches are cached against an immutable scene-node snapshot and a model
+  revision. Orbit/pan/zoom, texture completion and ordinary redraws reuse the arrays; successful
+  asynchronous GLB/glTF parsing increments the revision and rebuilds them. Synchronous
+  `ModelSource.Bytes` parsing now contributes its meshes to the same render immediately.
+- Next milestone: broaden Web glTF support with alpha modes and double-sided materials.
 
 ## Completed local Maven alpha milestone
 
@@ -518,8 +521,7 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Continue by caching CPU-side Web mesh batches to avoid rebuilding unchanged vertex arrays, then
-broaden glTF coverage.
+Continue Web glTF coverage with alpha modes and double-sided materials.
 The user explicitly allowed breaking the old empty GroupNode API before alpha03. Do not expose
 backend types in public commonMain API.
 ```

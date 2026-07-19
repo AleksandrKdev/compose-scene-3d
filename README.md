@@ -32,7 +32,8 @@ Source repository: [AleksandrKdev/compose-scene-3d](https://github.com/Aleksandr
   are cached by `TextureAssetKey`. It loads binary (`.glb`) and JSON (`.gltf`) glTF 2.0 models;
   its PBR shader supports directional, point and spot lighting plus directional and spot PCF shadow
   maps. Camera projection runs in the vertex shader. Per-mesh WebGL buffers persist across renders,
-  are shared by all active passes and skip uploads while world-space geometry is unchanged.
+  are shared by all active passes and skip uploads while world-space geometry is unchanged. CPU
+  mesh batches are likewise reused until the scene or asynchronously loaded model set changes.
 - `renderer-testkit`: an internal backend-neutral conformance harness for retained commands,
   lifecycle behavior and capability declarations. New renderers must pass the same contract.
 - `samples/android-app`, `samples/desktop-app`, `samples/ios-app` and `samples/web-app`:
@@ -232,7 +233,7 @@ protection. Cascades, contact shadows and the other filtering techniques still f
 
 ## Roadmap
 
-1. Cache CPU-side Web mesh batches and avoid rebuilding unchanged vertex arrays.
+1. Continue glTF feature coverage, starting with alpha modes and double-sided materials.
 2. Continue glTF feature coverage and optimize Web GPU resource submission.
 3. Stabilize the public API based on cross-backend experience.
 
