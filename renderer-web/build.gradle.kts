@@ -22,6 +22,7 @@ kotlin {
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.ui)
+            implementation("org.jetbrains.kotlinx:kotlinx-browser:0.5.0")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

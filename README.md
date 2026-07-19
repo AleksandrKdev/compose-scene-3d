@@ -9,7 +9,7 @@ owned by a renderer implementation rather than by recomposition.
 ## Status
 
 Early architecture prototype with working Filament primitive and GLB rendering on Android,
-Desktop and iOS/Metal, plus a portable Compose Canvas renderer for Web/Wasm. A stable public
+Desktop and iOS/Metal, plus an independent WebGL2 renderer for Web/Wasm. A stable public
 release is not available yet.
 
 Current release coordinates: `io.github.aleksandrkdev:*:0.1.0-alpha02`.
@@ -26,10 +26,10 @@ Source repository: [AleksandrKdev/compose-scene-3d](https://github.com/Aleksandr
   retaining independent instances and transforms. It provides orbit/pan/zoom interaction and maps
   Filament picking results back to stable `NodeKey` values. Box, sphere, plane and cylinder
   primitives use backend-neutral PBR material parameters.
-- `renderer-web`: an independent Wasm renderer for primitives, indexed custom meshes, nested
-  transforms and the shared orbit/pan/zoom camera. Its current Compose Canvas rasterizer is a
-  functional compatibility backend; GLB, textures, shadows and GPU WebGL2 acceleration remain
-  future work and are reported as unsupported capabilities.
+- `renderer-web`: an independent WebGL2 Wasm renderer for primitives, indexed custom meshes,
+  nested transforms and the shared orbit/pan/zoom camera. It uses GPU vertex/index buffers and a
+  depth buffer; GLB, textures, PBR shaders and shadows remain future work and are reported as
+  unsupported capabilities.
 - `renderer-testkit`: an internal backend-neutral conformance harness for retained commands,
   lifecycle behavior and capability declarations. New renderers must pass the same contract.
 - `samples/android-app`, `samples/desktop-app`, `samples/ios-app` and `samples/web-app`:
@@ -206,8 +206,8 @@ provenance is unknown.
 
 ## Roadmap
 
-1. Move `renderer-web` triangle submission from Compose Canvas to WebGL2 with a depth buffer.
-2. Add Web texture loading and glTF/GLB support.
+1. Add Web texture loading and glTF/GLB support.
+2. Add Web PBR shaders and lighting.
 3. Stabilize the public API based on cross-backend experience.
 
 ## Running the samples

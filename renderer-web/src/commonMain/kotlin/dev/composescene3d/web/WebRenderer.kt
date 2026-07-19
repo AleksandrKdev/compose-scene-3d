@@ -1,20 +1,21 @@
+@file:OptIn(kotlin.js.ExperimentalWasmJsInterop::class)
+
 package dev.composescene3d.web
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import dev.composescene3d.compose.SceneCameraState
 import dev.composescene3d.compose.rememberSceneCameraState
 import dev.composescene3d.compose.sceneCameraGestures
@@ -44,12 +45,21 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 import kotlin.math.tan
+import kotlin.js.unsafeCast
+import kotlinx.browser.document
+import org.khronos.webgl.Float32Array
+import org.khronos.webgl.Uint32Array
+import org.khronos.webgl.WebGLBuffer
+import org.khronos.webgl.WebGLProgram
+import org.khronos.webgl.WebGLRenderingContext
+import org.khronos.webgl.WebGLShader
+import org.khronos.webgl.set
+import org.w3c.dom.HTMLCanvasElement
 
 /**
- * Browser renderer with no Filament dependency. The first implementation deliberately uses the
- * portable Compose canvas, while retaining indexed triangles and a depth-sorted render list. This
- * gives Wasm users a working backend today and leaves the public API independent of a future
- * WebGL2 implementation.
+ * Browser renderer with no Filament dependency. It uses WebGL2 while retaining the browser canvas
+ * behind a transparent Compose input surface. This
+ * keeps the scene API backend-neutral and reuses the common camera gesture implementation.
  */
 class WebRenderer : SceneRenderer {
     internal val nodes = mutableStateMapOf<NodeKey, SceneNode>()
@@ -83,17 +93,22 @@ fun WebViewport(
     zoomSpeed: Float = 0.12f,
 ) {
     var viewportHeight by remember { mutableIntStateOf(1) }
+    val gpuSurface = remember { WebGlSurface() }
+    DisposableEffect(gpuSurface) { onDispose(gpuSurface::close) }
     var surface = modifier
-        .background(backgroundColor.toColor())
         .onSizeChanged { viewportHeight = it.height.coerceAtLeast(1) }
+        .onGloballyPositioned { coordinates ->
+            val position = coordinates.positionInWindow()
+            gpuSurface.place(
+                position.x.toInt(), position.y.toInt(),
+                coordinates.size.width, coordinates.size.height,
+            )
+        }
     if (orbitEnabled) {
         surface = surface.sceneCameraGestures(cameraState, { viewportHeight }, zoomSpeed = zoomSpeed)
     }
     Canvas(surface) {
-        val triangles = buildRenderList(renderer.nodes.values, cameraState, size.width, size.height)
-        triangles.sortedByDescending(ProjectedTriangle::depth).forEach { triangle ->
-            drawTriangle(triangle)
-        }
+        gpuSurface.render(renderer.nodes.values, cameraState, backgroundColor)
     }
 }
 
@@ -103,78 +118,6 @@ private data class MeshData(
     val normals: List<Vec3>,
     val material: Material3D,
 )
-
-private data class ProjectedTriangle(
-    val a: Offset,
-    val b: Offset,
-    val c: Offset,
-    val depth: Float,
-    val color: Color,
-)
-
-private fun buildRenderList(
-    nodes: Collection<SceneNode>,
-    camera: SceneCameraState,
-    width: Float,
-    height: Float,
-): List<ProjectedTriangle> = buildList {
-    fun append(node: SceneNode, parents: List<Transform>) {
-        val transforms = listOf(node.transform) + parents
-        if (node is GroupNode) {
-            node.children.forEach { append(it, transforms) }
-            return
-        }
-        val mesh = node.toMesh() ?: return
-        val world = mesh.positions.map { point -> transforms.fold(point) { p, t -> t.apply(p) } }
-        val transformedNormals = mesh.normals.map { normal ->
-            transforms.fold(normal) { n, t -> t.rotation.rotate(n) }.normalized()
-        }
-        mesh.indices.chunked(3).forEach { index ->
-            val p0 = camera.project(world[index[0]], width, height) ?: return@forEach
-            val p1 = camera.project(world[index[1]], width, height) ?: return@forEach
-            val p2 = camera.project(world[index[2]], width, height) ?: return@forEach
-            val normal = (transformedNormals[index[0]] + transformedNormals[index[1]] +
-                transformedNormals[index[2]]).normalized()
-            val light = (0.2f + 0.8f * normal.dot(Vec3(0.35f, 0.8f, 0.45f).normalized()))
-                .coerceIn(0.15f, 1f)
-            add(ProjectedTriangle(p0.screen, p1.screen, p2.screen,
-                (p0.depth + p1.depth + p2.depth) / 3f, mesh.material.color(light)))
-        }
-    }
-    nodes.forEach { append(it, emptyList()) }
-}
-
-private data class Projection(val screen: Offset, val depth: Float)
-
-private fun SceneCameraState.project(point: Vec3, width: Float, height: Float): Projection? {
-    val forward = (target - eye).normalized()
-    val right = forward.cross(up).normalized()
-    val cameraUp = right.cross(forward)
-    val relative = point - eye
-    val x = relative.dot(right)
-    val y = relative.dot(cameraUp)
-    val z = relative.dot(forward)
-    if (z <= 0.01f) return null
-    val aspect = (width / height).coerceAtLeast(0.01f)
-    val scale = when (val value = projection) {
-        is CameraProjection.Perspective ->
-            (1.0 / tan(value.verticalFovDegrees * PI / 360.0)).toFloat()
-        is CameraProjection.Orthographic -> 2f * z / value.verticalSize.toFloat()
-    }
-    return Projection(
-        Offset((x * scale / (z * aspect) + 1f) * width / 2f, (1f - y * scale / z) * height / 2f),
-        z,
-    )
-}
-
-private fun DrawScope.drawTriangle(triangle: ProjectedTriangle) {
-    drawPath(Path().apply {
-        moveTo(triangle.a.x, triangle.a.y)
-        lineTo(triangle.b.x, triangle.b.y)
-        lineTo(triangle.c.x, triangle.c.y)
-        close()
-    }, triangle.color)
-}
 
 private fun SceneNode.toMesh(): MeshData? = when (this) {
     is BoxNode -> boxMesh(size, UnlitMaterial(Color3D(color.x, color.y, color.z)))
@@ -255,3 +198,188 @@ private operator fun Vec3.times(v: Float)=Vec3(x*v,y*v,z*v)
 private fun Vec3.dot(v: Vec3)=x*v.x+y*v.y+z*v.z
 private fun Vec3.cross(v: Vec3)=Vec3(y*v.z-z*v.y,z*v.x-x*v.z,x*v.y-y*v.x)
 private fun Vec3.normalized(): Vec3 { val l=sqrt(dot(this)); return if(l==0f) Vec3.Zero else this*(1f/l) }
+
+private class WebGlSurface {
+    private val canvas = document.createElement("canvas").unsafeCast<HTMLCanvasElement>()
+    private val gl: WebGLRenderingContext
+    private val program: WebGLProgram
+    private val vertexBuffer: WebGLBuffer
+    private val indexBuffer: WebGLBuffer
+    private val positionAttribute: Int
+    private val colorAttribute: Int
+    private var width = 1
+    private var height = 1
+
+    init {
+        canvas.style.cssText = "position:fixed;pointer-events:none;z-index:2147483647;"
+        document.body?.appendChild(canvas)
+        gl = requireNotNull(webGl2Context(canvas)) {
+            "ComposeScene3D Web requires WebGL2"
+        }
+        program = createProgram(VERTEX_SHADER, FRAGMENT_SHADER)
+        vertexBuffer = requireNotNull(gl.createBuffer())
+        indexBuffer = requireNotNull(gl.createBuffer())
+        positionAttribute = gl.getAttribLocation(program, "aPosition")
+        colorAttribute = gl.getAttribLocation(program, "aColor")
+        gl.enable(WebGLRenderingContext.DEPTH_TEST)
+        gl.depthFunc(WebGLRenderingContext.LEQUAL)
+    }
+
+    fun place(x: Int, y: Int, width: Int, height: Int) {
+        this.width = width.coerceAtLeast(1)
+        this.height = height.coerceAtLeast(1)
+        canvas.style.left = "${x}px"
+        canvas.style.top = "${y}px"
+        canvas.style.width = "${this.width}px"
+        canvas.style.height = "${this.height}px"
+        if (canvas.width != this.width || canvas.height != this.height) {
+            canvas.width = this.width
+            canvas.height = this.height
+        }
+    }
+
+    fun render(nodes: Collection<SceneNode>, camera: SceneCameraState, background: Color3D) {
+        val mesh = buildGpuMesh(nodes, camera, width.toFloat(), height.toFloat())
+        gl.viewport(0, 0, canvas.width, canvas.height)
+        gl.clearColor(background.red, background.green, background.blue, background.alpha)
+        gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT or WebGLRenderingContext.DEPTH_BUFFER_BIT)
+        if (mesh.indices.isEmpty()) return
+
+        gl.useProgram(program)
+        gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, vertexBuffer)
+        gl.bufferData(WebGLRenderingContext.ARRAY_BUFFER, mesh.vertices.toTypedArray(), WebGLRenderingContext.DYNAMIC_DRAW)
+        gl.enableVertexAttribArray(positionAttribute)
+        gl.vertexAttribPointer(positionAttribute, 3, WebGLRenderingContext.FLOAT, false, 28, 0)
+        gl.enableVertexAttribArray(colorAttribute)
+        gl.vertexAttribPointer(colorAttribute, 4, WebGLRenderingContext.FLOAT, false, 28, 12)
+        gl.bindBuffer(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER, indexBuffer)
+        gl.bufferData(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER, mesh.indices.toTypedArray(), WebGLRenderingContext.DYNAMIC_DRAW)
+        gl.drawElements(
+            WebGLRenderingContext.TRIANGLES, mesh.indices.size,
+            WebGLRenderingContext.UNSIGNED_INT, 0,
+        )
+    }
+
+    fun close() {
+        gl.deleteBuffer(vertexBuffer)
+        gl.deleteBuffer(indexBuffer)
+        gl.deleteProgram(program)
+        canvas.remove()
+    }
+
+    private fun createProgram(vertexSource: String, fragmentSource: String): WebGLProgram {
+        val vertex = compileShader(WebGLRenderingContext.VERTEX_SHADER, vertexSource)
+        val fragment = compileShader(WebGLRenderingContext.FRAGMENT_SHADER, fragmentSource)
+        val result = requireNotNull(gl.createProgram())
+        gl.attachShader(result, vertex)
+        gl.attachShader(result, fragment)
+        gl.linkProgram(result)
+        check(gl.getProgramParameter(result, WebGLRenderingContext.LINK_STATUS) == true.toJsBoolean()) {
+            "WebGL program link failed: ${gl.getProgramInfoLog(result)}"
+        }
+        gl.deleteShader(vertex)
+        gl.deleteShader(fragment)
+        return result
+    }
+
+    private fun compileShader(type: Int, source: String): WebGLShader {
+        val shader = requireNotNull(gl.createShader(type))
+        gl.shaderSource(shader, source)
+        gl.compileShader(shader)
+        check(gl.getShaderParameter(shader, WebGLRenderingContext.COMPILE_STATUS) == true.toJsBoolean()) {
+            "WebGL shader compile failed: ${gl.getShaderInfoLog(shader)}"
+        }
+        return shader
+    }
+}
+
+private data class GpuMesh(val vertices: FloatArray, val indices: IntArray)
+
+private fun buildGpuMesh(
+    nodes: Collection<SceneNode>,
+    camera: SceneCameraState,
+    width: Float,
+    height: Float,
+): GpuMesh {
+    val vertices = mutableListOf<Float>()
+    val indices = mutableListOf<Int>()
+    fun append(node: SceneNode, parents: List<Transform>) {
+        val transforms = listOf(node.transform) + parents
+        if (node is GroupNode) {
+            node.children.forEach { append(it, transforms) }
+            return
+        }
+        val mesh = node.toMesh() ?: return
+        val baseIndex = vertices.size / 7
+        mesh.positions.forEachIndexed { index, position ->
+            val world = transforms.fold(position) { point, transform -> transform.apply(point) }
+            val clip = camera.projectClip(world, width, height) ?: Vec3(2f, 2f, 1f)
+            val normal = transforms.fold(mesh.normals[index]) { value, transform ->
+                transform.rotation.rotate(value)
+            }.normalized()
+            val light = (0.2f + 0.8f * normal.dot(Vec3(0.35f, 0.8f, 0.45f).normalized()))
+                .coerceIn(0.15f, 1f)
+            val color = mesh.material.color(light)
+            vertices += listOf(clip.x, clip.y, clip.z, color.red, color.green, color.blue, color.alpha)
+        }
+        indices += mesh.indices.map { it + baseIndex }
+    }
+    nodes.forEach { append(it, emptyList()) }
+    return GpuMesh(vertices.toFloatArray(), indices.toIntArray())
+}
+
+private fun SceneCameraState.projectClip(point: Vec3, width: Float, height: Float): Vec3? {
+    val forward = (target - eye).normalized()
+    val right = forward.cross(up).normalized()
+    val cameraUp = right.cross(forward)
+    val relative = point - eye
+    val x = relative.dot(right)
+    val y = relative.dot(cameraUp)
+    val z = relative.dot(forward)
+    val near: Float
+    val far: Float
+    val scale: Float
+    when (val value = projection) {
+        is CameraProjection.Perspective -> {
+            near = value.near.toFloat(); far = value.far.toFloat()
+            scale = (1.0 / tan(value.verticalFovDegrees * PI / 360.0)).toFloat()
+        }
+        is CameraProjection.Orthographic -> {
+            near = value.near.toFloat(); far = value.far.toFloat()
+            scale = 2f * z / value.verticalSize.toFloat()
+        }
+    }
+    if (z <= near || z >= far) return null
+    val aspect = (width / height).coerceAtLeast(0.01f)
+    return Vec3(x * scale / (z * aspect), y * scale / z, ((z-near)/(far-near))*2f-1f)
+}
+
+private fun FloatArray.toTypedArray() = Float32Array(size).also { result ->
+    forEachIndexed { index, value -> result[index] = value }
+}
+private fun IntArray.toTypedArray() = Uint32Array(size).also { result ->
+    forEachIndexed { index, value -> result[index] = value }
+}
+
+@JsFun("(canvas) => canvas.getContext('webgl2')")
+private external fun webGl2Context(canvas: HTMLCanvasElement): WebGLRenderingContext?
+
+private const val VERTEX_SHADER = """#version 300 es
+precision highp float;
+in vec3 aPosition;
+in vec4 aColor;
+out vec4 vColor;
+void main() {
+    gl_Position = vec4(aPosition, 1.0);
+    vColor = aColor;
+}
+"""
+
+private const val FRAGMENT_SHADER = """#version 300 es
+precision mediump float;
+in vec4 vColor;
+out vec4 outColor;
+void main() {
+    outColor = vColor;
+}
+"""
