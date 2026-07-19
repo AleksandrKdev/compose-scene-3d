@@ -298,11 +298,11 @@ private class WebGlSurface(
             gl.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, vertexBuffer)
             gl.bufferData(WebGLRenderingContext.ARRAY_BUFFER, mesh.vertices.toTypedArray(), WebGLRenderingContext.DYNAMIC_DRAW)
             gl.enableVertexAttribArray(positionAttribute)
-            gl.vertexAttribPointer(positionAttribute, 3, WebGLRenderingContext.FLOAT, false, 36, 0)
+            gl.vertexAttribPointer(positionAttribute, 4, WebGLRenderingContext.FLOAT, false, 40, 0)
             gl.enableVertexAttribArray(colorAttribute)
-            gl.vertexAttribPointer(colorAttribute, 4, WebGLRenderingContext.FLOAT, false, 36, 12)
+            gl.vertexAttribPointer(colorAttribute, 4, WebGLRenderingContext.FLOAT, false, 40, 16)
             gl.enableVertexAttribArray(uvAttribute)
-            gl.vertexAttribPointer(uvAttribute, 2, WebGLRenderingContext.FLOAT, false, 36, 28)
+            gl.vertexAttribPointer(uvAttribute, 2, WebGLRenderingContext.FLOAT, false, 40, 32)
             bindTexture(mesh.texture)
             gl.bindBuffer(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER, indexBuffer)
             gl.bufferData(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER, mesh.indices.toTypedArray(), WebGLRenderingContext.DYNAMIC_DRAW)
@@ -455,7 +455,7 @@ private fun buildGpuBatches(
         val vertices = mutableListOf<Float>()
         mesh.positions.forEachIndexed { index, position ->
             val world = transforms.fold(position) { point, transform -> transform.apply(point) }
-            val clip = camera.projectClip(world, width, height) ?: Vec3(2f, 2f, 1f)
+            val clip = camera.projectClip(world, width, height) ?: ClipPoint(2f, 2f, 1f, 1f)
             val normal = transforms.fold(mesh.normals[index]) { value, transform ->
                 transform.rotation.rotate(value)
             }.normalized()
@@ -463,7 +463,8 @@ private fun buildGpuBatches(
                 .coerceIn(0.15f, 1f)
             val color = mesh.material.color(light)
             val uv = mesh.uvs
-            vertices += listOf(clip.x, clip.y, clip.z, color.red, color.green, color.blue, color.alpha,
+            vertices += listOf(clip.x, clip.y, clip.z, clip.w,
+                color.red, color.green, color.blue, color.alpha,
                 uv?.get(index*2) ?: 0f, uv?.get(index*2+1) ?: 0f)
         }
         add(GpuMesh(vertices.toFloatArray(), mesh.indices.toIntArray(),
@@ -486,7 +487,9 @@ private fun buildGpuBatches(
     nodes.forEach { append(it, emptyList()) }
 }
 
-private fun SceneCameraState.projectClip(point: Vec3, width: Float, height: Float): Vec3? {
+private data class ClipPoint(val x: Float, val y: Float, val z: Float, val w: Float)
+
+private fun SceneCameraState.projectClip(point: Vec3, width: Float, height: Float): ClipPoint? {
     val forward = (target - eye).normalized()
     val right = forward.cross(up).normalized()
     val cameraUp = right.cross(forward)
@@ -494,22 +497,25 @@ private fun SceneCameraState.projectClip(point: Vec3, width: Float, height: Floa
     val x = relative.dot(right)
     val y = relative.dot(cameraUp)
     val z = relative.dot(forward)
-    val near: Float
-    val far: Float
-    val scale: Float
+    val aspect = (width / height).coerceAtLeast(0.01f)
     when (val value = projection) {
         is CameraProjection.Perspective -> {
-            near = value.near.toFloat(); far = value.far.toFloat()
-            scale = (1.0 / tan(value.verticalFovDegrees * PI / 360.0)).toFloat()
+            val near = value.near.toFloat()
+            val far = value.far.toFloat()
+            if (z <= near || z >= far) return null
+            val depth = ((z - near) / (far - near)) * 2f - 1f
+            val scale = (1.0 / tan(value.verticalFovDegrees * PI / 360.0)).toFloat()
+            return ClipPoint(x * scale / aspect, y * scale, depth * z, z)
         }
         is CameraProjection.Orthographic -> {
-            near = value.near.toFloat(); far = value.far.toFloat()
-            scale = 2f * z / value.verticalSize.toFloat()
+            val near = value.near.toFloat()
+            val far = value.far.toFloat()
+            if (z <= near || z >= far) return null
+            val depth = ((z - near) / (far - near)) * 2f - 1f
+            val scale = 2f / value.verticalSize.toFloat()
+            return ClipPoint(x * scale / aspect, y * scale, depth, 1f)
         }
     }
-    if (z <= near || z >= far) return null
-    val aspect = (width / height).coerceAtLeast(0.01f)
-    return Vec3(x * scale / (z * aspect), y * scale / z, ((z-near)/(far-near))*2f-1f)
 }
 
 private fun FloatArray.toTypedArray() = Float32Array(size).also { result ->
@@ -656,13 +662,13 @@ private external fun loadGltfAsGlb(
 
 private const val VERTEX_SHADER = """#version 300 es
 precision highp float;
-in vec3 aPosition;
+in vec4 aPosition;
 in vec4 aColor;
 in vec2 aUv;
 out vec4 vColor;
 out vec2 vUv;
 void main() {
-    gl_Position = vec4(aPosition, 1.0);
+    gl_Position = aPosition;
     vColor = aColor;
     vUv = aUv;
 }
