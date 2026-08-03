@@ -503,10 +503,79 @@ data class LinearDimensionNode(
     }
 }
 
+/** A radius/diameter-style leader from a circle center through its measured edge. */
+data class RadialDimensionNode(
+    override val key: NodeKey,
+    val center: Vec3,
+    val edge: Vec3,
+    val labelOffset: Float = 0.25f,
+    val radius: Float = 0.008f,
+    val arrowHeadRadius: Float = 0.028f,
+    val arrowHeadLength: Float = 0.09f,
+    val segments: Int = 12,
+    val material: Material3D = UnlitMaterial(Color3D.Yellow),
+    override val transform: Transform = Transform(),
+    val castShadows: Boolean = false,
+    val receiveShadows: Boolean = false,
+) : SceneNode {
+    val labelAnchor: Vec3 get() = edge + (edge - center).normalizedSceneVector() * labelOffset
+
+    init {
+        val measured = center.distanceSquared(edge)
+        require(measured > 0f && measured.isFinite()) { "Radial dimension center and edge must be different" }
+        require(labelOffset >= 0f && labelOffset.isFinite()) { "Radial label offset must be non-negative" }
+        require(radius > 0f && arrowHeadRadius > 0f && arrowHeadLength > 0f) { "Radial dimension sizes must be positive" }
+        require(arrowHeadLength * arrowHeadLength < measured) { "Radial arrow head must be shorter than the radius" }
+        require(segments >= 3) { "Radial dimension segments must be at least 3" }
+    }
+}
+
+/** An engineering angle dimension drawn as an arc between two directions. */
+data class AngularDimensionNode(
+    override val key: NodeKey,
+    val center: Vec3,
+    val startDirection: Vec3,
+    val endDirection: Vec3,
+    val arcRadius: Float,
+    val radius: Float = 0.008f,
+    val arrowHeadRadius: Float = 0.028f,
+    val arrowHeadLength: Float = 0.09f,
+    val arcSegments: Int = 24,
+    val radialOvershoot: Float = 0.04f,
+    val material: Material3D = UnlitMaterial(Color3D.Yellow),
+    override val transform: Transform = Transform(),
+    val castShadows: Boolean = false,
+    val receiveShadows: Boolean = false,
+) : SceneNode {
+    val labelAnchor: Vec3 get() = center + (startDirection.normalizedSceneVector() + endDirection.normalizedSceneVector()).normalizedSceneVector() * arcRadius
+
+    init {
+        require(startDirection.distanceSquared(Vec3.Zero) > 0f && endDirection.distanceSquared(Vec3.Zero) > 0f) { "Angular dimension directions must be non-zero" }
+        require(startDirection.crossSceneVector(endDirection).distanceSquared(Vec3.Zero) > 0.000001f) { "Angular dimension directions must define a plane" }
+        require(arcRadius > 0f && radius > 0f && arrowHeadRadius > 0f && arrowHeadLength > 0f) { "Angular dimension sizes must be positive" }
+        require(arcSegments >= 3) { "Angular dimension arc segments must be at least 3" }
+        require(radialOvershoot >= 0f) { "Angular radial overshoot must be non-negative" }
+    }
+}
+
 private fun Vec3.distanceSquared(other: Vec3): Float =
     (x - other.x) * (x - other.x) +
         (y - other.y) * (y - other.y) +
         (z - other.z) * (z - other.z)
+
+private fun Vec3.normalizedSceneVector(): Vec3 {
+    val length = kotlin.math.sqrt(distanceSquared(Vec3.Zero))
+    return Vec3(x / length, y / length, z / length)
+}
+
+private operator fun Vec3.plus(other: Vec3) = Vec3(x + other.x, y + other.y, z + other.z)
+private operator fun Vec3.minus(other: Vec3) = Vec3(x - other.x, y - other.y, z - other.z)
+private operator fun Vec3.times(value: Float) = Vec3(x * value, y * value, z * value)
+private fun Vec3.crossSceneVector(other: Vec3) = Vec3(
+    y * other.z - z * other.y,
+    z * other.x - x * other.z,
+    x * other.y - y * other.x,
+)
 
 /** Indexed triangle geometry stored in backend-neutral, non-interleaved arrays. */
 class Geometry3D(

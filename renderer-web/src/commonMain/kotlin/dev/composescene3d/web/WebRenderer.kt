@@ -34,6 +34,8 @@ import dev.composescene3d.core.Material3D
 import dev.composescene3d.core.MeshNode
 import dev.composescene3d.core.LineNode
 import dev.composescene3d.core.LinearDimensionNode
+import dev.composescene3d.core.RadialDimensionNode
+import dev.composescene3d.core.AngularDimensionNode
 import dev.composescene3d.core.ModelNode
 import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.NodeKey
@@ -170,6 +172,8 @@ private fun SceneNode.toMesh(): MeshData? = when (this) {
     is ArrowNode -> geometry().toMeshData(material)
     is SectionedMeshNode -> null
     is LinearDimensionNode -> null
+    is RadialDimensionNode -> null
+    is AngularDimensionNode -> null
     else -> null
 }
 
@@ -1208,6 +1212,14 @@ private fun buildGpuBatches(
             }
             return
         }
+        if (node is RadialDimensionNode) {
+            node.geometry().forEach { appendMesh(it.toMeshData(node.material), transforms, node.castShadows, node.receiveShadows) }
+            return
+        }
+        if (node is AngularDimensionNode) {
+            node.geometry().forEach { appendMesh(it.toMeshData(node.material), transforms, node.castShadows, node.receiveShadows) }
+            return
+        }
         val mesh = node.toMesh() ?: return
         appendMesh(mesh, transforms, node.castShadows(), node.receiveShadows())
     }
@@ -1223,6 +1235,8 @@ private fun SceneNode.castShadows() = when (this) {
     is ArrowNode -> castShadows
     is SectionedMeshNode -> castShadows
     is LinearDimensionNode -> castShadows
+    is RadialDimensionNode -> castShadows
+    is AngularDimensionNode -> castShadows
     is MeshNode -> castShadows
     is ModelNode -> castShadows
     else -> false
@@ -1237,6 +1251,8 @@ private fun SceneNode.receiveShadows() = when (this) {
     is ArrowNode -> receiveShadows
     is SectionedMeshNode -> receiveShadows
     is LinearDimensionNode -> receiveShadows
+    is RadialDimensionNode -> receiveShadows
+    is AngularDimensionNode -> receiveShadows
     is MeshNode -> receiveShadows
     is ModelNode -> receiveShadows
     else -> false

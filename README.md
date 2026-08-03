@@ -271,6 +271,19 @@ Radius, arrow-head dimensions, extension gap/overshoot, segment count, material,
 configurable. The node remains domain-neutral: unit formatting, diameter symbols, tolerances, and
 lesson text belong to the consuming application.
 
+Radial and angular measurements use the same portable geometry and label-anchor model:
+
+```kotlin
+radialDimension("bore-radius", center = Vec3.Zero, edge = Vec3(0.5f, 0f, 0f))
+angularDimension(
+    "keyway-angle", center = Vec3.Zero,
+    startDirection = Vec3(1f, 0f, 0f), endDirection = Vec3(0f, 1f, 0f),
+    arcRadius = 0.7f,
+)
+```
+
+`RadialDimensionNode` and `AngularDimensionNode` expose `labelAnchor` for app-owned Compose text.
+
 World-space clipping planes provide dynamic section views on the Filament Android/iOS backend.
 `ClippedPbrMaterial` accepts one to three half-spaces and can be attached to primitives, custom
 meshes, or imported parts through `ModelPartOverride.material`:

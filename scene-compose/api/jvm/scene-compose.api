@@ -41,6 +41,8 @@ public final class dev/composescene3d/compose/SceneCameraStateKt {
 
 public final class dev/composescene3d/compose/SceneScope {
 	public static final field $stable I
+	public final fun angularDimension (Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;FFFFIFLdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZ)V
+	public static synthetic fun angularDimension$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;FFFFIFLdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZILjava/lang/Object;)V
 	public final fun arrow (Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;FFFILdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZ)V
 	public static synthetic fun arrow$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;FFFILdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZILjava/lang/Object;)V
 	public final fun box (Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Transform;ZZ)V
@@ -63,6 +65,8 @@ public final class dev/composescene3d/compose/SceneScope {
 	public static synthetic fun plane$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;FFZLdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZILjava/lang/Object;)V
 	public final fun pointLight (Ljava/lang/String;FLdev/composescene3d/core/Color3D;FLdev/composescene3d/core/Transform;)V
 	public static synthetic fun pointLight$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;FLdev/composescene3d/core/Color3D;FLdev/composescene3d/core/Transform;ILjava/lang/Object;)V
+	public final fun radialDimension (Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;FFFFILdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZ)V
+	public static synthetic fun radialDimension$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;FFFFILdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZILjava/lang/Object;)V
 	public final fun sectionedMesh (Ljava/lang/String;Ldev/composescene3d/core/Geometry3D;Ldev/composescene3d/core/ClippingPlane3D;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZ)V
 	public static synthetic fun sectionedMesh$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;Ldev/composescene3d/core/Geometry3D;Ldev/composescene3d/core/ClippingPlane3D;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZILjava/lang/Object;)V
 	public final fun sphere (Ljava/lang/String;FIILdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZ)V

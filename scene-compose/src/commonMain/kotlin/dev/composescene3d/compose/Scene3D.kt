@@ -9,6 +9,8 @@ import dev.composescene3d.core.BoxNode
 import dev.composescene3d.core.CylinderNode
 import dev.composescene3d.core.LineNode
 import dev.composescene3d.core.LinearDimensionNode
+import dev.composescene3d.core.RadialDimensionNode
+import dev.composescene3d.core.AngularDimensionNode
 import dev.composescene3d.core.ArrowNode
 import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.Material3D
@@ -180,6 +182,26 @@ class SceneScope internal constructor() {
             extensionGap, extensionOvershoot, segments, material, transform,
             castShadows, receiveShadows,
         )
+    }
+
+    fun radialDimension(
+        key: String, center: Vec3, edge: Vec3, labelOffset: Float = 0.25f,
+        radius: Float = 0.008f, arrowHeadRadius: Float = 0.028f,
+        arrowHeadLength: Float = 0.09f, segments: Int = 12,
+        material: Material3D = UnlitMaterial(Color3D.Yellow), transform: Transform = Transform(),
+        castShadows: Boolean = false, receiveShadows: Boolean = false,
+    ) {
+        nodes += RadialDimensionNode(NodeKey(key), center, edge, labelOffset, radius, arrowHeadRadius, arrowHeadLength, segments, material, transform, castShadows, receiveShadows)
+    }
+
+    fun angularDimension(
+        key: String, center: Vec3, startDirection: Vec3, endDirection: Vec3, arcRadius: Float,
+        radius: Float = 0.008f, arrowHeadRadius: Float = 0.028f,
+        arrowHeadLength: Float = 0.09f, arcSegments: Int = 24, radialOvershoot: Float = 0.04f,
+        material: Material3D = UnlitMaterial(Color3D.Yellow), transform: Transform = Transform(),
+        castShadows: Boolean = false, receiveShadows: Boolean = false,
+    ) {
+        nodes += AngularDimensionNode(NodeKey(key), center, startDirection, endDirection, arcRadius, radius, arrowHeadRadius, arrowHeadLength, arcSegments, radialOvershoot, material, transform, castShadows, receiveShadows)
     }
 
     fun mesh(

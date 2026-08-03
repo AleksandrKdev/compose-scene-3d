@@ -4,6 +4,8 @@ import dev.composescene3d.core.CylinderNode
 import dev.composescene3d.core.ArrowNode
 import dev.composescene3d.core.LineNode
 import dev.composescene3d.core.LinearDimensionNode
+import dev.composescene3d.core.RadialDimensionNode
+import dev.composescene3d.core.AngularDimensionNode
 import dev.composescene3d.core.SectionedMeshNode
 import dev.composescene3d.core.ClippingPlane3D
 import dev.composescene3d.core.Color3D
@@ -84,6 +86,16 @@ class SceneScopeTest {
 
         val dimension = assertIs<LinearDimensionNode>(scene.nodes.single())
         assertEquals(Vec3(0f, 0.5f, 0f), dimension.labelAnchor)
+    }
+
+    @Test
+    fun buildsRadialAndAngularEngineeringDimensions() {
+        val scene = SceneScope().apply {
+            radialDimension("radius", Vec3.Zero, Vec3(1f, 0f, 0f))
+            angularDimension("angle", Vec3.Zero, Vec3(1f, 0f, 0f), Vec3(0f, 1f, 0f), 0.8f)
+        }.build()
+        assertIs<RadialDimensionNode>(scene.nodes[0])
+        assertIs<AngularDimensionNode>(scene.nodes[1])
     }
 
     @Test

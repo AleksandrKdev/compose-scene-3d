@@ -135,4 +135,25 @@ class PrimitiveTest {
         assertEquals(Vec3(0f, 0.5f, 0f), dimension.labelAnchor)
         assertTrue(dimension.geometry().all { it.triangleCount > 0 })
     }
+
+    @Test
+    fun buildsRadialDimensionLeaderAndLabelAnchor() {
+        val dimension = RadialDimensionNode(
+            NodeKey("radius"), Vec3.Zero, Vec3(1f, 0f, 0f), labelOffset = 0.2f,
+        )
+        assertEquals(Vec3(1.2f, 0f, 0f), dimension.labelAnchor)
+        assertEquals(2, dimension.geometry().size)
+        assertTrue(dimension.geometry().all { it.triangleCount > 0 })
+    }
+
+    @Test
+    fun buildsAngularDimensionArcArrowsAndRadialLines() {
+        val dimension = AngularDimensionNode(
+            NodeKey("angle"), Vec3.Zero, Vec3(1f, 0f, 0f), Vec3(0f, 1f, 0f),
+            arcRadius = 0.8f, arcSegments = 8,
+        )
+        assertEquals(12, dimension.geometry().size)
+        assertTrue(dimension.labelAnchor.x > 0f && dimension.labelAnchor.y > 0f)
+        assertTrue(dimension.geometry().all { it.triangleCount > 0 })
+    }
 }
