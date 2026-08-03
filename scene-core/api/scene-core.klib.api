@@ -511,6 +511,22 @@ final class dev.composescene3d.core/GroupNode : dev.composescene3d.core/SceneNod
     final fun toString(): kotlin/String // dev.composescene3d.core/GroupNode.toString|toString(){}[0]
 }
 
+final class dev.composescene3d.core/HighlightMaterial : dev.composescene3d.core/Material3D { // dev.composescene3d.core/HighlightMaterial|null[0]
+    constructor <init>(dev.composescene3d.core/Color3D = ..., kotlin/Float = ...) // dev.composescene3d.core/HighlightMaterial.<init>|<init>(dev.composescene3d.core.Color3D;kotlin.Float){}[0]
+
+    final val color // dev.composescene3d.core/HighlightMaterial.color|{}color[0]
+        final fun <get-color>(): dev.composescene3d.core/Color3D // dev.composescene3d.core/HighlightMaterial.color.<get-color>|<get-color>(){}[0]
+    final val intensity // dev.composescene3d.core/HighlightMaterial.intensity|{}intensity[0]
+        final fun <get-intensity>(): kotlin/Float // dev.composescene3d.core/HighlightMaterial.intensity.<get-intensity>|<get-intensity>(){}[0]
+
+    final fun component1(): dev.composescene3d.core/Color3D // dev.composescene3d.core/HighlightMaterial.component1|component1(){}[0]
+    final fun component2(): kotlin/Float // dev.composescene3d.core/HighlightMaterial.component2|component2(){}[0]
+    final fun copy(dev.composescene3d.core/Color3D = ..., kotlin/Float = ...): dev.composescene3d.core/HighlightMaterial // dev.composescene3d.core/HighlightMaterial.copy|copy(dev.composescene3d.core.Color3D;kotlin.Float){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/HighlightMaterial.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/HighlightMaterial.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.composescene3d.core/HighlightMaterial.toString|toString(){}[0]
+}
+
 final class dev.composescene3d.core/MeshNode : dev.composescene3d.core/SceneNode { // dev.composescene3d.core/MeshNode|null[0]
     constructor <init>(dev.composescene3d.core/NodeKey, dev.composescene3d.core/Geometry3D, dev.composescene3d.core/Material3D = ..., dev.composescene3d.core/Transform = ..., kotlin/Boolean = ..., kotlin/Boolean = ...) // dev.composescene3d.core/MeshNode.<init>|<init>(dev.composescene3d.core.NodeKey;dev.composescene3d.core.Geometry3D;dev.composescene3d.core.Material3D;dev.composescene3d.core.Transform;kotlin.Boolean;kotlin.Boolean){}[0]
 

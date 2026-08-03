@@ -26,6 +26,7 @@ import dev.composescene3d.core.CylinderNode
 import dev.composescene3d.core.DirectionalLightNode
 import dev.composescene3d.core.EmissiveMaterial
 import dev.composescene3d.core.GroupNode
+import dev.composescene3d.core.HighlightMaterial
 import dev.composescene3d.core.Material3D
 import dev.composescene3d.core.MeshNode
 import dev.composescene3d.core.ModelNode
@@ -232,6 +233,7 @@ private fun Material3D.color(): Color = when (this) {
     is PbrMaterial -> baseColor.toColor()
     is UnlitMaterial -> color.toColor()
     is EmissiveMaterial -> color.toColor(intensity)
+    is HighlightMaterial -> color.toColor(intensity)
     is TransparentMaterial -> color.toColor()
     is TexturedMaterial -> Color.White
 }
@@ -253,18 +255,20 @@ private fun Material3D.reflectance() = when (this) {
     else -> 0.5f
 }
 private fun Material3D.shadingModel() = when (this) {
-    is UnlitMaterial, is EmissiveMaterial -> 1
+    is UnlitMaterial, is EmissiveMaterial, is HighlightMaterial -> 1
     else -> 0
 }
 private fun Material3D.normalScale() = (this as? TexturedMaterial)?.normalScale ?: 1f
 private fun Material3D.emissiveColor() = when (this) {
     is TexturedMaterial -> emissiveColor
     is EmissiveMaterial -> color
+    is HighlightMaterial -> color
     else -> Color3D.Black
 }
 private fun Material3D.emissiveIntensity() = when (this) {
     is TexturedMaterial -> if (emissiveTexture != null) emissiveIntensity else 0f
     is EmissiveMaterial -> intensity
+    is HighlightMaterial -> intensity
     else -> 0f
 }
 private fun Material3D.ambientOcclusionStrength() =

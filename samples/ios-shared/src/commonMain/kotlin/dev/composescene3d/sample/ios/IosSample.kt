@@ -18,6 +18,9 @@ import dev.composescene3d.compose.rememberSceneCameraState
 import dev.composescene3d.compose.rememberSceneController
 import dev.composescene3d.core.CameraDescription
 import dev.composescene3d.core.ModelSource
+import dev.composescene3d.core.ModelPartKey
+import dev.composescene3d.core.ModelPartOverride
+import dev.composescene3d.core.HighlightMaterial
 import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.TransparentMaterial
@@ -96,6 +99,7 @@ fun IosSample(
         ambientOcclusionTexture = null,
     )
     var selected by remember { mutableStateOf<String?>(null) }
+    var selectedPart by remember { mutableStateOf<ModelPartKey?>(null) }
 
     Box(Modifier.fillMaxSize()) {
         FilamentViewport(
@@ -104,7 +108,10 @@ fun IosSample(
             cameraState = cameraState,
             shadows = ShadowTechnique3D.Pcf,
             zoomSpeed = 0.12f,
-            onNodePicked = { selected = it?.value },
+            onPicked = { hit ->
+                selected = hit?.modelPartKey?.value ?: hit?.nodeKey?.value
+                selectedPart = hit?.takeIf { it.nodeKey.value == "duck" }?.modelPartKey
+            },
         )
         Scene3D(controller) {
             box(
@@ -116,6 +123,9 @@ fun IosSample(
                 key = "duck",
                 source = ModelSource.Resource("files/duck.glb"),
                 transform = Transform(translation = Vec3(0f, -1f, 0f)),
+                partOverrides = selectedPart?.let { part ->
+                    mapOf(part to ModelPartOverride(material = HighlightMaterial()))
+                }.orEmpty(),
             )
             group(key = "material-showcase") {
                 sphere(

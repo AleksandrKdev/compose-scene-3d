@@ -31,6 +31,7 @@ class PrimitiveTest {
     @Test
     fun validatesMaterialsAndLights() {
         assertFailsWith<IllegalArgumentException> { EmissiveMaterial(intensity = -1f) }
+        assertFailsWith<IllegalArgumentException> { HighlightMaterial(intensity = 0f) }
         assertFailsWith<IllegalArgumentException> {
             PointLightNode(NodeKey("point"), intensity = 1f, falloff = 0f)
         }

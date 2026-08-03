@@ -23,6 +23,9 @@ import dev.composescene3d.core.CameraDescription
 import dev.composescene3d.core.Transform
 import dev.composescene3d.core.Vec3
 import dev.composescene3d.core.ModelSource
+import dev.composescene3d.core.ModelPartKey
+import dev.composescene3d.core.ModelPartOverride
+import dev.composescene3d.core.HighlightMaterial
 import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.TransparentMaterial
@@ -99,6 +102,7 @@ private fun Sample() {
     )
     var moved by remember { mutableStateOf(false) }
     var selected by remember { mutableStateOf<String?>(null) }
+    var selectedPart by remember { mutableStateOf<ModelPartKey?>(null) }
 
     Box(Modifier.fillMaxSize()) {
         FilamentViewport(
@@ -106,7 +110,10 @@ private fun Sample() {
             environment = environment,
             cameraState = camera,
             shadows = ShadowTechnique3D.Pcf,
-            onNodePicked = { selected = it?.value },
+            onPicked = { hit ->
+                selected = hit?.modelPartKey?.value ?: hit?.nodeKey?.value
+                selectedPart = hit?.takeIf { it.nodeKey.value == "duck" }?.modelPartKey
+            },
         )
         Scene3D(controller) {
             box(
@@ -121,6 +128,9 @@ private fun Sample() {
                     translation = Vec3(0f, -1f, 0f),
                     scale = Vec3.One,
                 ),
+                partOverrides = selectedPart?.let { part ->
+                    mapOf(part to ModelPartOverride(material = HighlightMaterial()))
+                }.orEmpty(),
             )
             group(key = "material-showcase") {
                 sphere(

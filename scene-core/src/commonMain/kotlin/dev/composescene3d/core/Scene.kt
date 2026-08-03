@@ -212,6 +212,18 @@ data class EmissiveMaterial(
     }
 }
 
+/** High-contrast unlit fill intended for selected or instructional model parts. */
+data class HighlightMaterial(
+    val color: Color3D = Color3D.Yellow,
+    val intensity: Float = 1.5f,
+) : Material3D {
+    init {
+        require(intensity > 0f && intensity.isFinite()) {
+            "Highlight intensity must be finite and positive"
+        }
+    }
+}
+
 data class TexturedMaterial(
     val baseColorTexture: TextureSource,
     val metallic: Float = 0f,

@@ -27,6 +27,7 @@ import dev.composescene3d.core.CylinderNode
 import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.DirectionalLightNode
 import dev.composescene3d.core.GroupNode
+import dev.composescene3d.core.HighlightMaterial
 import dev.composescene3d.core.ModelNode
 import dev.composescene3d.core.ModelAssetKey
 import dev.composescene3d.core.ModelPart3D
@@ -945,6 +946,10 @@ internal fun rememberSceneMaterial(renderer: FilamentRenderer, material: Materia
     )
     is UnlitMaterial -> rememberUnlitColorMaterialInstance(material.color.toFilamentColor())
     is EmissiveMaterial -> rememberEmissiveMaterialInstance(
+        color = material.color.toFilamentColor(),
+        intensity = material.intensity,
+    )
+    is HighlightMaterial -> rememberEmissiveMaterialInstance(
         color = material.color.toFilamentColor(),
         intensity = material.intensity,
     )

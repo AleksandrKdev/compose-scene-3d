@@ -84,7 +84,7 @@ Scene3D(controller) {
             ),
             ModelPartKey("Gearbox/Cover") to ModelPartOverride(visible = false),
             ModelPartKey("Gearbox/Gear") to ModelPartOverride(
-                material = EmissiveMaterial(Color3D.rgb(255, 140, 40), intensity = 1.5f),
+                material = HighlightMaterial(Color3D.rgb(255, 140, 40)),
             ),
         ),
     )
@@ -94,8 +94,8 @@ Scene3D(controller) {
 Overrides are declarative and work on Android and iOS. Hiding a non-renderable hierarchy node
 hides its renderable descendants as well. A material assigned to a hierarchy node is inherited by
 its descendants, while a more specific child override wins. Remove the override to restore every
-original glTF primitive material. `EmissiveMaterial` or a bright `PbrMaterial` can be used for
-selection highlighting.
+original glTF primitive material. `HighlightMaterial` provides a high-contrast, lighting-independent
+selection fill on Android and iOS.
 
 ## Example
 
