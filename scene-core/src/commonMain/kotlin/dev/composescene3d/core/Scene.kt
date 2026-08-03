@@ -86,6 +86,10 @@ data class ModelPartOverride(
     val outline: ModelPartOutline? = null,
 )
 
+/** Replaces an imported part material with an explicitly supplied fade-capable material. */
+fun ModelPartOverride.withOpacity(material: Material3D, opacity: Float): ModelPartOverride =
+    copy(material = material.withOpacity(opacity))
+
 /** Geometry-expanded silhouette drawn around an imported model part. */
 data class ModelPartOutline(
     val color: Color3D = Color3D.Yellow,

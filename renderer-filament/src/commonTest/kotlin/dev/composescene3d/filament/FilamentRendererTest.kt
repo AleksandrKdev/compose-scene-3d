@@ -33,6 +33,8 @@ class FilamentRendererTest {
             skeletalAnimation = true,
             clippingPlanes = true,
             sectionHatching = true,
+            materialOpacity = true,
+            automaticImportedMaterialOpacity = false,
         ),
     )
 

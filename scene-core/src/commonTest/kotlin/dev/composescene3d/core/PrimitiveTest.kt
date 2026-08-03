@@ -3,6 +3,7 @@ package dev.composescene3d.core
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 class PrimitiveTest {
@@ -96,6 +97,7 @@ class PrimitiveTest {
     fun validatesPrimitiveGeometry() {
         assertFailsWith<IllegalArgumentException> { OpacityMaterial(PbrMaterial(), 1.1f) }
         assertFailsWith<IllegalArgumentException> { GroupNode(NodeKey("group"), emptyList(), opacity = -0.1f) }
+        assertIs<OpacityMaterial>(ModelPartOverride().withOpacity(PbrMaterial(), 0.5f).material)
         assertFailsWith<IllegalArgumentException> { SphereNode(NodeKey("sphere"), radius = 0f) }
         assertFailsWith<IllegalArgumentException> { PlaneNode(NodeKey("plane"), depth = 0f) }
         assertFailsWith<IllegalArgumentException> { CylinderNode(NodeKey("cylinder"), segments = 2) }

@@ -11,6 +11,8 @@ data class RendererCapabilities(
     val picking: Boolean = false,
     val clippingPlanes: Boolean = false,
     val sectionHatching: Boolean = false,
+    val materialOpacity: Boolean = false,
+    val automaticImportedMaterialOpacity: Boolean = false,
 )
 
 sealed interface SceneCommand {

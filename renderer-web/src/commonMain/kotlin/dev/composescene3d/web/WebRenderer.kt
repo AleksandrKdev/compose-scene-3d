@@ -100,6 +100,8 @@ class WebRenderer(
         customGeometry = true,
         shadows = true,
         physicallyBasedRendering = true,
+        materialOpacity = true,
+        automaticImportedMaterialOpacity = true,
     )
 
     override fun apply(commands: List<SceneCommand>) {

@@ -45,6 +45,8 @@ class WebRendererTest {
                 customGeometry = true,
                 physicallyBasedRendering = true,
                 shadows = true,
+                materialOpacity = true,
+                automaticImportedMaterialOpacity = true,
             ),
             WebRenderer().capabilities,
         )

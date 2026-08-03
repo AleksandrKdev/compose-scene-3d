@@ -365,6 +365,19 @@ mesh("cover", coverGeometry, material = OpacityMaterial(coverMaterial, opacity =
 albedo texture and PBR metallic/roughness factors; color materials retain their shading parameters.
 Imported glTF material fading requires the forthcoming custom glTF material-provider path.
 
+On Filament, imported opaque glTF textures cannot be read back from `MaterialInstance`. Supply the
+portable source material explicitly when fading a part:
+
+```kotlin
+val fadedCover = ModelPartOverride().withOpacity(
+    material = TexturedMaterial(baseColorTexture = coverTexture),
+    opacity = 0.35f,
+)
+```
+
+Check `RendererCapabilities.automaticImportedMaterialOpacity` when deciding whether a backend can
+fade authored glTF materials automatically. Filament reports `false`; Web reports `true`.
+
 Opacity can also be inherited by a complete declarative subtree; nested values multiply:
 
 ```kotlin

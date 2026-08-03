@@ -541,8 +541,8 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Continue the final library milestones with a custom glTF material-provider opacity path, then
-stabilize APIs and prepare a release.
+Continue the final library milestones with API stabilization, documentation audit, and release
+preparation. Automatic opaque glTF fading is explicitly capability-gated.
 Imported hierarchy, picking, part overrides, selection effects, exploded views, frame-tracked
 world-to-screen model-part annotations, solid 3D lines/arrows/callout leaders, and open clipping
 plane section views, CPU-generated concave/multi-contour/holed section caps for custom meshes, and
@@ -553,7 +553,9 @@ annotation selection/accessibility metadata for TalkBack and VoiceOver, bounding
 focus, smooth cancellable camera flights, gesture cancellation, and universal subtree visibility
 with stable node identity are done. OpacityMaterial and a Filament 1.72 transparent textured shader
 preserve declarative albedo/PBR factors on Android/iOS/Web; group inheritance and imported glTF
-opacity remains. Group opacity inheritance is done for declarative subtrees.
+opacity cannot preserve authored textures on Filament's current immutable material path, so
+ModelPartOverride.withOpacity accepts an explicit portable source material and renderer capability
+flags expose the distinction. Group opacity inheritance is done for declarative subtrees.
 The user explicitly allowed breaking the old empty GroupNode API before alpha03. Do not expose
 backend types in public commonMain API.
 ```

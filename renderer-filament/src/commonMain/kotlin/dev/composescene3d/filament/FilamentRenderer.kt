@@ -191,6 +191,8 @@ class FilamentRenderer(
         skeletalAnimation = true,
         clippingPlanes = true,
         sectionHatching = true,
+        materialOpacity = true,
+        automaticImportedMaterialOpacity = false,
     )
 
     private val retainedNodes = mutableStateMapOf<NodeKey, SceneNode>()
