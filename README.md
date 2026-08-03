@@ -291,6 +291,23 @@ polling the renderer. `rememberScreenPosition(SceneAnchor3D(...))` provides the 
 arbitrary instructional labels. Pass `worldTransform` when a dimension also inherits a parent-group
 transform.
 
+Dimension text and crowded overlays can stay portable and deterministic:
+
+```kotlin
+val text = formatDimensionValue(
+    12.5,
+    DimensionTextFormat(
+        decimals = 2, unit = "mm", prefix = "⌀",
+        tolerance = DimensionTolerance(upper = 0.1, lower = -0.05),
+    ),
+)
+val positioned = layoutScreenLabels(labels, viewportWidth, viewportHeight)
+```
+
+The layout keeps labels inside the viewport, resolves overlaps by priority and camera depth, and
+marks labels as hidden when no collision-free position is available. Compose remains responsible
+for measuring and drawing the actual text.
+
 World-space clipping planes provide dynamic section views on the Filament Android/iOS backend.
 `ClippedPbrMaterial` accepts one to three half-spaces and can be attached to primitives, custom
 meshes, or imported parts through `ModelPartOverride.material`:

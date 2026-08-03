@@ -558,6 +558,53 @@ final class dev.composescene3d.core/CylinderNode : dev.composescene3d.core/Scene
     final fun toString(): kotlin/String // dev.composescene3d.core/CylinderNode.toString|toString(){}[0]
 }
 
+final class dev.composescene3d.core/DimensionTextFormat { // dev.composescene3d.core/DimensionTextFormat|null[0]
+    constructor <init>(kotlin/Int = ..., kotlin/String = ..., kotlin/String = ..., kotlin/Char = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., dev.composescene3d.core/DimensionTolerance? = ...) // dev.composescene3d.core/DimensionTextFormat.<init>|<init>(kotlin.Int;kotlin.String;kotlin.String;kotlin.Char;kotlin.Boolean;kotlin.Boolean;dev.composescene3d.core.DimensionTolerance?){}[0]
+
+    final val decimalSeparator // dev.composescene3d.core/DimensionTextFormat.decimalSeparator|{}decimalSeparator[0]
+        final fun <get-decimalSeparator>(): kotlin/Char // dev.composescene3d.core/DimensionTextFormat.decimalSeparator.<get-decimalSeparator>|<get-decimalSeparator>(){}[0]
+    final val decimals // dev.composescene3d.core/DimensionTextFormat.decimals|{}decimals[0]
+        final fun <get-decimals>(): kotlin/Int // dev.composescene3d.core/DimensionTextFormat.decimals.<get-decimals>|<get-decimals>(){}[0]
+    final val prefix // dev.composescene3d.core/DimensionTextFormat.prefix|{}prefix[0]
+        final fun <get-prefix>(): kotlin/String // dev.composescene3d.core/DimensionTextFormat.prefix.<get-prefix>|<get-prefix>(){}[0]
+    final val spaceBeforeUnit // dev.composescene3d.core/DimensionTextFormat.spaceBeforeUnit|{}spaceBeforeUnit[0]
+        final fun <get-spaceBeforeUnit>(): kotlin/Boolean // dev.composescene3d.core/DimensionTextFormat.spaceBeforeUnit.<get-spaceBeforeUnit>|<get-spaceBeforeUnit>(){}[0]
+    final val tolerance // dev.composescene3d.core/DimensionTextFormat.tolerance|{}tolerance[0]
+        final fun <get-tolerance>(): dev.composescene3d.core/DimensionTolerance? // dev.composescene3d.core/DimensionTextFormat.tolerance.<get-tolerance>|<get-tolerance>(){}[0]
+    final val trimTrailingZeros // dev.composescene3d.core/DimensionTextFormat.trimTrailingZeros|{}trimTrailingZeros[0]
+        final fun <get-trimTrailingZeros>(): kotlin/Boolean // dev.composescene3d.core/DimensionTextFormat.trimTrailingZeros.<get-trimTrailingZeros>|<get-trimTrailingZeros>(){}[0]
+    final val unit // dev.composescene3d.core/DimensionTextFormat.unit|{}unit[0]
+        final fun <get-unit>(): kotlin/String // dev.composescene3d.core/DimensionTextFormat.unit.<get-unit>|<get-unit>(){}[0]
+
+    final fun component1(): kotlin/Int // dev.composescene3d.core/DimensionTextFormat.component1|component1(){}[0]
+    final fun component2(): kotlin/String // dev.composescene3d.core/DimensionTextFormat.component2|component2(){}[0]
+    final fun component3(): kotlin/String // dev.composescene3d.core/DimensionTextFormat.component3|component3(){}[0]
+    final fun component4(): kotlin/Char // dev.composescene3d.core/DimensionTextFormat.component4|component4(){}[0]
+    final fun component5(): kotlin/Boolean // dev.composescene3d.core/DimensionTextFormat.component5|component5(){}[0]
+    final fun component6(): kotlin/Boolean // dev.composescene3d.core/DimensionTextFormat.component6|component6(){}[0]
+    final fun component7(): dev.composescene3d.core/DimensionTolerance? // dev.composescene3d.core/DimensionTextFormat.component7|component7(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin/String = ..., kotlin/String = ..., kotlin/Char = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., dev.composescene3d.core/DimensionTolerance? = ...): dev.composescene3d.core/DimensionTextFormat // dev.composescene3d.core/DimensionTextFormat.copy|copy(kotlin.Int;kotlin.String;kotlin.String;kotlin.Char;kotlin.Boolean;kotlin.Boolean;dev.composescene3d.core.DimensionTolerance?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/DimensionTextFormat.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/DimensionTextFormat.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.composescene3d.core/DimensionTextFormat.toString|toString(){}[0]
+}
+
+final class dev.composescene3d.core/DimensionTolerance { // dev.composescene3d.core/DimensionTolerance|null[0]
+    constructor <init>(kotlin/Double, kotlin/Double = ...) // dev.composescene3d.core/DimensionTolerance.<init>|<init>(kotlin.Double;kotlin.Double){}[0]
+
+    final val lower // dev.composescene3d.core/DimensionTolerance.lower|{}lower[0]
+        final fun <get-lower>(): kotlin/Double // dev.composescene3d.core/DimensionTolerance.lower.<get-lower>|<get-lower>(){}[0]
+    final val upper // dev.composescene3d.core/DimensionTolerance.upper|{}upper[0]
+        final fun <get-upper>(): kotlin/Double // dev.composescene3d.core/DimensionTolerance.upper.<get-upper>|<get-upper>(){}[0]
+
+    final fun component1(): kotlin/Double // dev.composescene3d.core/DimensionTolerance.component1|component1(){}[0]
+    final fun component2(): kotlin/Double // dev.composescene3d.core/DimensionTolerance.component2|component2(){}[0]
+    final fun copy(kotlin/Double = ..., kotlin/Double = ...): dev.composescene3d.core/DimensionTolerance // dev.composescene3d.core/DimensionTolerance.copy|copy(kotlin.Double;kotlin.Double){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/DimensionTolerance.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/DimensionTolerance.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.composescene3d.core/DimensionTolerance.toString|toString(){}[0]
+}
+
 final class dev.composescene3d.core/DirectionalLightNode : dev.composescene3d.core/SceneNode { // dev.composescene3d.core/DirectionalLightNode|null[0]
     constructor <init>(dev.composescene3d.core/NodeKey, kotlin/Float, dev.composescene3d.core/Vec3 = ..., dev.composescene3d.core/Transform = ..., dev.composescene3d.core/ShadowMap3D? = ...) // dev.composescene3d.core/DirectionalLightNode.<init>|<init>(dev.composescene3d.core.NodeKey;kotlin.Float;dev.composescene3d.core.Vec3;dev.composescene3d.core.Transform;dev.composescene3d.core.ShadowMap3D?){}[0]
 
@@ -1047,6 +1094,28 @@ final class dev.composescene3d.core/PointLightNode : dev.composescene3d.core/Sce
     final fun toString(): kotlin/String // dev.composescene3d.core/PointLightNode.toString|toString(){}[0]
 }
 
+final class dev.composescene3d.core/PositionedScreenLabel3D { // dev.composescene3d.core/PositionedScreenLabel3D|null[0]
+    constructor <init>(kotlin/String, kotlin/Float, kotlin/Float, kotlin/Boolean) // dev.composescene3d.core/PositionedScreenLabel3D.<init>|<init>(kotlin.String;kotlin.Float;kotlin.Float;kotlin.Boolean){}[0]
+
+    final val key // dev.composescene3d.core/PositionedScreenLabel3D.key|{}key[0]
+        final fun <get-key>(): kotlin/String // dev.composescene3d.core/PositionedScreenLabel3D.key.<get-key>|<get-key>(){}[0]
+    final val visible // dev.composescene3d.core/PositionedScreenLabel3D.visible|{}visible[0]
+        final fun <get-visible>(): kotlin/Boolean // dev.composescene3d.core/PositionedScreenLabel3D.visible.<get-visible>|<get-visible>(){}[0]
+    final val x // dev.composescene3d.core/PositionedScreenLabel3D.x|{}x[0]
+        final fun <get-x>(): kotlin/Float // dev.composescene3d.core/PositionedScreenLabel3D.x.<get-x>|<get-x>(){}[0]
+    final val y // dev.composescene3d.core/PositionedScreenLabel3D.y|{}y[0]
+        final fun <get-y>(): kotlin/Float // dev.composescene3d.core/PositionedScreenLabel3D.y.<get-y>|<get-y>(){}[0]
+
+    final fun component1(): kotlin/String // dev.composescene3d.core/PositionedScreenLabel3D.component1|component1(){}[0]
+    final fun component2(): kotlin/Float // dev.composescene3d.core/PositionedScreenLabel3D.component2|component2(){}[0]
+    final fun component3(): kotlin/Float // dev.composescene3d.core/PositionedScreenLabel3D.component3|component3(){}[0]
+    final fun component4(): kotlin/Boolean // dev.composescene3d.core/PositionedScreenLabel3D.component4|component4(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Boolean = ...): dev.composescene3d.core/PositionedScreenLabel3D // dev.composescene3d.core/PositionedScreenLabel3D.copy|copy(kotlin.String;kotlin.Float;kotlin.Float;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/PositionedScreenLabel3D.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/PositionedScreenLabel3D.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.composescene3d.core/PositionedScreenLabel3D.toString|toString(){}[0]
+}
+
 final class dev.composescene3d.core/Quaternion { // dev.composescene3d.core/Quaternion|null[0]
     constructor <init>(kotlin/Float, kotlin/Float, kotlin/Float, kotlin/Float) // dev.composescene3d.core/Quaternion.<init>|<init>(kotlin.Float;kotlin.Float;kotlin.Float;kotlin.Float){}[0]
 
@@ -1219,6 +1288,31 @@ final class dev.composescene3d.core/ScenePickResult { // dev.composescene3d.core
     final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/ScenePickResult.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // dev.composescene3d.core/ScenePickResult.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // dev.composescene3d.core/ScenePickResult.toString|toString(){}[0]
+}
+
+final class dev.composescene3d.core/ScreenLabel3D { // dev.composescene3d.core/ScreenLabel3D|null[0]
+    constructor <init>(kotlin/String, dev.composescene3d.core/ScreenPosition3D, kotlin/Float, kotlin/Float, kotlin/Int = ...) // dev.composescene3d.core/ScreenLabel3D.<init>|<init>(kotlin.String;dev.composescene3d.core.ScreenPosition3D;kotlin.Float;kotlin.Float;kotlin.Int){}[0]
+
+    final val anchor // dev.composescene3d.core/ScreenLabel3D.anchor|{}anchor[0]
+        final fun <get-anchor>(): dev.composescene3d.core/ScreenPosition3D // dev.composescene3d.core/ScreenLabel3D.anchor.<get-anchor>|<get-anchor>(){}[0]
+    final val height // dev.composescene3d.core/ScreenLabel3D.height|{}height[0]
+        final fun <get-height>(): kotlin/Float // dev.composescene3d.core/ScreenLabel3D.height.<get-height>|<get-height>(){}[0]
+    final val key // dev.composescene3d.core/ScreenLabel3D.key|{}key[0]
+        final fun <get-key>(): kotlin/String // dev.composescene3d.core/ScreenLabel3D.key.<get-key>|<get-key>(){}[0]
+    final val priority // dev.composescene3d.core/ScreenLabel3D.priority|{}priority[0]
+        final fun <get-priority>(): kotlin/Int // dev.composescene3d.core/ScreenLabel3D.priority.<get-priority>|<get-priority>(){}[0]
+    final val width // dev.composescene3d.core/ScreenLabel3D.width|{}width[0]
+        final fun <get-width>(): kotlin/Float // dev.composescene3d.core/ScreenLabel3D.width.<get-width>|<get-width>(){}[0]
+
+    final fun component1(): kotlin/String // dev.composescene3d.core/ScreenLabel3D.component1|component1(){}[0]
+    final fun component2(): dev.composescene3d.core/ScreenPosition3D // dev.composescene3d.core/ScreenLabel3D.component2|component2(){}[0]
+    final fun component3(): kotlin/Float // dev.composescene3d.core/ScreenLabel3D.component3|component3(){}[0]
+    final fun component4(): kotlin/Float // dev.composescene3d.core/ScreenLabel3D.component4|component4(){}[0]
+    final fun component5(): kotlin/Int // dev.composescene3d.core/ScreenLabel3D.component5|component5(){}[0]
+    final fun copy(kotlin/String = ..., dev.composescene3d.core/ScreenPosition3D = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Int = ...): dev.composescene3d.core/ScreenLabel3D // dev.composescene3d.core/ScreenLabel3D.copy|copy(kotlin.String;dev.composescene3d.core.ScreenPosition3D;kotlin.Float;kotlin.Float;kotlin.Int){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/ScreenLabel3D.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/ScreenLabel3D.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.composescene3d.core/ScreenLabel3D.toString|toString(){}[0]
 }
 
 final class dev.composescene3d.core/ScreenPosition3D { // dev.composescene3d.core/ScreenPosition3D|null[0]
@@ -1579,5 +1673,7 @@ final fun (dev.composescene3d.core/RadialDimensionNode).dev.composescene3d.core/
 final fun (dev.composescene3d.core/TextureSource).dev.composescene3d.core/assetKey(): dev.composescene3d.core/TextureAssetKey // dev.composescene3d.core/assetKey|assetKey@dev.composescene3d.core.TextureSource(){}[0]
 final fun (dev.composescene3d.core/Transform).dev.composescene3d.core/transformPoint(dev.composescene3d.core/Vec3): dev.composescene3d.core/Vec3 // dev.composescene3d.core/transformPoint|transformPoint@dev.composescene3d.core.Transform(dev.composescene3d.core.Vec3){}[0]
 final fun (kotlin.collections/Iterable<dev.composescene3d.core/SceneNode>).dev.composescene3d.core/flattenSceneNodes(): kotlin.collections/List<dev.composescene3d.core/SceneNode> // dev.composescene3d.core/flattenSceneNodes|flattenSceneNodes@kotlin.collections.Iterable<dev.composescene3d.core.SceneNode>(){}[0]
+final fun dev.composescene3d.core/formatDimensionValue(kotlin/Double, dev.composescene3d.core/DimensionTextFormat = ...): kotlin/String // dev.composescene3d.core/formatDimensionValue|formatDimensionValue(kotlin.Double;dev.composescene3d.core.DimensionTextFormat){}[0]
+final fun dev.composescene3d.core/layoutScreenLabels(kotlin.collections/List<dev.composescene3d.core/ScreenLabel3D>, kotlin/Int, kotlin/Int, kotlin/Float = ..., kotlin/Float = ...): kotlin.collections/List<dev.composescene3d.core/PositionedScreenLabel3D> // dev.composescene3d.core/layoutScreenLabels|layoutScreenLabels(kotlin.collections.List<dev.composescene3d.core.ScreenLabel3D>;kotlin.Int;kotlin.Int;kotlin.Float;kotlin.Float){}[0]
 final fun dev.composescene3d.core/projectWorldToScreen(dev.composescene3d.core/Vec3, dev.composescene3d.core/CameraDescription, kotlin/Int, kotlin/Int): dev.composescene3d.core/ScreenPosition3D // dev.composescene3d.core/projectWorldToScreen|projectWorldToScreen(dev.composescene3d.core.Vec3;dev.composescene3d.core.CameraDescription;kotlin.Int;kotlin.Int){}[0]
 final fun dev.composescene3d.core/reconcile(dev.composescene3d.core/SceneDescription, dev.composescene3d.core/SceneDescription): kotlin.collections/List<dev.composescene3d.core/SceneCommand> // dev.composescene3d.core/reconcile|reconcile(dev.composescene3d.core.SceneDescription;dev.composescene3d.core.SceneDescription){}[0]
