@@ -472,6 +472,36 @@ final class dev.composescene3d.core/EnvironmentMap { // dev.composescene3d.core/
     final fun toString(): kotlin/String // dev.composescene3d.core/EnvironmentMap.toString|toString(){}[0]
 }
 
+final class dev.composescene3d.core/ExplodedPart3D { // dev.composescene3d.core/ExplodedPart3D|null[0]
+    constructor <init>(dev.composescene3d.core/ModelPartKey, dev.composescene3d.core/Vec3) // dev.composescene3d.core/ExplodedPart3D.<init>|<init>(dev.composescene3d.core.ModelPartKey;dev.composescene3d.core.Vec3){}[0]
+
+    final val key // dev.composescene3d.core/ExplodedPart3D.key|{}key[0]
+        final fun <get-key>(): dev.composescene3d.core/ModelPartKey // dev.composescene3d.core/ExplodedPart3D.key.<get-key>|<get-key>(){}[0]
+    final val translation // dev.composescene3d.core/ExplodedPart3D.translation|{}translation[0]
+        final fun <get-translation>(): dev.composescene3d.core/Vec3 // dev.composescene3d.core/ExplodedPart3D.translation.<get-translation>|<get-translation>(){}[0]
+
+    final fun component1(): dev.composescene3d.core/ModelPartKey // dev.composescene3d.core/ExplodedPart3D.component1|component1(){}[0]
+    final fun component2(): dev.composescene3d.core/Vec3 // dev.composescene3d.core/ExplodedPart3D.component2|component2(){}[0]
+    final fun copy(dev.composescene3d.core/ModelPartKey = ..., dev.composescene3d.core/Vec3 = ...): dev.composescene3d.core/ExplodedPart3D // dev.composescene3d.core/ExplodedPart3D.copy|copy(dev.composescene3d.core.ModelPartKey;dev.composescene3d.core.Vec3){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/ExplodedPart3D.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/ExplodedPart3D.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.composescene3d.core/ExplodedPart3D.toString|toString(){}[0]
+}
+
+final class dev.composescene3d.core/ExplodedView3D { // dev.composescene3d.core/ExplodedView3D|null[0]
+    constructor <init>(kotlin.collections/List<dev.composescene3d.core/ExplodedPart3D>) // dev.composescene3d.core/ExplodedView3D.<init>|<init>(kotlin.collections.List<dev.composescene3d.core.ExplodedPart3D>){}[0]
+
+    final val parts // dev.composescene3d.core/ExplodedView3D.parts|{}parts[0]
+        final fun <get-parts>(): kotlin.collections/List<dev.composescene3d.core/ExplodedPart3D> // dev.composescene3d.core/ExplodedView3D.parts.<get-parts>|<get-parts>(){}[0]
+
+    final fun component1(): kotlin.collections/List<dev.composescene3d.core/ExplodedPart3D> // dev.composescene3d.core/ExplodedView3D.component1|component1(){}[0]
+    final fun copy(kotlin.collections/List<dev.composescene3d.core/ExplodedPart3D> = ...): dev.composescene3d.core/ExplodedView3D // dev.composescene3d.core/ExplodedView3D.copy|copy(kotlin.collections.List<dev.composescene3d.core.ExplodedPart3D>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/ExplodedView3D.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/ExplodedView3D.hashCode|hashCode(){}[0]
+    final fun overrides(kotlin/Float, kotlin.collections/Map<dev.composescene3d.core/ModelPartKey, dev.composescene3d.core/ModelPartOverride> = ...): kotlin.collections/Map<dev.composescene3d.core/ModelPartKey, dev.composescene3d.core/ModelPartOverride> // dev.composescene3d.core/ExplodedView3D.overrides|overrides(kotlin.Float;kotlin.collections.Map<dev.composescene3d.core.ModelPartKey,dev.composescene3d.core.ModelPartOverride>){}[0]
+    final fun toString(): kotlin/String // dev.composescene3d.core/ExplodedView3D.toString|toString(){}[0]
+}
+
 final class dev.composescene3d.core/Geometry3D { // dev.composescene3d.core/Geometry3D|null[0]
     constructor <init>(kotlin/FloatArray, kotlin/IntArray, kotlin/FloatArray, kotlin/FloatArray? = ...) // dev.composescene3d.core/Geometry3D.<init>|<init>(kotlin.FloatArray;kotlin.IntArray;kotlin.FloatArray;kotlin.FloatArray?){}[0]
 
@@ -1106,6 +1136,7 @@ final value class dev.composescene3d.core/TextureAssetKey { // dev.composescene3
     final fun toString(): kotlin/String // dev.composescene3d.core/TextureAssetKey.toString|toString(){}[0]
 }
 
+final fun (dev.composescene3d.core/ModelNode).dev.composescene3d.core/withExplodedView(dev.composescene3d.core/ExplodedView3D, kotlin/Float): dev.composescene3d.core/ModelNode // dev.composescene3d.core/withExplodedView|withExplodedView@dev.composescene3d.core.ModelNode(dev.composescene3d.core.ExplodedView3D;kotlin.Float){}[0]
 final fun (dev.composescene3d.core/ModelSource).dev.composescene3d.core/assetKey(): dev.composescene3d.core/ModelAssetKey // dev.composescene3d.core/assetKey|assetKey@dev.composescene3d.core.ModelSource(){}[0]
 final fun (dev.composescene3d.core/TextureSource).dev.composescene3d.core/assetKey(): dev.composescene3d.core/TextureAssetKey // dev.composescene3d.core/assetKey|assetKey@dev.composescene3d.core.TextureSource(){}[0]
 final fun (kotlin.collections/Iterable<dev.composescene3d.core/SceneNode>).dev.composescene3d.core/flattenSceneNodes(): kotlin.collections/List<dev.composescene3d.core/SceneNode> // dev.composescene3d.core/flattenSceneNodes|flattenSceneNodes@kotlin.collections.Iterable<dev.composescene3d.core.SceneNode>(){}[0]

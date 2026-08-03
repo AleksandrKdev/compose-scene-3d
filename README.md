@@ -102,6 +102,32 @@ selection fill on Android and iOS.
 draws only expanded back faces of the selected subtree, while the original surface remains visible.
 The width is specified in scene units and should be tuned to the model scale.
 
+Define an exploded assembly once and animate only its progress. Existing visibility, material,
+outline, rotation and scale overrides are preserved when translations are merged:
+
+```kotlin
+val explodedView = remember {
+    ExplodedView3D(
+        listOf(
+            ExplodedPart3D(ModelPartKey("Gearbox/Cover"), Vec3(0f, 0.8f, 0f)),
+            ExplodedPart3D(ModelPartKey("Gearbox/Shaft"), Vec3(1.2f, 0f, 0f)),
+        ),
+    )
+}
+val progress by animateFloatAsState(if (exploded) 1f else 0f)
+
+Scene3D(controller) {
+    model(
+        key = "gearbox",
+        source = ModelSource.Resource("files/gearbox.glb"),
+        partOverrides = explodedView.overrides(progress, selectionOverrides),
+    )
+}
+```
+
+An entry pointing to a hierarchy node moves its complete subtree, which is useful for nested
+assemblies. Translation vectors are expressed in that part's authored local coordinate system.
+
 ## Example
 
 ```kotlin
