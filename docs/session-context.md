@@ -541,8 +541,8 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Continue mobile interactive-textbook support with picking individual imported model parts on
-Android/iOS, then add per-part visibility/transform/material overrides.
+Continue mobile interactive-textbook support with per-part visibility/transform/material
+overrides on Android/iOS, now that imported model hierarchy and individual part picking are done.
 The user explicitly allowed breaking the old empty GroupNode API before alpha03. Do not expose
 backend types in public commonMain API.
 ```

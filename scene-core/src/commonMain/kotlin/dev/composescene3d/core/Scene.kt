@@ -78,6 +78,12 @@ data class ModelPart3D(
     val renderable: Boolean = false,
 )
 
+/** Result of selecting a renderable scene entity. Imported models also identify the selected part. */
+data class ScenePickResult(
+    val nodeKey: NodeKey,
+    val modelPartKey: ModelPartKey? = null,
+)
+
 fun ModelSource.assetKey(): ModelAssetKey = when (this) {
     is ModelSource.Resource -> ModelAssetKey("resource:$path")
     is ModelSource.Url -> ModelAssetKey("url:$value")

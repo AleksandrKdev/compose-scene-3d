@@ -758,6 +758,22 @@ final class dev.composescene3d.core/SceneDescription { // dev.composescene3d.cor
     }
 }
 
+final class dev.composescene3d.core/ScenePickResult { // dev.composescene3d.core/ScenePickResult|null[0]
+    constructor <init>(dev.composescene3d.core/NodeKey, dev.composescene3d.core/ModelPartKey? = ...) // dev.composescene3d.core/ScenePickResult.<init>|<init>(dev.composescene3d.core.NodeKey;dev.composescene3d.core.ModelPartKey?){}[0]
+
+    final val modelPartKey // dev.composescene3d.core/ScenePickResult.modelPartKey|{}modelPartKey[0]
+        final fun <get-modelPartKey>(): dev.composescene3d.core/ModelPartKey? // dev.composescene3d.core/ScenePickResult.modelPartKey.<get-modelPartKey>|<get-modelPartKey>(){}[0]
+    final val nodeKey // dev.composescene3d.core/ScenePickResult.nodeKey|{}nodeKey[0]
+        final fun <get-nodeKey>(): dev.composescene3d.core/NodeKey // dev.composescene3d.core/ScenePickResult.nodeKey.<get-nodeKey>|<get-nodeKey>(){}[0]
+
+    final fun component1(): dev.composescene3d.core/NodeKey // dev.composescene3d.core/ScenePickResult.component1|component1(){}[0]
+    final fun component2(): dev.composescene3d.core/ModelPartKey? // dev.composescene3d.core/ScenePickResult.component2|component2(){}[0]
+    final fun copy(dev.composescene3d.core/NodeKey = ..., dev.composescene3d.core/ModelPartKey? = ...): dev.composescene3d.core/ScenePickResult // dev.composescene3d.core/ScenePickResult.copy|copy(dev.composescene3d.core.NodeKey;dev.composescene3d.core.ModelPartKey?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/ScenePickResult.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/ScenePickResult.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.composescene3d.core/ScenePickResult.toString|toString(){}[0]
+}
+
 final class dev.composescene3d.core/ShadowMap3D { // dev.composescene3d.core/ShadowMap3D|null[0]
     constructor <init>(kotlin/Int = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Int = ..., kotlin/Boolean = ..., kotlin/Float = ..., kotlin/Int = ..., kotlin/Float = ...) // dev.composescene3d.core/ShadowMap3D.<init>|<init>(kotlin.Int;kotlin.Float;kotlin.Float;kotlin.Float;kotlin.Int;kotlin.Boolean;kotlin.Float;kotlin.Int;kotlin.Float){}[0]
 

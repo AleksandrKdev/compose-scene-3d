@@ -4,6 +4,8 @@ import dev.composescene3d.core.BoxNode
 import dev.composescene3d.core.NodeKey
 import dev.composescene3d.core.ModelNode
 import dev.composescene3d.core.ModelSource
+import dev.composescene3d.core.ModelPartKey
+import dev.composescene3d.core.ScenePickResult
 import dev.composescene3d.core.GroupNode
 import dev.composescene3d.core.SceneCommand
 import dev.composescene3d.core.RendererCapabilities
@@ -98,6 +100,31 @@ class FilamentRendererTest {
 
         assertEquals(null, renderer.resolveEntity(41))
         assertEquals(null, renderer.resolveEntity(42))
+    }
+
+    @Test
+    fun pickingAnImportedEntityReturnsItsNodeAndPart() {
+        val renderer = FilamentRenderer()
+        val model = ModelNode(NodeKey("machine"), ModelSource.Bytes(byteArrayOf(1), "machine"))
+        val part = ModelPartKey("assembly/shaft")
+        renderer.apply(listOf(SceneCommand.Create(model)))
+        renderer.registerEntities(model.key, listOf(43))
+        renderer.registerModelPartEntity(43, part)
+
+        assertEquals(ScenePickResult(model.key, part), renderer.resolvePick(43))
+
+        renderer.apply(listOf(SceneCommand.Remove(model.key)))
+        assertEquals(null, renderer.resolvePick(43))
+    }
+
+    @Test
+    fun pickingPrimitiveReturnsNodeWithoutModelPart() {
+        val renderer = FilamentRenderer()
+        val box = BoxNode(NodeKey("box"))
+        renderer.apply(listOf(SceneCommand.Create(box)))
+        renderer.registerEntities(box.key, listOf(44))
+
+        assertEquals(ScenePickResult(box.key), renderer.resolvePick(44))
     }
 
     @Test

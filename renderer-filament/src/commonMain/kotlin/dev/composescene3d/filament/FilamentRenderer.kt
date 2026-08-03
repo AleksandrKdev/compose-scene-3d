@@ -42,6 +42,7 @@ import dev.composescene3d.core.PointLightNode
 import dev.composescene3d.core.RendererCapabilities
 import dev.composescene3d.core.SceneCommand
 import dev.composescene3d.core.SceneNode
+import dev.composescene3d.core.ScenePickResult
 import dev.composescene3d.core.SceneRenderer
 import dev.composescene3d.core.SceneSubscription
 import dev.composescene3d.core.ShadowMap3D
@@ -234,6 +235,14 @@ class FilamentRenderer(
 
     internal fun resolveEntity(entity: Int): NodeKey? = entityToNode[entity]
 
+    internal fun resolvePick(entity: Int): ScenePickResult? = entityToNode[entity]?.let { nodeKey ->
+        ScenePickResult(nodeKey = nodeKey, modelPartKey = entityToPart[entity])
+    }
+
+    internal fun registerModelPartEntity(entity: Int, partKey: ModelPartKey) {
+        entityToPart[entity] = partKey
+    }
+
     override fun modelParts(nodeKey: NodeKey): List<ModelPart3D> = partsByNode[nodeKey].orEmpty()
 
     override fun observeModelParts(
@@ -273,7 +282,7 @@ class FilamentRenderer(
         }
         val result = entities.map { entity ->
             val partKey = keyFor(entity)
-            entityToPart[entity] = partKey
+            registerModelPartEntity(entity, partKey)
             ModelPart3D(
                 key = partKey,
                 name = requireNotNull(names[entity]),
@@ -330,7 +339,27 @@ fun FilamentViewport(
     onNodePicked: (NodeKey?) -> Unit = {},
 ) = FilamentViewportContent(
     renderer, modifier, backgroundColor, null, cameraState, orbitEnabled, zoomSpeed,
-    pickingEnabled, shadows, onNodePicked,
+    pickingEnabled, shadows, onNodePicked, null,
+)
+
+/**
+ * Displays a scene and reports both its selected node and, for imported glTF/GLB models, the
+ * selected model part. [onPicked] receives null when Filament does not resolve a scene entity.
+ */
+@Composable
+fun FilamentViewport(
+    renderer: FilamentRenderer,
+    onPicked: (ScenePickResult?) -> Unit,
+    modifier: Modifier = Modifier.fillMaxSize(),
+    backgroundColor: Vec3 = Vec3(0.04f, 0.05f, 0.07f),
+    cameraState: SceneCameraState = rememberSceneCameraState(),
+    orbitEnabled: Boolean = true,
+    zoomSpeed: Float = 0.12f,
+    pickingEnabled: Boolean = true,
+    shadows: ShadowTechnique3D? = ShadowTechnique3D.Pcf,
+) = FilamentViewportContent(
+    renderer, modifier, backgroundColor, null, cameraState, orbitEnabled, zoomSpeed,
+    pickingEnabled, shadows, {}, onPicked,
 )
 
 @Composable
@@ -347,7 +376,25 @@ fun FilamentViewport(
     onNodePicked: (NodeKey?) -> Unit = {},
 ) = FilamentViewportContent(
     renderer, modifier, backgroundColor, environment, cameraState, orbitEnabled, zoomSpeed,
-    pickingEnabled, shadows, onNodePicked,
+    pickingEnabled, shadows, onNodePicked, null,
+)
+
+/** Environment-map variant that reports an imported model's selected part. */
+@Composable
+fun FilamentViewport(
+    renderer: FilamentRenderer,
+    environment: EnvironmentMap,
+    onPicked: (ScenePickResult?) -> Unit,
+    modifier: Modifier = Modifier.fillMaxSize(),
+    backgroundColor: Vec3 = Vec3(0.04f, 0.05f, 0.07f),
+    cameraState: SceneCameraState = rememberSceneCameraState(),
+    orbitEnabled: Boolean = true,
+    zoomSpeed: Float = 0.12f,
+    pickingEnabled: Boolean = true,
+    shadows: ShadowTechnique3D? = ShadowTechnique3D.Pcf,
+) = FilamentViewportContent(
+    renderer, modifier, backgroundColor, environment, cameraState, orbitEnabled, zoomSpeed,
+    pickingEnabled, shadows, {}, onPicked,
 )
 
 @Composable
@@ -362,6 +409,7 @@ private fun FilamentViewportContent(
     pickingEnabled: Boolean,
     shadows: ShadowTechnique3D?,
     onNodePicked: (NodeKey?) -> Unit,
+    onPicked: ((ScenePickResult?) -> Unit)?,
 ) {
     val engine = rememberFilamentEngine()
     val viewState = rememberFilamentViewState()
@@ -441,8 +489,11 @@ private fun FilamentViewportContent(
         // Picking lives on the parent, as in Filament KMP's own sample. Keeping its tap detector
         // off the render-surface modifier prevents it from competing with two-finger pinch events.
         containerModifier = containerModifier.pickOnTap(viewState) { result ->
-            val key = renderer.resolveEntity(result.renderable)
-            callbackScope.launch { onNodePicked(key) }
+            val picked = renderer.resolvePick(result.renderable)
+            callbackScope.launch {
+                onNodePicked(picked?.nodeKey)
+                onPicked?.invoke(picked)
+            }
         }
     }
 

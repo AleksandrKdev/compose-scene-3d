@@ -210,6 +210,20 @@ val environment = EnvironmentMap(
 FilamentViewport(renderer = renderer, environment = environment)
 ```
 
+To select an individual named glTF/GLB part on Android or iOS, use the picking overload. Primitive
+geometry produces a result without `modelPartKey`; imported model renderables include the stable
+part key exposed by `modelParts`:
+
+```kotlin
+FilamentViewport(
+    renderer = renderer,
+    onPicked = { result ->
+        selectedNode = result?.nodeKey
+        selectedPart = result?.modelPartKey
+    },
+)
+```
+
 Generate both files offline with Filament `cmgen -f ktx -x output environment.hdr`. Runtime HDR
 conversion is intentionally excluded: preprocessing produces smaller assets and deterministic
 results on Android, Desktop and iOS.
