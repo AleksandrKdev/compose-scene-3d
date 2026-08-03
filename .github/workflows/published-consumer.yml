@@ -36,5 +36,5 @@ jobs:
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COMPOSE_SCENE_3D_GROUP: dev.composescene3d
-          COMPOSE_SCENE_3D_VERSION: 0.1.0-alpha01
+          COMPOSE_SCENE_3D_GROUP: io.github.aleksandrkdev
+          COMPOSE_SCENE_3D_VERSION: 0.1.0-alpha02

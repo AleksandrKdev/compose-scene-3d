@@ -540,8 +540,16 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
   permanently closes a controller remembered by its parent. Manual controllers remain caller-owned.
 - Documented camera state initialization/cancellation, gesture units and desktop input, annotation
   selection state, and controller lifecycle.
-- The next stabilization step is a final README/sample/publication audit before cutting
-  `0.1.0-alpha03`.
+- Release version is now a Gradle `libraryVersion` property. Tag workflows strip the leading `v`
+  and use the exact same value for publication and the external consumer verification; manual runs
+  require an explicit version input. This prevents publishing alpha03 while accidentally verifying
+  alpha02.
+- Web/Wasm browser tests are now part of normal and publication CI. The stale Web test use of the
+  removed `BoxNode.color` API was migrated to `BoxNode.material`.
+- A complete unsigned local Maven publication for `0.1.0-alpha03` and an independent JVM consumer
+  resolving those local artifacts both build successfully.
+- The codebase is release-candidate ready; the next step is reviewing CI, choosing whether to cut
+  `v0.1.0-alpha03`, and then running the publication workflows.
 
 ## Useful files
 

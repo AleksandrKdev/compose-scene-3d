@@ -11,9 +11,12 @@ plugins {
     id("com.vanniktech.maven.publish") version "0.37.0" apply false
 }
 
+val libraryVersion = providers.gradleProperty("libraryVersion")
+    .orElse("0.1.0-alpha03-SNAPSHOT")
+
 allprojects {
     group = "io.github.aleksandrkdev"
-    version = "0.1.0-alpha03-SNAPSHOT"
+    version = libraryVersion.get()
 }
 
 val publishedModules = setOf("scene-core", "scene-compose", "renderer-filament", "renderer-web")

@@ -628,8 +628,9 @@ orbit, use the mouse wheel to zoom, and use a secondary-button drag to pan.
 
 ## Continuous integration
 
-The macOS GitHub Actions workflow runs common/JVM tests, builds the Android sample, compiles the
-Desktop sample, links simulator and device iOS frameworks, and builds the complete SwiftUI host.
+The macOS GitHub Actions workflow runs common/JVM and Web/Wasm browser tests, builds the Android
+and optimized Web samples, compiles the Desktop sample, links simulator and device iOS frameworks,
+and builds the complete SwiftUI host.
 The workflow deliberately targets arm64 because Filament KMP publishes an arm64 iOS Simulator
 artifact.
 
@@ -686,8 +687,8 @@ repositories {
 }
 
 dependencies {
-    implementation("dev.composescene3d:scene-compose:0.1.0-alpha01")
-    implementation("dev.composescene3d:renderer-filament:0.1.0-alpha01")
+    implementation("io.github.aleksandrkdev:scene-compose:0.1.0-alpha02")
+    implementation("io.github.aleksandrkdev:renderer-filament:0.1.0-alpha02")
 }
 ```
 
@@ -716,7 +717,8 @@ dependencies {
 
 Maintainers publish tags through the `Publish Maven Central` workflow. It expects Central Portal
 user-token secrets `MAVEN_CENTRAL_USERNAME` and `MAVEN_CENTRAL_PASSWORD`, plus the armored private
-key `SIGNING_KEY` and its `SIGNING_PASSWORD`.
+key `SIGNING_KEY` and its `SIGNING_PASSWORD`. A `v0.1.0-alpha03` tag automatically publishes
+version `0.1.0-alpha03`; a manual workflow run requires the same version as an explicit input.
 
 For Android-only development Android Studio may use its bundled JDK 21. Do not configure a
 project-wide Gradle daemon JVM criterion for Java 22: that can prevent initial sync before Gradle's

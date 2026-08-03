@@ -1,7 +1,9 @@
 package dev.composescene3d.web
 
 import dev.composescene3d.core.BoxNode
+import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.NodeKey
+import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.core.RendererCapabilities
 import dev.composescene3d.core.SceneCommand
 import kotlin.test.Test
@@ -27,7 +29,7 @@ class WebRendererTest {
     fun retainsUpdatesAndRemovesNodes() {
         val renderer = WebRenderer()
         val first = BoxNode(NodeKey("box"))
-        val updated = first.copy(color = dev.composescene3d.core.Vec3(1f, 0f, 0f))
+        val updated = first.copy(material = PbrMaterial(baseColor = Color3D.Red))
 
         renderer.apply(listOf(SceneCommand.Create(first)))
         assertEquals(first, renderer.nodes[first.key])

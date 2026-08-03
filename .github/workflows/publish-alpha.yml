@@ -2,6 +2,11 @@ name: Publish alpha
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: Version to publish without the v prefix
+        required: true
+        default: 0.1.0-alpha03
   push:
     tags:
       - 'v*'
@@ -30,8 +35,25 @@ jobs:
       - name: Set up Gradle cache
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Resolve release version
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            release_version="${GITHUB_REF_NAME#v}"
+          else
+            release_version="${{ inputs.version }}"
+          fi
+          echo "ORG_GRADLE_PROJECT_libraryVersion=$release_version" >> "$GITHUB_ENV"
+          echo "COMPOSE_SCENE_3D_VERSION=$release_version" >> "$GITHUB_ENV"
+
       - name: Verify tests and binary API
-        run: ./gradlew :scene-core:jvmTest :scene-compose:jvmTest :renderer-filament:jvmTest checkKotlinAbi
+        run: >-
+          ./gradlew
+          :scene-core:jvmTest
+          :scene-compose:jvmTest
+          :renderer-filament:jvmTest
+          :renderer-web:wasmJsBrowserTest
+          checkKotlinAbi
 
       - name: Publish to GitHub Packages
         run: ./gradlew publishAllPublicationsToGitHubPackagesRepository
