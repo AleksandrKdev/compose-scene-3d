@@ -85,6 +85,7 @@ Scene3D(controller) {
             ModelPartKey("Gearbox/Cover") to ModelPartOverride(visible = false),
             ModelPartKey("Gearbox/Gear") to ModelPartOverride(
                 material = HighlightMaterial(Color3D.rgb(255, 140, 40)),
+                outline = ModelPartOutline(color = Color3D.Cyan, width = 0.015f),
             ),
         ),
     )
@@ -96,6 +97,10 @@ hides its renderable descendants as well. A material assigned to a hierarchy nod
 its descendants, while a more specific child override wins. Remove the override to restore every
 original glTF primitive material. `HighlightMaterial` provides a high-contrast, lighting-independent
 selection fill on Android and iOS.
+
+`ModelPartOutline` adds a true geometry-expanded silhouette: a second lightweight glTF instance
+draws only expanded back faces of the selected subtree, while the original surface remains visible.
+The width is specified in scene units and should be tuned to the model scale.
 
 ## Example
 

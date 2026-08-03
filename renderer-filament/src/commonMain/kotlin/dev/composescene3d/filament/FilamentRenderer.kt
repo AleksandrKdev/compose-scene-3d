@@ -33,6 +33,7 @@ import dev.composescene3d.core.ModelAssetKey
 import dev.composescene3d.core.ModelPart3D
 import dev.composescene3d.core.ModelPartKey
 import dev.composescene3d.core.ModelPartOverride
+import dev.composescene3d.core.ModelPartOutline
 import dev.composescene3d.core.ModelPartProvider
 import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.Material3D
@@ -263,60 +264,64 @@ class FilamentRenderer(
         instance: FilamentInstance,
         engine: Engine,
     ) {
-        val asset = instance.getAsset()
         partsByNode.remove(key)
-        val entities = instance.getEntities().toList()
-        val entitySet = entities.toSet()
-        val transforms = engine.getTransformManager()
-        val renderables = engine.getRenderableManager()
-        val parents = entities.associateWith { entity ->
-            if (!transforms.hasComponent(entity)) null else {
-                transforms.getParent(transforms.getInstance(entity)).takeIf(entitySet::contains)
-            }
-        }
-        val names = entities.associateWith { entity ->
-            asset.getName(entity).orEmpty().takeIf { it.isNotBlank() } ?: "part"
-        }
-        val keys = mutableMapOf<Int, ModelPartKey>()
-        fun keyFor(entity: Int): ModelPartKey = keys.getOrPut(entity) {
-            val parent = parents[entity]
-            val name = requireNotNull(names[entity]).replace("/", "_")
-            val siblings = entities.filter { parents[it] == parent && names[it] == names[entity] }
-            val occurrence = siblings.indexOf(entity)
-            val segment = if (occurrence == 0) name else "$name#${occurrence + 1}"
-            ModelPartKey(parent?.let { "${keyFor(it).value}/$segment" } ?: segment)
-        }
-        val result = entities.map { entity ->
-            val partKey = keyFor(entity)
-            registerModelPartEntity(entity, partKey)
+        val parts = describeModelParts(instance, engine)
+        val result = parts.map { part ->
+            registerModelPartEntity(part.entity, part.key)
             ModelPart3D(
-                key = partKey,
-                name = requireNotNull(names[entity]),
-                parentKey = parents[entity]?.let(::keyFor),
-                childKeys = entities.filter { parents[it] == entity }.map(::keyFor),
-                renderable = renderables.hasComponent(entity),
+                key = part.key,
+                name = part.name,
+                parentKey = part.parentKey,
+                childKeys = parts.filter { it.parentKey == part.key }.map(NativeModelPart::key),
+                renderable = part.originalMaterials.isNotEmpty(),
             )
         }
-        modelPartBindings[key] = entities.mapNotNull { entity ->
-            if (!transforms.hasComponent(entity)) return@mapNotNull null
-            val transformInstance = transforms.getInstance(entity)
+        modelPartBindings[key] = parts.map { part ->
             ModelPartBinding(
-                entity = entity,
-                key = keyFor(entity),
-                parentKey = parents[entity]?.let(::keyFor),
-                originalTransform = transforms.getTransform(transformInstance, FloatArray(16)),
-                originalMaterials = if (renderables.hasComponent(entity)) {
-                    val renderable = renderables.getInstance(entity)
-                    List(renderables.getPrimitiveCount(renderable)) { primitive ->
-                        renderables.getMaterialInstanceAt(renderable, primitive)
-                    }
-                } else {
-                    emptyList()
-                },
+                entity = part.entity,
+                key = part.key,
+                parentKey = part.parentKey,
+                originalTransform = part.originalTransform,
+                originalMaterials = part.originalMaterials,
             )
         }
         partsByNode[key] = result
         modelPartListeners.toList().forEach { it(key, result) }
+    }
+
+    internal fun applyModelPartOutlines(
+        instance: FilamentInstance,
+        overrides: Map<ModelPartKey, ModelPartOverride>,
+        materials: Map<ModelPartOutline, MaterialInstance>,
+        engine: Engine,
+    ) {
+        val parts = describeModelParts(instance, engine)
+        val parentByKey = parts.associate { it.key to it.parentKey }
+        val transforms = engine.getTransformManager()
+        val renderables = engine.getRenderableManager()
+        parts.forEach { part ->
+            val outline = resolveModelPartOutline(part.key, parentByKey, overrides)
+            val visible = outline != null && isModelPartVisible(part.key, parentByKey, overrides)
+            if (renderables.hasComponent(part.entity)) {
+                val renderable = renderables.getInstance(part.entity)
+                renderables.setLayerMask(renderable, 0xff, if (visible) 0xff else 0x00)
+                materials[outline]?.let { material ->
+                    repeat(renderables.getPrimitiveCount(renderable)) { primitive ->
+                        renderables.setMaterialInstanceAt(renderable, primitive, material)
+                    }
+                }
+                renderables.setCastShadows(renderable, false)
+                renderables.setReceiveShadows(renderable, false)
+                renderables.setPriority(renderable, 1)
+            }
+            if (transforms.hasComponent(part.entity)) {
+                val offset = overrides[part.key]?.transformOffset ?: Transform()
+                transforms.setTransform(
+                    transforms.getInstance(part.entity),
+                    multiplyMatrices(part.originalTransform, offset.toFilamentMatrix()),
+                )
+            }
+        }
     }
 
     private fun unregisterEntities(key: NodeKey) {
@@ -388,6 +393,53 @@ private data class ModelPartBinding(
     val originalMaterials: List<MaterialInstance?>,
 )
 
+private data class NativeModelPart(
+    val entity: Int,
+    val key: ModelPartKey,
+    val name: String,
+    val parentKey: ModelPartKey?,
+    val originalTransform: FloatArray,
+    val originalMaterials: List<MaterialInstance?>,
+)
+
+private fun describeModelParts(instance: FilamentInstance, engine: Engine): List<NativeModelPart> {
+    val asset = instance.getAsset()
+    val entities = instance.getEntities().toList()
+    val entitySet = entities.toSet()
+    val transforms = engine.getTransformManager()
+    val renderables = engine.getRenderableManager()
+    val parents = entities.associateWith { entity ->
+        transforms.getParent(transforms.getInstance(entity)).takeIf(entitySet::contains)
+    }
+    val names = entities.associateWith { entity ->
+        asset.getName(entity).orEmpty().takeIf(String::isNotBlank) ?: "part"
+    }
+    val keys = mutableMapOf<Int, ModelPartKey>()
+    fun keyFor(entity: Int): ModelPartKey = keys.getOrPut(entity) {
+        val parent = parents[entity]
+        val name = requireNotNull(names[entity]).replace("/", "_")
+        val siblings = entities.filter { parents[it] == parent && names[it] == names[entity] }
+        val occurrence = siblings.indexOf(entity)
+        val segment = if (occurrence == 0) name else "$name#${occurrence + 1}"
+        ModelPartKey(parent?.let { "${keyFor(it).value}/$segment" } ?: segment)
+    }
+    return entities.filter(transforms::hasComponent).map { entity ->
+        val renderable = if (renderables.hasComponent(entity)) renderables.getInstance(entity) else null
+        NativeModelPart(
+            entity = entity,
+            key = keyFor(entity),
+            name = requireNotNull(names[entity]),
+            parentKey = parents[entity]?.let(::keyFor),
+            originalTransform = transforms.getTransform(transforms.getInstance(entity), FloatArray(16)),
+            originalMaterials = if (renderable == null) emptyList() else {
+                List(renderables.getPrimitiveCount(renderable)) { primitive ->
+                    renderables.getMaterialInstanceAt(renderable, primitive)
+                }
+            },
+        )
+    }
+}
+
 internal fun isModelPartVisible(
     key: ModelPartKey,
     parentByKey: Map<ModelPartKey, ModelPartKey?>,
@@ -409,6 +461,19 @@ internal fun resolveModelPartMaterial(
     var current: ModelPartKey? = key
     while (current != null) {
         overrides[current]?.material?.let { return it }
+        current = parentByKey[current]
+    }
+    return null
+}
+
+internal fun resolveModelPartOutline(
+    key: ModelPartKey,
+    parentByKey: Map<ModelPartKey, ModelPartKey?>,
+    overrides: Map<ModelPartKey, ModelPartOverride>,
+): ModelPartOutline? {
+    var current: ModelPartKey? = key
+    while (current != null) {
+        overrides[current]?.outline?.let { return it }
         current = parentByKey[current]
     }
     return null
@@ -810,6 +875,13 @@ private fun FilamentSceneScope.FilamentModels(
                 .associateWith { material ->
                     key(material) { rememberSceneMaterial(renderer, material) }
                 }
+            val outlineMaterials = model.partOverrides.values
+                .mapNotNull(ModelPartOverride::outline)
+                .distinct()
+                .mapNotNull { outline ->
+                    key(outline) { rememberOutlineMaterial(outline) }?.let { outline to it }
+                }
+                .toMap()
             GltfInstance(
                 asset = asset,
                 position = Position(
@@ -843,6 +915,21 @@ private fun FilamentSceneScope.FilamentModels(
                     applyShadows(model.castShadows, model.receiveShadows)
                 },
             )
+            if (outlineMaterials.isNotEmpty()) {
+                key("outline", model.partOverrides) {
+                    GltfInstance(
+                        asset = asset,
+                        position = model.transform.translation.toFilamentPosition(),
+                        rotation = model.transform.rotation.toFilamentQuaternion(),
+                        scale = model.transform.scale.toFilamentScale(),
+                        onCreate = {
+                            renderer.applyModelPartOutlines(
+                                instance, model.partOverrides, outlineMaterials, engine,
+                            )
+                        },
+                    )
+                }
+            }
         }
     }
 }
@@ -957,6 +1044,18 @@ internal fun rememberSceneMaterial(renderer: FilamentRenderer, material: Materia
         rememberPbrTexturedMaterial(renderer, material)
     }
     is TransparentMaterial -> rememberTransparentMaterial(material)
+}
+
+@Composable
+private fun rememberOutlineMaterial(outline: ModelPartOutline): MaterialInstance? {
+    val compiled = rememberMaterial(key = "compose-scene-3d-outline-v1.72") {
+        Res.readBytes("files/materials/outline.filamat")
+    } ?: return null
+    val linear = outline.color.toLinearSrgb()
+    return rememberMaterialInstance(compiled, outline) {
+        setParameter("color", linear.red, linear.green, linear.blue, linear.alpha)
+        setParameter("width", outline.width)
+    }
 }
 
 @Composable

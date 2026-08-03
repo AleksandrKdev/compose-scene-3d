@@ -25,6 +25,7 @@ import dev.composescene3d.core.Vec3
 import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.ModelPartKey
 import dev.composescene3d.core.ModelPartOverride
+import dev.composescene3d.core.ModelPartOutline
 import dev.composescene3d.core.HighlightMaterial
 import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.core.Color3D
@@ -129,7 +130,10 @@ private fun Sample() {
                     scale = Vec3.One,
                 ),
                 partOverrides = selectedPart?.let { part ->
-                    mapOf(part to ModelPartOverride(material = HighlightMaterial()))
+                    mapOf(part to ModelPartOverride(
+                        material = HighlightMaterial(),
+                        outline = ModelPartOutline(color = Color3D.Cyan, width = 0.02f),
+                    ))
                 }.orEmpty(),
             )
             group(key = "material-showcase") {

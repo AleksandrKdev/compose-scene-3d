@@ -1,0 +1,32 @@
+// Expanded back-face silhouette for selected imported model parts.
+// Compile with the matc version matching the runtime:
+// matc -p all -a all -o outline.filamat outline.mat
+
+material {
+    name : ComposeScene3DOutline,
+    shadingModel : lit,
+    culling : front,
+    depthWrite : true,
+    depthCulling : true,
+    shadowMultiplier : false,
+    variantFilter : [ directionalLighting, dynamicLighting, shadowReceiver, skinning, ssr, stereo ],
+    parameters : [
+        { type : float4, name : color },
+        { type : float, name : width }
+    ]
+}
+
+vertex {
+    void materialVertex(inout MaterialVertexInputs material) {
+        material.worldPosition.xyz += material.worldNormal * materialParams.width;
+    }
+}
+
+fragment {
+    void material(inout MaterialInputs material) {
+        prepareMaterial(material);
+        material.baseColor = materialParams.color;
+        material.emissive = materialParams.color;
+        material.roughness = 1.0;
+    }
+}

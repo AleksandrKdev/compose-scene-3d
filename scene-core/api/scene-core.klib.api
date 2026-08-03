@@ -611,11 +611,29 @@ final class dev.composescene3d.core/ModelPart3D { // dev.composescene3d.core/Mod
     final fun toString(): kotlin/String // dev.composescene3d.core/ModelPart3D.toString|toString(){}[0]
 }
 
+final class dev.composescene3d.core/ModelPartOutline { // dev.composescene3d.core/ModelPartOutline|null[0]
+    constructor <init>(dev.composescene3d.core/Color3D = ..., kotlin/Float = ...) // dev.composescene3d.core/ModelPartOutline.<init>|<init>(dev.composescene3d.core.Color3D;kotlin.Float){}[0]
+
+    final val color // dev.composescene3d.core/ModelPartOutline.color|{}color[0]
+        final fun <get-color>(): dev.composescene3d.core/Color3D // dev.composescene3d.core/ModelPartOutline.color.<get-color>|<get-color>(){}[0]
+    final val width // dev.composescene3d.core/ModelPartOutline.width|{}width[0]
+        final fun <get-width>(): kotlin/Float // dev.composescene3d.core/ModelPartOutline.width.<get-width>|<get-width>(){}[0]
+
+    final fun component1(): dev.composescene3d.core/Color3D // dev.composescene3d.core/ModelPartOutline.component1|component1(){}[0]
+    final fun component2(): kotlin/Float // dev.composescene3d.core/ModelPartOutline.component2|component2(){}[0]
+    final fun copy(dev.composescene3d.core/Color3D = ..., kotlin/Float = ...): dev.composescene3d.core/ModelPartOutline // dev.composescene3d.core/ModelPartOutline.copy|copy(dev.composescene3d.core.Color3D;kotlin.Float){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/ModelPartOutline.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/ModelPartOutline.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.composescene3d.core/ModelPartOutline.toString|toString(){}[0]
+}
+
 final class dev.composescene3d.core/ModelPartOverride { // dev.composescene3d.core/ModelPartOverride|null[0]
-    constructor <init>(kotlin/Boolean = ..., dev.composescene3d.core/Transform = ..., dev.composescene3d.core/Material3D? = ...) // dev.composescene3d.core/ModelPartOverride.<init>|<init>(kotlin.Boolean;dev.composescene3d.core.Transform;dev.composescene3d.core.Material3D?){}[0]
+    constructor <init>(kotlin/Boolean = ..., dev.composescene3d.core/Transform = ..., dev.composescene3d.core/Material3D? = ..., dev.composescene3d.core/ModelPartOutline? = ...) // dev.composescene3d.core/ModelPartOverride.<init>|<init>(kotlin.Boolean;dev.composescene3d.core.Transform;dev.composescene3d.core.Material3D?;dev.composescene3d.core.ModelPartOutline?){}[0]
 
     final val material // dev.composescene3d.core/ModelPartOverride.material|{}material[0]
         final fun <get-material>(): dev.composescene3d.core/Material3D? // dev.composescene3d.core/ModelPartOverride.material.<get-material>|<get-material>(){}[0]
+    final val outline // dev.composescene3d.core/ModelPartOverride.outline|{}outline[0]
+        final fun <get-outline>(): dev.composescene3d.core/ModelPartOutline? // dev.composescene3d.core/ModelPartOverride.outline.<get-outline>|<get-outline>(){}[0]
     final val transformOffset // dev.composescene3d.core/ModelPartOverride.transformOffset|{}transformOffset[0]
         final fun <get-transformOffset>(): dev.composescene3d.core/Transform // dev.composescene3d.core/ModelPartOverride.transformOffset.<get-transformOffset>|<get-transformOffset>(){}[0]
     final val visible // dev.composescene3d.core/ModelPartOverride.visible|{}visible[0]
@@ -624,7 +642,8 @@ final class dev.composescene3d.core/ModelPartOverride { // dev.composescene3d.co
     final fun component1(): kotlin/Boolean // dev.composescene3d.core/ModelPartOverride.component1|component1(){}[0]
     final fun component2(): dev.composescene3d.core/Transform // dev.composescene3d.core/ModelPartOverride.component2|component2(){}[0]
     final fun component3(): dev.composescene3d.core/Material3D? // dev.composescene3d.core/ModelPartOverride.component3|component3(){}[0]
-    final fun copy(kotlin/Boolean = ..., dev.composescene3d.core/Transform = ..., dev.composescene3d.core/Material3D? = ...): dev.composescene3d.core/ModelPartOverride // dev.composescene3d.core/ModelPartOverride.copy|copy(kotlin.Boolean;dev.composescene3d.core.Transform;dev.composescene3d.core.Material3D?){}[0]
+    final fun component4(): dev.composescene3d.core/ModelPartOutline? // dev.composescene3d.core/ModelPartOverride.component4|component4(){}[0]
+    final fun copy(kotlin/Boolean = ..., dev.composescene3d.core/Transform = ..., dev.composescene3d.core/Material3D? = ..., dev.composescene3d.core/ModelPartOutline? = ...): dev.composescene3d.core/ModelPartOverride // dev.composescene3d.core/ModelPartOverride.copy|copy(kotlin.Boolean;dev.composescene3d.core.Transform;dev.composescene3d.core.Material3D?;dev.composescene3d.core.ModelPartOutline?){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/ModelPartOverride.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // dev.composescene3d.core/ModelPartOverride.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // dev.composescene3d.core/ModelPartOverride.toString|toString(){}[0]

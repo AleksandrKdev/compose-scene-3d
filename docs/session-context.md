@@ -541,9 +541,9 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Continue mobile interactive-textbook support with a geometric selection outline, then exploded-view
-helpers on Android/iOS. Imported hierarchy, individual part picking, subtree visibility, local
-transform offsets, per-part materials and dedicated high-contrast fill highlighting are done.
+Continue mobile interactive-textbook support with exploded-view helpers on Android/iOS. Imported
+hierarchy, individual part picking, subtree visibility, local transform offsets, per-part materials,
+high-contrast fill highlighting and a geometry-expanded selection outline are done.
 The user explicitly allowed breaking the old empty GroupNode API before alpha03. Do not expose
 backend types in public commonMain API.
 ```

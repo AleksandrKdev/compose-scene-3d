@@ -343,17 +343,34 @@ public final class dev/composescene3d/core/ModelPartKey {
 	public final synthetic fun unbox-impl ()Ljava/lang/String;
 }
 
+public final class dev/composescene3d/core/ModelPartOutline {
+	public fun <init> ()V
+	public fun <init> (Ldev/composescene3d/core/Color3D;F)V
+	public synthetic fun <init> (Ldev/composescene3d/core/Color3D;FILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ldev/composescene3d/core/Color3D;
+	public final fun component2 ()F
+	public final fun copy (Ldev/composescene3d/core/Color3D;F)Ldev/composescene3d/core/ModelPartOutline;
+	public static synthetic fun copy$default (Ldev/composescene3d/core/ModelPartOutline;Ldev/composescene3d/core/Color3D;FILjava/lang/Object;)Ldev/composescene3d/core/ModelPartOutline;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getColor ()Ldev/composescene3d/core/Color3D;
+	public final fun getWidth ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class dev/composescene3d/core/ModelPartOverride {
 	public fun <init> ()V
-	public fun <init> (ZLdev/composescene3d/core/Transform;Ldev/composescene3d/core/Material3D;)V
-	public synthetic fun <init> (ZLdev/composescene3d/core/Transform;Ldev/composescene3d/core/Material3D;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZLdev/composescene3d/core/Transform;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/ModelPartOutline;)V
+	public synthetic fun <init> (ZLdev/composescene3d/core/Transform;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/ModelPartOutline;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
 	public final fun component2 ()Ldev/composescene3d/core/Transform;
 	public final fun component3 ()Ldev/composescene3d/core/Material3D;
-	public final fun copy (ZLdev/composescene3d/core/Transform;Ldev/composescene3d/core/Material3D;)Ldev/composescene3d/core/ModelPartOverride;
-	public static synthetic fun copy$default (Ldev/composescene3d/core/ModelPartOverride;ZLdev/composescene3d/core/Transform;Ldev/composescene3d/core/Material3D;ILjava/lang/Object;)Ldev/composescene3d/core/ModelPartOverride;
+	public final fun component4 ()Ldev/composescene3d/core/ModelPartOutline;
+	public final fun copy (ZLdev/composescene3d/core/Transform;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/ModelPartOutline;)Ldev/composescene3d/core/ModelPartOverride;
+	public static synthetic fun copy$default (Ldev/composescene3d/core/ModelPartOverride;ZLdev/composescene3d/core/Transform;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/ModelPartOutline;ILjava/lang/Object;)Ldev/composescene3d/core/ModelPartOverride;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getMaterial ()Ldev/composescene3d/core/Material3D;
+	public final fun getOutline ()Ldev/composescene3d/core/ModelPartOutline;
 	public final fun getTransformOffset ()Ldev/composescene3d/core/Transform;
 	public final fun getVisible ()Z
 	public fun hashCode ()I

@@ -20,6 +20,7 @@ import dev.composescene3d.core.CameraDescription
 import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.ModelPartKey
 import dev.composescene3d.core.ModelPartOverride
+import dev.composescene3d.core.ModelPartOutline
 import dev.composescene3d.core.HighlightMaterial
 import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.core.Color3D
@@ -124,7 +125,10 @@ fun IosSample(
                 source = ModelSource.Resource("files/duck.glb"),
                 transform = Transform(translation = Vec3(0f, -1f, 0f)),
                 partOverrides = selectedPart?.let { part ->
-                    mapOf(part to ModelPartOverride(material = HighlightMaterial()))
+                    mapOf(part to ModelPartOverride(
+                        material = HighlightMaterial(),
+                        outline = ModelPartOutline(color = Color3D.Cyan, width = 0.02f),
+                    ))
                 }.orEmpty(),
             )
             group(key = "material-showcase") {

@@ -83,7 +83,18 @@ data class ModelPartOverride(
     val visible: Boolean = true,
     val transformOffset: Transform = Transform(),
     val material: Material3D? = null,
+    val outline: ModelPartOutline? = null,
 )
+
+/** Geometry-expanded silhouette drawn around an imported model part. */
+data class ModelPartOutline(
+    val color: Color3D = Color3D.Yellow,
+    val width: Float = 0.015f,
+) {
+    init {
+        require(width > 0f && width.isFinite()) { "Outline width must be finite and positive" }
+    }
+}
 
 /** Result of selecting a renderable scene entity. Imported models also identify the selected part. */
 data class ScenePickResult(

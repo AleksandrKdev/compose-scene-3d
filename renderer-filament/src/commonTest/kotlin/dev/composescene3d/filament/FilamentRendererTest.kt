@@ -8,6 +8,7 @@ import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.ModelPartKey
 import dev.composescene3d.core.ModelPartOverride
+import dev.composescene3d.core.ModelPartOutline
 import dev.composescene3d.core.ScenePickResult
 import dev.composescene3d.core.GroupNode
 import dev.composescene3d.core.SceneCommand
@@ -169,6 +170,24 @@ class FilamentRendererTest {
             root to ModelPartOverride(material = rootMaterial),
         )))
         assertEquals(null, resolveModelPartMaterial(bearing, parents, emptyMap()))
+    }
+
+    @Test
+    fun closestOutlineOverrideWinsAndParentAppliesToSubtree() {
+        val root = ModelPartKey("assembly")
+        val child = ModelPartKey("assembly/shaft")
+        val leaf = ModelPartKey("assembly/shaft/bearing")
+        val parents = mapOf(root to null, child to root, leaf to child)
+        val outer = ModelPartOutline(Color3D.Yellow)
+        val inner = ModelPartOutline(Color3D.Cyan)
+
+        assertEquals(inner, resolveModelPartOutline(leaf, parents, mapOf(
+            root to ModelPartOverride(outline = outer),
+            child to ModelPartOverride(outline = inner),
+        )))
+        assertEquals(outer, resolveModelPartOutline(child, parents, mapOf(
+            root to ModelPartOverride(outline = outer),
+        )))
     }
 
     @Test
