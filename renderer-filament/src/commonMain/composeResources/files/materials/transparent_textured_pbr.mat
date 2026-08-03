@@ -1,0 +1,24 @@
+material {
+    name : ComposeScene3DTransparentTexturedPbr,
+    shadingModel : lit,
+    blending : transparent,
+    requires : [ uv0 ],
+    variantFilter : [ skinning, ssr, stereo ],
+    parameters : [
+        { type : sampler2d, name : albedo },
+        { type : float, name : opacity },
+        { type : float, name : metallicFactor },
+        { type : float, name : roughnessFactor }
+    ]
+}
+fragment {
+    void material(inout MaterialInputs material) {
+        prepareMaterial(material);
+        vec4 color = texture(materialParams_albedo, getUV0());
+        color.rgb *= color.a * materialParams.opacity;
+        color.a *= materialParams.opacity;
+        material.baseColor = color;
+        material.metallic = materialParams.metallicFactor;
+        material.roughness = materialParams.roughnessFactor;
+    }
+}

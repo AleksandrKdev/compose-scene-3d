@@ -332,6 +332,11 @@ data class TransparentMaterial(
     }
 }
 
+/** Multiplies a material's alpha while retaining its shading and texture inputs. */
+data class OpacityMaterial(val material: Material3D, val opacity: Float) : Material3D {
+    init { require(opacity in 0f..1f) { "Material opacity must be between 0 and 1" } }
+}
+
 data class BoxNode(
     override val key: NodeKey,
     val size: Vec3 = Vec3.One,

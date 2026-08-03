@@ -541,8 +541,8 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Continue the final library milestones with subtree opacity that preserves textured PBR materials on
-Android/iOS, then API stabilization, documentation, and release preparation.
+Continue the final library milestones by inheriting OpacityMaterial through groups and adding a
+custom glTF material-provider opacity path, then stabilize APIs and prepare a release.
 Imported hierarchy, picking, part overrides, selection effects, exploded views, frame-tracked
 world-to-screen model-part annotations, solid 3D lines/arrows/callout leaders, and open clipping
 plane section views, CPU-generated concave/multi-contour/holed section caps for custom meshes, and
@@ -551,7 +551,9 @@ Compose screen anchoring for dimensions and arbitrary scene points, collision-fr
 layout, locale-explicit engineering dimension formatting with tolerances, and interactive
 annotation selection/accessibility metadata for TalkBack and VoiceOver, bounding-sphere camera
 focus, smooth cancellable camera flights, gesture cancellation, and universal subtree visibility
-with stable node identity are done.
+with stable node identity are done. OpacityMaterial and a Filament 1.72 transparent textured shader
+preserve declarative albedo/PBR factors on Android/iOS/Web; group inheritance and imported glTF
+opacity remain.
 The user explicitly allowed breaking the old empty GroupNode API before alpha03. Do not expose
 backend types in public commonMain API.
 ```

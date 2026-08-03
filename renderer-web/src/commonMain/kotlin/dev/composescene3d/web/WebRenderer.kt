@@ -53,6 +53,7 @@ import dev.composescene3d.core.SphereNode
 import dev.composescene3d.core.SpotLightNode
 import dev.composescene3d.core.Transform
 import dev.composescene3d.core.TransparentMaterial
+import dev.composescene3d.core.OpacityMaterial
 import dev.composescene3d.core.TexturedMaterial
 import dev.composescene3d.core.TextureSource
 import dev.composescene3d.core.assetKey
@@ -250,6 +251,7 @@ private fun Quaternion.rotate(v: Vec3): Vec3 {
     return v + uv * (2f*w) + uuv * 2f
 }
 private fun Material3D.color(): Color = when (this) {
+    is OpacityMaterial -> material.color().copy(alpha = material.color().alpha * opacity)
     is PbrMaterial -> baseColor.toColor()
     is UnlitMaterial -> color.toColor()
     is EmissiveMaterial -> color.toColor(intensity)
@@ -259,45 +261,53 @@ private fun Material3D.color(): Color = when (this) {
     is ClippedPbrMaterial -> baseColor.toColor()
     is TexturedMaterial -> Color.White
 }
-private fun Material3D.metallic() = when (this) {
+private fun Material3D.metallic(): Float = when (this) {
+    is OpacityMaterial -> material.metallic()
     is PbrMaterial -> metallic
     is TransparentMaterial -> metallic
     is TexturedMaterial -> metallic
     is ClippedPbrMaterial -> metallic
     else -> 0f
 }
-private fun Material3D.roughness() = when (this) {
+private fun Material3D.roughness(): Float = when (this) {
+    is OpacityMaterial -> material.roughness()
     is PbrMaterial -> roughness
     is TransparentMaterial -> roughness
     is TexturedMaterial -> roughness
     is ClippedPbrMaterial -> roughness
     else -> 1f
 }
-private fun Material3D.reflectance() = when (this) {
+private fun Material3D.reflectance(): Float = when (this) {
+    is OpacityMaterial -> material.reflectance()
     is PbrMaterial -> reflectance
     is TransparentMaterial -> reflectance
     is ClippedPbrMaterial -> reflectance
     else -> 0.5f
 }
-private fun Material3D.shadingModel() = when (this) {
+private fun Material3D.shadingModel(): Int = when (this) {
+    is OpacityMaterial -> material.shadingModel()
     is UnlitMaterial, is EmissiveMaterial, is HighlightMaterial, is HatchMaterial -> 1
     else -> 0
 }
-private fun Material3D.normalScale() = (this as? TexturedMaterial)?.normalScale ?: 1f
-private fun Material3D.emissiveColor() = when (this) {
+private fun Material3D.normalScale() = (baseMaterial() as? TexturedMaterial)?.normalScale ?: 1f
+private fun Material3D.emissiveColor(): Color3D = when (this) {
+    is OpacityMaterial -> material.emissiveColor()
     is TexturedMaterial -> emissiveColor
     is EmissiveMaterial -> color
     is HighlightMaterial -> color
     else -> Color3D.Black
 }
-private fun Material3D.emissiveIntensity() = when (this) {
+private fun Material3D.emissiveIntensity(): Float = when (this) {
+    is OpacityMaterial -> material.emissiveIntensity()
     is TexturedMaterial -> if (emissiveTexture != null) emissiveIntensity else 0f
     is EmissiveMaterial -> intensity
     is HighlightMaterial -> intensity
     else -> 0f
 }
 private fun Material3D.ambientOcclusionStrength() =
-    (this as? TexturedMaterial)?.ambientOcclusionStrength ?: 1f
+    (baseMaterial() as? TexturedMaterial)?.ambientOcclusionStrength ?: 1f
+private tailrec fun Material3D.baseMaterial(): Material3D =
+    if (this is OpacityMaterial) material.baseMaterial() else this
 private fun Color3D.toColor(multiplier: Float = 1f) = Color(
     (red*multiplier).coerceIn(0f,1f), (green*multiplier).coerceIn(0f,1f),
     (blue*multiplier).coerceIn(0f,1f), alpha.coerceIn(0f,1f),
@@ -1156,7 +1166,7 @@ private fun buildGpuBatches(
                 color.red, color.green, color.blue, color.alpha,
                 uv?.get(index*2) ?: 0f, uv?.get(index*2+1) ?: 0f)
         }
-        val textured = mesh.material as? TexturedMaterial
+        val textured = mesh.material.baseMaterial() as? TexturedMaterial
         add(GpuMesh(
             vertices = vertices.toFloatArray(),
             indices = mesh.indices.toIntArray(),
@@ -1175,9 +1185,9 @@ private fun buildGpuBatches(
             ambientOcclusionStrength = mesh.material.ambientOcclusionStrength(),
             castShadows = castShadows,
             receiveShadows = receiveShadows,
-            alphaMode = if (mesh.material is TransparentMaterial) WEB_ALPHA_BLEND else mesh.alphaMode,
+            alphaMode = if (mesh.material is TransparentMaterial || mesh.material is OpacityMaterial) WEB_ALPHA_BLEND else mesh.alphaMode,
             alphaCutoff = mesh.alphaCutoff,
-            doubleSided = mesh.doubleSided || mesh.material is TransparentMaterial,
+            doubleSided = mesh.doubleSided || mesh.material is TransparentMaterial || mesh.material is OpacityMaterial,
         ))
     }
     fun append(node: SceneNode, parents: List<Transform>) {

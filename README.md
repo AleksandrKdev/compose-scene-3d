@@ -355,6 +355,16 @@ group("internal-parts", visible = showInternals) {
 Nested groups inherit hidden state on Filament and Web, allowing lesson steps to reveal assemblies
 without application-side filtering or unstable node identities.
 
+Declarative materials can be faded without changing their source definition:
+
+```kotlin
+mesh("cover", coverGeometry, material = OpacityMaterial(coverMaterial, opacity = 0.35f))
+```
+
+`OpacityMaterial` uses transparent rendering on Filament and Web. `TexturedMaterial` retains its
+albedo texture and PBR metallic/roughness factors; color materials retain their shading parameters.
+Imported glTF material fading requires the forthcoming custom glTF material-provider path.
+
 World-space clipping planes provide dynamic section views on the Filament Android/iOS backend.
 `ClippedPbrMaterial` accepts one to three half-spaces and can be attached to primitives, custom
 meshes, or imported parts through `ModelPartOverride.material`:

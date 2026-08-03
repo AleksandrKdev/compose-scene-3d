@@ -1035,6 +1035,22 @@ final class dev.composescene3d.core/ModelPartOverride { // dev.composescene3d.co
     final fun toString(): kotlin/String // dev.composescene3d.core/ModelPartOverride.toString|toString(){}[0]
 }
 
+final class dev.composescene3d.core/OpacityMaterial : dev.composescene3d.core/Material3D { // dev.composescene3d.core/OpacityMaterial|null[0]
+    constructor <init>(dev.composescene3d.core/Material3D, kotlin/Float) // dev.composescene3d.core/OpacityMaterial.<init>|<init>(dev.composescene3d.core.Material3D;kotlin.Float){}[0]
+
+    final val material // dev.composescene3d.core/OpacityMaterial.material|{}material[0]
+        final fun <get-material>(): dev.composescene3d.core/Material3D // dev.composescene3d.core/OpacityMaterial.material.<get-material>|<get-material>(){}[0]
+    final val opacity // dev.composescene3d.core/OpacityMaterial.opacity|{}opacity[0]
+        final fun <get-opacity>(): kotlin/Float // dev.composescene3d.core/OpacityMaterial.opacity.<get-opacity>|<get-opacity>(){}[0]
+
+    final fun component1(): dev.composescene3d.core/Material3D // dev.composescene3d.core/OpacityMaterial.component1|component1(){}[0]
+    final fun component2(): kotlin/Float // dev.composescene3d.core/OpacityMaterial.component2|component2(){}[0]
+    final fun copy(dev.composescene3d.core/Material3D = ..., kotlin/Float = ...): dev.composescene3d.core/OpacityMaterial // dev.composescene3d.core/OpacityMaterial.copy|copy(dev.composescene3d.core.Material3D;kotlin.Float){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/OpacityMaterial.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/OpacityMaterial.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.composescene3d.core/OpacityMaterial.toString|toString(){}[0]
+}
+
 final class dev.composescene3d.core/PbrMaterial : dev.composescene3d.core/Material3D { // dev.composescene3d.core/PbrMaterial|null[0]
     constructor <init>(dev.composescene3d.core/Color3D = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ...) // dev.composescene3d.core/PbrMaterial.<init>|<init>(dev.composescene3d.core.Color3D;kotlin.Float;kotlin.Float;kotlin.Float){}[0]
 

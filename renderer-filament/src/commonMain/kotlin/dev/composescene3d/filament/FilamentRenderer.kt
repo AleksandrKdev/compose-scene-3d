@@ -66,6 +66,7 @@ import dev.composescene3d.core.TextureSource
 import dev.composescene3d.core.TexturedMaterial
 import dev.composescene3d.core.Transform
 import dev.composescene3d.core.TransparentMaterial
+import dev.composescene3d.core.OpacityMaterial
 import dev.composescene3d.core.EmissiveMaterial
 import dev.composescene3d.core.EnvironmentMap
 import dev.composescene3d.core.UnlitMaterial
@@ -1148,6 +1149,41 @@ internal fun rememberSceneMaterial(renderer: FilamentRenderer, material: Materia
         rememberPbrTexturedMaterial(renderer, material)
     }
     is TransparentMaterial -> rememberTransparentMaterial(material)
+    is OpacityMaterial -> rememberOpacityMaterial(renderer, material)
+}
+
+@Composable
+private fun rememberOpacityMaterial(renderer: FilamentRenderer, faded: OpacityMaterial): MaterialInstance {
+    val base = faded.material
+    if (base !is TexturedMaterial) {
+        val color = when (base) {
+            is PbrMaterial -> base.baseColor
+            is UnlitMaterial -> base.color
+            is EmissiveMaterial -> base.color
+            is HighlightMaterial -> base.color
+            is TransparentMaterial -> base.color
+            else -> Color3D.White
+        }
+        return rememberTransparentMaterial(TransparentMaterial(
+            color.copy(alpha = color.alpha * faded.opacity),
+            metallic = (base as? PbrMaterial)?.metallic ?: 0f,
+            roughness = (base as? PbrMaterial)?.roughness ?: 0.5f,
+        ))
+    }
+    val albedo = rememberSceneTexture(renderer, base.baseColorTexture, TextureLoader.TextureType.COLOR)
+    val compiled = rememberMaterial(key = "compose-scene-3d-transparent-textured-pbr-v1.72") {
+        Res.readBytes("files/materials/transparent_textured_pbr.filamat")
+    }
+    if (albedo == null || compiled == null) return rememberTransparentMaterial(
+        TransparentMaterial(Color3D(0.7f, 0.7f, 0.7f, faded.opacity)),
+    )
+    val sampler = remember { TextureSampler() }
+    return rememberMaterialInstance(compiled, albedo, faded) {
+        setParameter("albedo", albedo, sampler)
+        setParameter("opacity", faded.opacity)
+        setParameter("metallicFactor", base.metallic)
+        setParameter("roughnessFactor", base.roughness)
+    }
 }
 
 @Composable
