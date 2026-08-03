@@ -98,6 +98,7 @@ import io.github.erkko68.filament.compose.scene.Shadows
 import io.github.erkko68.filament.utils.Quaternion
 import io.github.erkko68.filament.utils.KTX1Loader
 import io.github.erkko68.filament.Engine
+import io.github.erkko68.filament.MaterialInstance
 import io.github.erkko68.filament.Texture
 import io.github.erkko68.filament.TextureSampler
 import io.github.erkko68.filament.Renderer
@@ -303,6 +304,14 @@ class FilamentRenderer(
                 key = keyFor(entity),
                 parentKey = parents[entity]?.let(::keyFor),
                 originalTransform = transforms.getTransform(transformInstance, FloatArray(16)),
+                originalMaterials = if (renderables.hasComponent(entity)) {
+                    val renderable = renderables.getInstance(entity)
+                    List(renderables.getPrimitiveCount(renderable)) { primitive ->
+                        renderables.getMaterialInstanceAt(renderable, primitive)
+                    }
+                } else {
+                    emptyList()
+                },
             )
         }
         partsByNode[key] = result
@@ -323,6 +332,7 @@ class FilamentRenderer(
     internal fun applyModelPartOverrides(
         key: NodeKey,
         overrides: Map<ModelPartKey, ModelPartOverride>,
+        materials: Map<Material3D, MaterialInstance>,
         engine: Engine,
     ) {
         val bindings = modelPartBindings[key].orEmpty()
@@ -332,7 +342,21 @@ class FilamentRenderer(
         bindings.forEach { binding ->
             val visible = isModelPartVisible(binding.key, parentByKey, overrides)
             if (renderables.hasComponent(binding.entity)) {
-                renderables.setLayerMask(renderables.getInstance(binding.entity), 0xff, if (visible) 0xff else 0x00)
+                val renderable = renderables.getInstance(binding.entity)
+                renderables.setLayerMask(renderable, 0xff, if (visible) 0xff else 0x00)
+                val overrideMaterial = resolveModelPartMaterial(binding.key, parentByKey, overrides)
+                    ?.let(materials::get)
+                binding.originalMaterials.forEachIndexed { primitive, originalMaterial ->
+                    when {
+                        overrideMaterial != null -> renderables.setMaterialInstanceAt(
+                            renderable, primitive, overrideMaterial,
+                        )
+                        originalMaterial != null -> renderables.setMaterialInstanceAt(
+                            renderable, primitive, originalMaterial,
+                        )
+                        else -> renderables.clearMaterialInstanceAt(renderable, primitive)
+                    }
+                }
             }
             if (transforms.hasComponent(binding.entity)) {
                 val offset = overrides[binding.key]?.transformOffset ?: Transform()
@@ -360,6 +384,7 @@ private data class ModelPartBinding(
     val key: ModelPartKey,
     val parentKey: ModelPartKey?,
     val originalTransform: FloatArray,
+    val originalMaterials: List<MaterialInstance?>,
 )
 
 internal fun isModelPartVisible(
@@ -373,6 +398,19 @@ internal fun isModelPartVisible(
         current = parentByKey[current]
     }
     return true
+}
+
+internal fun resolveModelPartMaterial(
+    key: ModelPartKey,
+    parentByKey: Map<ModelPartKey, ModelPartKey?>,
+    overrides: Map<ModelPartKey, ModelPartOverride>,
+): Material3D? {
+    var current: ModelPartKey? = key
+    while (current != null) {
+        overrides[current]?.material?.let { return it }
+        current = parentByKey[current]
+    }
+    return null
 }
 
 internal fun multiplyMatrices(left: FloatArray, right: FloatArray): FloatArray {
@@ -765,6 +803,12 @@ private fun FilamentSceneScope.FilamentModels(
 
     models.filter(ModelNode::visible).forEach { model ->
         key(model.key.value) {
+            val overrideMaterials = model.partOverrides.values
+                .mapNotNull(ModelPartOverride::material)
+                .distinct()
+                .associateWith { material ->
+                    key(material) { rememberSceneMaterial(renderer, material) }
+                }
             GltfInstance(
                 asset = asset,
                 position = Position(
@@ -786,11 +830,15 @@ private fun FilamentSceneScope.FilamentModels(
                 onCreate = {
                     renderer.registerEntities(model.key, instance.getEntities().toList())
                     renderer.registerModelParts(model.key, instance, engine)
-                    renderer.applyModelPartOverrides(model.key, model.partOverrides, engine)
+                    renderer.applyModelPartOverrides(
+                        model.key, model.partOverrides, overrideMaterials, engine,
+                    )
                     applyShadows(model.castShadows, model.receiveShadows)
                 },
                 onUpdate = {
-                    renderer.applyModelPartOverrides(model.key, model.partOverrides, engine)
+                    renderer.applyModelPartOverrides(
+                        model.key, model.partOverrides, overrideMaterials, engine,
+                    )
                     applyShadows(model.castShadows, model.receiveShadows)
                 },
             )

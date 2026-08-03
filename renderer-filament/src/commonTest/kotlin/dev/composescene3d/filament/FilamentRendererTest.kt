@@ -4,6 +4,8 @@ import dev.composescene3d.core.BoxNode
 import dev.composescene3d.core.NodeKey
 import dev.composescene3d.core.ModelNode
 import dev.composescene3d.core.ModelSource
+import dev.composescene3d.core.PbrMaterial
+import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.ModelPartKey
 import dev.composescene3d.core.ModelPartOverride
 import dev.composescene3d.core.ScenePickResult
@@ -141,6 +143,32 @@ class FilamentRendererTest {
             isModelPartVisible(bearing, parents, mapOf(root to ModelPartOverride(visible = false))),
         )
         assertEquals(true, isModelPartVisible(bearing, parents, emptyMap()))
+    }
+
+    @Test
+    fun closestMaterialOverrideWinsAndParentAppliesToSubtree() {
+        val root = ModelPartKey("assembly")
+        val shaft = ModelPartKey("assembly/shaft")
+        val bearing = ModelPartKey("assembly/shaft/bearing")
+        val parents = mapOf(root to null, shaft to root, bearing to shaft)
+        val rootMaterial = PbrMaterial(baseColor = Color3D.Red)
+        val shaftMaterial = PbrMaterial(baseColor = Color3D.Blue)
+
+        assertEquals(
+            shaftMaterial,
+            resolveModelPartMaterial(
+                bearing,
+                parents,
+                mapOf(
+                    root to ModelPartOverride(material = rootMaterial),
+                    shaft to ModelPartOverride(material = shaftMaterial),
+                ),
+            ),
+        )
+        assertEquals(rootMaterial, resolveModelPartMaterial(shaft, parents, mapOf(
+            root to ModelPartOverride(material = rootMaterial),
+        )))
+        assertEquals(null, resolveModelPartMaterial(bearing, parents, emptyMap()))
     }
 
     @Test

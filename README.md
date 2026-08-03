@@ -83,14 +83,19 @@ Scene3D(controller) {
                 transformOffset = Transform(translation = Vec3(0.4f, 0f, 0f)),
             ),
             ModelPartKey("Gearbox/Cover") to ModelPartOverride(visible = false),
+            ModelPartKey("Gearbox/Gear") to ModelPartOverride(
+                material = EmissiveMaterial(Color3D.rgb(255, 140, 40), intensity = 1.5f),
+            ),
         ),
     )
 }
 ```
 
 Overrides are declarative and work on Android and iOS. Hiding a non-renderable hierarchy node
-hides its renderable descendants as well. Per-part material replacement is the next mobile
-milestone.
+hides its renderable descendants as well. A material assigned to a hierarchy node is inherited by
+its descendants, while a more specific child override wins. Remove the override to restore every
+original glTF primitive material. `EmissiveMaterial` or a bright `PbrMaterial` can be used for
+selection highlighting.
 
 ## Example
 

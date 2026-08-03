@@ -82,6 +82,7 @@ data class ModelPart3D(
 data class ModelPartOverride(
     val visible: Boolean = true,
     val transformOffset: Transform = Transform(),
+    val material: Material3D? = null,
 )
 
 /** Result of selecting a renderable scene entity. Imported models also identify the selected part. */
