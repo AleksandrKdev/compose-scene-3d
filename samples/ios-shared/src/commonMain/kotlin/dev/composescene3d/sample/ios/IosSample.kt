@@ -126,7 +126,7 @@ fun IosSample(
         Scene3D(controller) {
             box(
                 key = "demo-box",
-                color = Vec3(0.15f, 0.55f, 0.95f),
+                material = PbrMaterial(baseColor = Color3D(0.15f, 0.55f, 0.95f)),
                 transform = Transform(translation = Vec3(-1f, 0f, 0f)),
             )
             model(

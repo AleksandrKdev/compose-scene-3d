@@ -380,14 +380,14 @@ final class dev.composescene3d.core/ArrowNode : dev.composescene3d.core/SceneNod
 }
 
 final class dev.composescene3d.core/BoxNode : dev.composescene3d.core/SceneNode { // dev.composescene3d.core/BoxNode|null[0]
-    constructor <init>(dev.composescene3d.core/NodeKey, dev.composescene3d.core/Vec3 = ..., dev.composescene3d.core/Vec3 = ..., dev.composescene3d.core/Transform = ..., kotlin/Boolean = ..., kotlin/Boolean = ...) // dev.composescene3d.core/BoxNode.<init>|<init>(dev.composescene3d.core.NodeKey;dev.composescene3d.core.Vec3;dev.composescene3d.core.Vec3;dev.composescene3d.core.Transform;kotlin.Boolean;kotlin.Boolean){}[0]
+    constructor <init>(dev.composescene3d.core/NodeKey, dev.composescene3d.core/Vec3 = ..., dev.composescene3d.core/Material3D = ..., dev.composescene3d.core/Transform = ..., kotlin/Boolean = ..., kotlin/Boolean = ...) // dev.composescene3d.core/BoxNode.<init>|<init>(dev.composescene3d.core.NodeKey;dev.composescene3d.core.Vec3;dev.composescene3d.core.Material3D;dev.composescene3d.core.Transform;kotlin.Boolean;kotlin.Boolean){}[0]
 
     final val castShadows // dev.composescene3d.core/BoxNode.castShadows|{}castShadows[0]
         final fun <get-castShadows>(): kotlin/Boolean // dev.composescene3d.core/BoxNode.castShadows.<get-castShadows>|<get-castShadows>(){}[0]
-    final val color // dev.composescene3d.core/BoxNode.color|{}color[0]
-        final fun <get-color>(): dev.composescene3d.core/Vec3 // dev.composescene3d.core/BoxNode.color.<get-color>|<get-color>(){}[0]
     final val key // dev.composescene3d.core/BoxNode.key|{}key[0]
         final fun <get-key>(): dev.composescene3d.core/NodeKey // dev.composescene3d.core/BoxNode.key.<get-key>|<get-key>(){}[0]
+    final val material // dev.composescene3d.core/BoxNode.material|{}material[0]
+        final fun <get-material>(): dev.composescene3d.core/Material3D // dev.composescene3d.core/BoxNode.material.<get-material>|<get-material>(){}[0]
     final val receiveShadows // dev.composescene3d.core/BoxNode.receiveShadows|{}receiveShadows[0]
         final fun <get-receiveShadows>(): kotlin/Boolean // dev.composescene3d.core/BoxNode.receiveShadows.<get-receiveShadows>|<get-receiveShadows>(){}[0]
     final val size // dev.composescene3d.core/BoxNode.size|{}size[0]
@@ -397,11 +397,11 @@ final class dev.composescene3d.core/BoxNode : dev.composescene3d.core/SceneNode 
 
     final fun component1(): dev.composescene3d.core/NodeKey // dev.composescene3d.core/BoxNode.component1|component1(){}[0]
     final fun component2(): dev.composescene3d.core/Vec3 // dev.composescene3d.core/BoxNode.component2|component2(){}[0]
-    final fun component3(): dev.composescene3d.core/Vec3 // dev.composescene3d.core/BoxNode.component3|component3(){}[0]
+    final fun component3(): dev.composescene3d.core/Material3D // dev.composescene3d.core/BoxNode.component3|component3(){}[0]
     final fun component4(): dev.composescene3d.core/Transform // dev.composescene3d.core/BoxNode.component4|component4(){}[0]
     final fun component5(): kotlin/Boolean // dev.composescene3d.core/BoxNode.component5|component5(){}[0]
     final fun component6(): kotlin/Boolean // dev.composescene3d.core/BoxNode.component6|component6(){}[0]
-    final fun copy(dev.composescene3d.core/NodeKey = ..., dev.composescene3d.core/Vec3 = ..., dev.composescene3d.core/Vec3 = ..., dev.composescene3d.core/Transform = ..., kotlin/Boolean = ..., kotlin/Boolean = ...): dev.composescene3d.core/BoxNode // dev.composescene3d.core/BoxNode.copy|copy(dev.composescene3d.core.NodeKey;dev.composescene3d.core.Vec3;dev.composescene3d.core.Vec3;dev.composescene3d.core.Transform;kotlin.Boolean;kotlin.Boolean){}[0]
+    final fun copy(dev.composescene3d.core/NodeKey = ..., dev.composescene3d.core/Vec3 = ..., dev.composescene3d.core/Material3D = ..., dev.composescene3d.core/Transform = ..., kotlin/Boolean = ..., kotlin/Boolean = ...): dev.composescene3d.core/BoxNode // dev.composescene3d.core/BoxNode.copy|copy(dev.composescene3d.core.NodeKey;dev.composescene3d.core.Vec3;dev.composescene3d.core.Material3D;dev.composescene3d.core.Transform;kotlin.Boolean;kotlin.Boolean){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/BoxNode.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // dev.composescene3d.core/BoxNode.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // dev.composescene3d.core/BoxNode.toString|toString(){}[0]

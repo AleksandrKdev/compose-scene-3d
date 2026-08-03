@@ -75,12 +75,12 @@ class SceneScope internal constructor() {
     fun box(
         key: String,
         size: Vec3 = Vec3.One,
-        color: Vec3 = Vec3(0.7f, 0.7f, 0.7f),
+        material: Material3D = PbrMaterial(),
         transform: Transform = Transform(),
         castShadows: Boolean = true,
         receiveShadows: Boolean = true,
     ) {
-        nodes += BoxNode(NodeKey(key), size, color, transform, castShadows, receiveShadows)
+        nodes += BoxNode(NodeKey(key), size, material, transform, castShadows, receiveShadows)
     }
 
     fun sphere(

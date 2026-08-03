@@ -81,7 +81,9 @@ fun main() {
                         box(
                             key = "cube",
                             size = Vec3(2f, 2f, 2f),
-                            color = Vec3(0.16f, 0.58f, 0.96f),
+                            material = PbrMaterial(
+                                baseColor = Color3D(0.16f, 0.58f, 0.96f),
+                            ),
                             transform = Transform(translation = Vec3(-2.4f, 0f, 0f)),
                         )
                         sphere(

@@ -1058,10 +1058,7 @@ private fun GltfInstanceScope.applyShadows(cast: Boolean, receive: Boolean) {
 
 @Composable
 private fun FilamentSceneScope.FilamentBox(renderer: FilamentRenderer, node: BoxNode) {
-    val material = rememberSceneMaterial(
-        renderer,
-        PbrMaterial(baseColor = Color3D(node.color.x, node.color.y, node.color.z))
-    )
+    val material = rememberSceneMaterial(renderer, node.material)
     Cube(
         material = material,
         position = Position(

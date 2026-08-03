@@ -362,7 +362,7 @@ fun Material3D.withOpacity(opacity: Float): Material3D {
 data class BoxNode(
     override val key: NodeKey,
     val size: Vec3 = Vec3.One,
-    val color: Vec3 = Vec3(0.7f, 0.7f, 0.7f),
+    val material: Material3D = PbrMaterial(),
     override val transform: Transform = Transform(),
     val castShadows: Boolean = true,
     val receiveShadows: Boolean = true,

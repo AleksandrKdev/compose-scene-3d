@@ -16,6 +16,21 @@ Current release coordinates: `io.github.aleksandrkdev:*:0.1.0-alpha02`.
 
 Source repository: [AleksandrKdev/compose-scene-3d](https://github.com/AleksandrKdev/compose-scene-3d).
 
+### Alpha03 migration
+
+The upcoming `alpha03` makes `box` consistent with every other primitive: replace the old
+`color = Vec3(...)` argument with a backend-neutral material:
+
+```kotlin
+box(
+    key = "housing",
+    material = PbrMaterial(baseColor = Color3D(0.15f, 0.55f, 0.95f)),
+)
+```
+
+Boxes can therefore use the same PBR, unlit, emissive, transparent and textured materials as
+spheres, planes, cylinders and custom meshes.
+
 ## Modules
 
 - `scene-core`: immutable scene descriptions, retained scene reconciliation and renderer commands.

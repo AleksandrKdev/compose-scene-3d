@@ -76,20 +76,20 @@ public final class dev/composescene3d/core/ArrowNode : dev/composescene3d/core/S
 }
 
 public final class dev/composescene3d/core/BoxNode : dev/composescene3d/core/SceneNode {
-	public synthetic fun <init> (Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Transform;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun <init> (Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Transform;ZZLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-V7PxYp4 ()Ljava/lang/String;
 	public final fun component2 ()Ldev/composescene3d/core/Vec3;
-	public final fun component3 ()Ldev/composescene3d/core/Vec3;
+	public final fun component3 ()Ldev/composescene3d/core/Material3D;
 	public final fun component4 ()Ldev/composescene3d/core/Transform;
 	public final fun component5 ()Z
 	public final fun component6 ()Z
-	public final fun copy-qet8Xuo (Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Transform;ZZ)Ldev/composescene3d/core/BoxNode;
-	public static synthetic fun copy-qet8Xuo$default (Ldev/composescene3d/core/BoxNode;Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Transform;ZZILjava/lang/Object;)Ldev/composescene3d/core/BoxNode;
+	public final fun copy-qet8Xuo (Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZ)Ldev/composescene3d/core/BoxNode;
+	public static synthetic fun copy-qet8Xuo$default (Ldev/composescene3d/core/BoxNode;Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZILjava/lang/Object;)Ldev/composescene3d/core/BoxNode;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCastShadows ()Z
-	public final fun getColor ()Ldev/composescene3d/core/Vec3;
 	public fun getKey-V7PxYp4 ()Ljava/lang/String;
+	public final fun getMaterial ()Ldev/composescene3d/core/Material3D;
 	public final fun getReceiveShadows ()Z
 	public final fun getSize ()Ldev/composescene3d/core/Vec3;
 	public fun getTransform ()Ldev/composescene3d/core/Transform;

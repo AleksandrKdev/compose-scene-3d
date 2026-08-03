@@ -531,8 +531,12 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 - Documented the backend contract, retained command lifecycle, all renderer capability semantics,
   shared camera/math conventions and imported hierarchy behavior. Removed the stale statement that
   model-part transform overrides were still planned. This changed no ABI.
-- The next stabilization step is auditing the Compose-facing public API and examples before cutting
-  `0.1.0-alpha03`.
+- Replaced the legacy `BoxNode.color: Vec3` and Compose `box(color = ...)` surface with the same
+  `Material3D` contract used by every other primitive. Filament and Web now render boxes through
+  their normal material paths, enabling textures, PBR, emissive, unlit and opacity materials.
+  This is an intentional alpha02-to-alpha03 source/ABI break and is documented in README.
+- The next stabilization step is documenting the remaining Compose-facing state, lifecycle,
+  gestures and annotation APIs before cutting `0.1.0-alpha03`.
 
 ## Useful files
 

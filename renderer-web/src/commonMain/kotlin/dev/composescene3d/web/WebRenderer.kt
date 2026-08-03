@@ -164,7 +164,7 @@ private data class MeshData(
 )
 
 private fun SceneNode.toMesh(): MeshData? = when (this) {
-    is BoxNode -> boxMesh(size, PbrMaterial(baseColor = Color3D(color.x, color.y, color.z)))
+    is BoxNode -> boxMesh(size, material)
     is MeshNode -> MeshData(
         geometry.positions.toVec3List(), geometry.indices.toList(), geometry.normals.toVec3List(),
         geometry.uvs, material,

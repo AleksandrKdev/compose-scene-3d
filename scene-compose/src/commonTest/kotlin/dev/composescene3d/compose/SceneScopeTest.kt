@@ -1,6 +1,7 @@
 package dev.composescene3d.compose
 
 import dev.composescene3d.core.CylinderNode
+import dev.composescene3d.core.BoxNode
 import dev.composescene3d.core.ArrowNode
 import dev.composescene3d.core.LineNode
 import dev.composescene3d.core.LinearDimensionNode
@@ -54,15 +55,17 @@ class SceneScopeTest {
     fun buildsNewPrimitivesWithBackendNeutralMaterials() {
         val metal = PbrMaterial(baseColor = Color3D(1f, 0.5f, 0f), metallic = 1f)
         val scene = SceneScope().apply {
+            box(key = "box", material = metal)
             sphere(key = "sphere", material = metal)
             plane(key = "plane", width = 4f, depth = 3f)
             cylinder(key = "cylinder", height = 2f)
         }.build()
 
-        assertEquals(3, scene.nodes.size)
-        assertEquals(metal, assertIs<SphereNode>(scene.nodes[0]).material)
-        assertEquals(4f, assertIs<PlaneNode>(scene.nodes[1]).width)
-        assertEquals(2f, assertIs<CylinderNode>(scene.nodes[2]).height)
+        assertEquals(4, scene.nodes.size)
+        assertEquals(metal, assertIs<BoxNode>(scene.nodes[0]).material)
+        assertEquals(metal, assertIs<SphereNode>(scene.nodes[1]).material)
+        assertEquals(4f, assertIs<PlaneNode>(scene.nodes[2]).width)
+        assertEquals(2f, assertIs<CylinderNode>(scene.nodes[3]).height)
     }
 
     @Test

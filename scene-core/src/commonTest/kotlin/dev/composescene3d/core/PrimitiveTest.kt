@@ -8,9 +8,9 @@ import kotlin.test.assertTrue
 
 class PrimitiveTest {
     @Test
-    fun boxKeepsLegacyColorApi() {
-        val color = Vec3(0.1f, 0.2f, 0.3f)
-        assertEquals(color, BoxNode(NodeKey("box"), color = color).color)
+    fun boxUsesTheSharedMaterialApi() {
+        val material = PbrMaterial(baseColor = Color3D(0.1f, 0.2f, 0.3f))
+        assertEquals(material, BoxNode(NodeKey("box"), material = material).material)
     }
 
     @Test
