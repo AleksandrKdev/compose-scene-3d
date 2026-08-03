@@ -797,15 +797,17 @@ private fun FilamentSceneScope.FilamentNodes(
                 is PointLightNode -> FilamentLight(node)
                 is SpotLightNode -> FilamentLight(node)
                 is GroupNode -> {
-                    val groupEntity = remember(node.key) { mutableStateOf<Int?>(null) }
-                    Group(
-                        position = node.transform.translation.toFilamentPosition(),
-                        rotation = node.transform.rotation.toFilamentQuaternion(),
-                        scale = node.transform.scale.toFilamentScale(),
-                        onCreate = { groupEntity.value = it },
-                    ) {
-                        CompositionLocalProvider(LocalComposeScene3DParent provides groupEntity.value) {
-                            FilamentNodes(renderer, node.children)
+                    if (node.visible) {
+                        val groupEntity = remember(node.key) { mutableStateOf<Int?>(null) }
+                        Group(
+                            position = node.transform.translation.toFilamentPosition(),
+                            rotation = node.transform.rotation.toFilamentQuaternion(),
+                            scale = node.transform.scale.toFilamentScale(),
+                            onCreate = { groupEntity.value = it },
+                        ) {
+                            CompositionLocalProvider(LocalComposeScene3DParent provides groupEntity.value) {
+                                FilamentNodes(renderer, node.children)
+                            }
                         }
                     }
                 }

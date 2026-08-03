@@ -1183,6 +1183,7 @@ private fun buildGpuBatches(
     fun append(node: SceneNode, parents: List<Transform>) {
         val transforms = listOf(node.transform) + parents
         if (node is GroupNode) {
+            if (!node.visible) return
             node.children.forEach { append(it, transforms) }
             return
         }

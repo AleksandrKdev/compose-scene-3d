@@ -31,6 +31,7 @@ import dev.composescene3d.core.HatchMaterial
 import dev.composescene3d.core.Vec3
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 
 class SceneScopeTest {
@@ -96,6 +97,16 @@ class SceneScopeTest {
         }.build()
         assertIs<RadialDimensionNode>(scene.nodes[0])
         assertIs<AngularDimensionNode>(scene.nodes[1])
+    }
+
+    @Test
+    fun buildsHiddenSceneSubtree() {
+        val scene = SceneScope().apply {
+            group("internals", visible = false) { box("bearing") }
+        }.build()
+        val group = assertIs<GroupNode>(scene.nodes.single())
+        assertFalse(group.visible)
+        assertEquals(1, group.children.size)
     }
 
     @Test

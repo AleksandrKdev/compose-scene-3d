@@ -741,7 +741,7 @@ final class dev.composescene3d.core/Geometry3D { // dev.composescene3d.core/Geom
 }
 
 final class dev.composescene3d.core/GroupNode : dev.composescene3d.core/SceneNode { // dev.composescene3d.core/GroupNode|null[0]
-    constructor <init>(dev.composescene3d.core/NodeKey, kotlin.collections/List<dev.composescene3d.core/SceneNode>, dev.composescene3d.core/Transform = ...) // dev.composescene3d.core/GroupNode.<init>|<init>(dev.composescene3d.core.NodeKey;kotlin.collections.List<dev.composescene3d.core.SceneNode>;dev.composescene3d.core.Transform){}[0]
+    constructor <init>(dev.composescene3d.core/NodeKey, kotlin.collections/List<dev.composescene3d.core/SceneNode>, dev.composescene3d.core/Transform = ..., kotlin/Boolean = ...) // dev.composescene3d.core/GroupNode.<init>|<init>(dev.composescene3d.core.NodeKey;kotlin.collections.List<dev.composescene3d.core.SceneNode>;dev.composescene3d.core.Transform;kotlin.Boolean){}[0]
 
     final val children // dev.composescene3d.core/GroupNode.children|{}children[0]
         final fun <get-children>(): kotlin.collections/List<dev.composescene3d.core/SceneNode> // dev.composescene3d.core/GroupNode.children.<get-children>|<get-children>(){}[0]
@@ -749,11 +749,14 @@ final class dev.composescene3d.core/GroupNode : dev.composescene3d.core/SceneNod
         final fun <get-key>(): dev.composescene3d.core/NodeKey // dev.composescene3d.core/GroupNode.key.<get-key>|<get-key>(){}[0]
     final val transform // dev.composescene3d.core/GroupNode.transform|{}transform[0]
         final fun <get-transform>(): dev.composescene3d.core/Transform // dev.composescene3d.core/GroupNode.transform.<get-transform>|<get-transform>(){}[0]
+    final val visible // dev.composescene3d.core/GroupNode.visible|{}visible[0]
+        final fun <get-visible>(): kotlin/Boolean // dev.composescene3d.core/GroupNode.visible.<get-visible>|<get-visible>(){}[0]
 
     final fun component1(): dev.composescene3d.core/NodeKey // dev.composescene3d.core/GroupNode.component1|component1(){}[0]
     final fun component2(): kotlin.collections/List<dev.composescene3d.core/SceneNode> // dev.composescene3d.core/GroupNode.component2|component2(){}[0]
     final fun component3(): dev.composescene3d.core/Transform // dev.composescene3d.core/GroupNode.component3|component3(){}[0]
-    final fun copy(dev.composescene3d.core/NodeKey = ..., kotlin.collections/List<dev.composescene3d.core/SceneNode> = ..., dev.composescene3d.core/Transform = ...): dev.composescene3d.core/GroupNode // dev.composescene3d.core/GroupNode.copy|copy(dev.composescene3d.core.NodeKey;kotlin.collections.List<dev.composescene3d.core.SceneNode>;dev.composescene3d.core.Transform){}[0]
+    final fun component4(): kotlin/Boolean // dev.composescene3d.core/GroupNode.component4|component4(){}[0]
+    final fun copy(dev.composescene3d.core/NodeKey = ..., kotlin.collections/List<dev.composescene3d.core/SceneNode> = ..., dev.composescene3d.core/Transform = ..., kotlin/Boolean = ...): dev.composescene3d.core/GroupNode // dev.composescene3d.core/GroupNode.copy|copy(dev.composescene3d.core.NodeKey;kotlin.collections.List<dev.composescene3d.core.SceneNode>;dev.composescene3d.core.Transform;kotlin.Boolean){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/GroupNode.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // dev.composescene3d.core/GroupNode.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // dev.composescene3d.core/GroupNode.toString|toString(){}[0]

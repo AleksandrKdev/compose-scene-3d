@@ -121,6 +121,7 @@ data class GroupNode(
     override val key: NodeKey,
     val children: List<SceneNode>,
     override val transform: Transform = Transform(),
+    val visible: Boolean = true,
 ) : SceneNode
 
 data class ModelNode(

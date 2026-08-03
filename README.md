@@ -343,6 +343,18 @@ Perspective distance is derived from vertical FOV; orthographic focus adjusts `v
 `animateTo` supports arbitrary camera destinations and returns `false` when a user orbit, pan, zoom,
 or reset cancels the flight.
 
+Visibility can be controlled for an entire articulated subtree without removing its declarations:
+
+```kotlin
+group("internal-parts", visible = showInternals) {
+    model("bearing", bearingSource)
+    model("shaft", shaftSource)
+}
+```
+
+Nested groups inherit hidden state on Filament and Web, allowing lesson steps to reveal assemblies
+without application-side filtering or unstable node identities.
+
 World-space clipping planes provide dynamic section views on the Filament Android/iOS backend.
 `ClippedPbrMaterial` accepts one to three half-spaces and can be attached to primitives, custom
 meshes, or imported parts through `ModelPartOverride.material`:

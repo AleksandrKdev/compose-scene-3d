@@ -63,10 +63,11 @@ class SceneScope internal constructor() {
     fun group(
         key: String,
         transform: Transform = Transform(),
+        visible: Boolean = true,
         content: SceneScope.() -> Unit,
     ) {
         val children = SceneScope().apply(content).nodes.toList()
-        nodes += GroupNode(NodeKey(key), children, transform)
+        nodes += GroupNode(NodeKey(key), children, transform, visible)
     }
 
     fun box(
