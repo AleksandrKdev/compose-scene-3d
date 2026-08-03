@@ -78,6 +78,13 @@ sealed interface dev.composescene3d.core/CameraProjection { // dev.composescene3
     }
 }
 
+sealed interface dev.composescene3d.core/EngineeringDimensionNode : dev.composescene3d.core/SceneNode { // dev.composescene3d.core/EngineeringDimensionNode|null[0]
+    abstract val labelAnchor // dev.composescene3d.core/EngineeringDimensionNode.labelAnchor|{}labelAnchor[0]
+        abstract fun <get-labelAnchor>(): dev.composescene3d.core/Vec3 // dev.composescene3d.core/EngineeringDimensionNode.labelAnchor.<get-labelAnchor>|<get-labelAnchor>(){}[0]
+
+    open fun sceneAnchor(dev.composescene3d.core/Transform = ...): dev.composescene3d.core/SceneAnchor3D // dev.composescene3d.core/EngineeringDimensionNode.sceneAnchor|sceneAnchor(dev.composescene3d.core.Transform){}[0]
+}
+
 sealed interface dev.composescene3d.core/Material3D // dev.composescene3d.core/Material3D|null[0]
 
 sealed interface dev.composescene3d.core/ModelSource { // dev.composescene3d.core/ModelSource|null[0]
@@ -275,7 +282,7 @@ sealed interface dev.composescene3d.core/TextureSource { // dev.composescene3d.c
     }
 }
 
-final class dev.composescene3d.core/AngularDimensionNode : dev.composescene3d.core/SceneNode { // dev.composescene3d.core/AngularDimensionNode|null[0]
+final class dev.composescene3d.core/AngularDimensionNode : dev.composescene3d.core/EngineeringDimensionNode { // dev.composescene3d.core/AngularDimensionNode|null[0]
     constructor <init>(dev.composescene3d.core/NodeKey, dev.composescene3d.core/Vec3, dev.composescene3d.core/Vec3, dev.composescene3d.core/Vec3, kotlin/Float, kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Int = ..., kotlin/Float = ..., dev.composescene3d.core/Material3D = ..., dev.composescene3d.core/Transform = ..., kotlin/Boolean = ..., kotlin/Boolean = ...) // dev.composescene3d.core/AngularDimensionNode.<init>|<init>(dev.composescene3d.core.NodeKey;dev.composescene3d.core.Vec3;dev.composescene3d.core.Vec3;dev.composescene3d.core.Vec3;kotlin.Float;kotlin.Float;kotlin.Float;kotlin.Float;kotlin.Int;kotlin.Float;dev.composescene3d.core.Material3D;dev.composescene3d.core.Transform;kotlin.Boolean;kotlin.Boolean){}[0]
 
     final val arcRadius // dev.composescene3d.core/AngularDimensionNode.arcRadius|{}arcRadius[0]
@@ -764,7 +771,7 @@ final class dev.composescene3d.core/LineNode : dev.composescene3d.core/SceneNode
     final fun toString(): kotlin/String // dev.composescene3d.core/LineNode.toString|toString(){}[0]
 }
 
-final class dev.composescene3d.core/LinearDimensionNode : dev.composescene3d.core/SceneNode { // dev.composescene3d.core/LinearDimensionNode|null[0]
+final class dev.composescene3d.core/LinearDimensionNode : dev.composescene3d.core/EngineeringDimensionNode { // dev.composescene3d.core/LinearDimensionNode|null[0]
     constructor <init>(dev.composescene3d.core/NodeKey, dev.composescene3d.core/Vec3, dev.composescene3d.core/Vec3, dev.composescene3d.core/Vec3, kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Int = ..., dev.composescene3d.core/Material3D = ..., dev.composescene3d.core/Transform = ..., kotlin/Boolean = ..., kotlin/Boolean = ...) // dev.composescene3d.core/LinearDimensionNode.<init>|<init>(dev.composescene3d.core.NodeKey;dev.composescene3d.core.Vec3;dev.composescene3d.core.Vec3;dev.composescene3d.core.Vec3;kotlin.Float;kotlin.Float;kotlin.Float;kotlin.Float;kotlin.Float;kotlin.Int;dev.composescene3d.core.Material3D;dev.composescene3d.core.Transform;kotlin.Boolean;kotlin.Boolean){}[0]
 
     final val arrowHeadLength // dev.composescene3d.core/LinearDimensionNode.arrowHeadLength|{}arrowHeadLength[0]
@@ -1067,7 +1074,7 @@ final class dev.composescene3d.core/Quaternion { // dev.composescene3d.core/Quat
     }
 }
 
-final class dev.composescene3d.core/RadialDimensionNode : dev.composescene3d.core/SceneNode { // dev.composescene3d.core/RadialDimensionNode|null[0]
+final class dev.composescene3d.core/RadialDimensionNode : dev.composescene3d.core/EngineeringDimensionNode { // dev.composescene3d.core/RadialDimensionNode|null[0]
     constructor <init>(dev.composescene3d.core/NodeKey, dev.composescene3d.core/Vec3, dev.composescene3d.core/Vec3, kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Int = ..., dev.composescene3d.core/Material3D = ..., dev.composescene3d.core/Transform = ..., kotlin/Boolean = ..., kotlin/Boolean = ...) // dev.composescene3d.core/RadialDimensionNode.<init>|<init>(dev.composescene3d.core.NodeKey;dev.composescene3d.core.Vec3;dev.composescene3d.core.Vec3;kotlin.Float;kotlin.Float;kotlin.Float;kotlin.Float;kotlin.Int;dev.composescene3d.core.Material3D;dev.composescene3d.core.Transform;kotlin.Boolean;kotlin.Boolean){}[0]
 
     final val arrowHeadLength // dev.composescene3d.core/RadialDimensionNode.arrowHeadLength|{}arrowHeadLength[0]
@@ -1150,6 +1157,24 @@ final class dev.composescene3d.core/RendererCapabilities { // dev.composescene3d
     final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/RendererCapabilities.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // dev.composescene3d.core/RendererCapabilities.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // dev.composescene3d.core/RendererCapabilities.toString|toString(){}[0]
+}
+
+final class dev.composescene3d.core/SceneAnchor3D { // dev.composescene3d.core/SceneAnchor3D|null[0]
+    constructor <init>(dev.composescene3d.core/Vec3, dev.composescene3d.core/Transform = ...) // dev.composescene3d.core/SceneAnchor3D.<init>|<init>(dev.composescene3d.core.Vec3;dev.composescene3d.core.Transform){}[0]
+
+    final val localPosition // dev.composescene3d.core/SceneAnchor3D.localPosition|{}localPosition[0]
+        final fun <get-localPosition>(): dev.composescene3d.core/Vec3 // dev.composescene3d.core/SceneAnchor3D.localPosition.<get-localPosition>|<get-localPosition>(){}[0]
+    final val transform // dev.composescene3d.core/SceneAnchor3D.transform|{}transform[0]
+        final fun <get-transform>(): dev.composescene3d.core/Transform // dev.composescene3d.core/SceneAnchor3D.transform.<get-transform>|<get-transform>(){}[0]
+    final val worldPosition // dev.composescene3d.core/SceneAnchor3D.worldPosition|{}worldPosition[0]
+        final fun <get-worldPosition>(): dev.composescene3d.core/Vec3 // dev.composescene3d.core/SceneAnchor3D.worldPosition.<get-worldPosition>|<get-worldPosition>(){}[0]
+
+    final fun component1(): dev.composescene3d.core/Vec3 // dev.composescene3d.core/SceneAnchor3D.component1|component1(){}[0]
+    final fun component2(): dev.composescene3d.core/Transform // dev.composescene3d.core/SceneAnchor3D.component2|component2(){}[0]
+    final fun copy(dev.composescene3d.core/Vec3 = ..., dev.composescene3d.core/Transform = ...): dev.composescene3d.core/SceneAnchor3D // dev.composescene3d.core/SceneAnchor3D.copy|copy(dev.composescene3d.core.Vec3;dev.composescene3d.core.Transform){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/SceneAnchor3D.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/SceneAnchor3D.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.composescene3d.core/SceneAnchor3D.toString|toString(){}[0]
 }
 
 final class dev.composescene3d.core/SceneController { // dev.composescene3d.core/SceneController|null[0]
@@ -1552,6 +1577,7 @@ final fun (dev.composescene3d.core/ModelNode).dev.composescene3d.core/withExplod
 final fun (dev.composescene3d.core/ModelSource).dev.composescene3d.core/assetKey(): dev.composescene3d.core/ModelAssetKey // dev.composescene3d.core/assetKey|assetKey@dev.composescene3d.core.ModelSource(){}[0]
 final fun (dev.composescene3d.core/RadialDimensionNode).dev.composescene3d.core/geometry(): kotlin.collections/List<dev.composescene3d.core/Geometry3D> // dev.composescene3d.core/geometry|geometry@dev.composescene3d.core.RadialDimensionNode(){}[0]
 final fun (dev.composescene3d.core/TextureSource).dev.composescene3d.core/assetKey(): dev.composescene3d.core/TextureAssetKey // dev.composescene3d.core/assetKey|assetKey@dev.composescene3d.core.TextureSource(){}[0]
+final fun (dev.composescene3d.core/Transform).dev.composescene3d.core/transformPoint(dev.composescene3d.core/Vec3): dev.composescene3d.core/Vec3 // dev.composescene3d.core/transformPoint|transformPoint@dev.composescene3d.core.Transform(dev.composescene3d.core.Vec3){}[0]
 final fun (kotlin.collections/Iterable<dev.composescene3d.core/SceneNode>).dev.composescene3d.core/flattenSceneNodes(): kotlin.collections/List<dev.composescene3d.core/SceneNode> // dev.composescene3d.core/flattenSceneNodes|flattenSceneNodes@kotlin.collections.Iterable<dev.composescene3d.core.SceneNode>(){}[0]
 final fun dev.composescene3d.core/projectWorldToScreen(dev.composescene3d.core/Vec3, dev.composescene3d.core/CameraDescription, kotlin/Int, kotlin/Int): dev.composescene3d.core/ScreenPosition3D // dev.composescene3d.core/projectWorldToScreen|projectWorldToScreen(dev.composescene3d.core.Vec3;dev.composescene3d.core.CameraDescription;kotlin.Int;kotlin.Int){}[0]
 final fun dev.composescene3d.core/reconcile(dev.composescene3d.core/SceneDescription, dev.composescene3d.core/SceneDescription): kotlin.collections/List<dev.composescene3d.core/SceneCommand> // dev.composescene3d.core/reconcile|reconcile(dev.composescene3d.core.SceneDescription;dev.composescene3d.core.SceneDescription){}[0]

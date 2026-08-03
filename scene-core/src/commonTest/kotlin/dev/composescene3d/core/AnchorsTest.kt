@@ -41,4 +41,30 @@ class AnchorsTest {
         assertEquals(100f, result.y, 0.001f)
         assertTrue(result.visible)
     }
+
+    @Test
+    fun transformsSceneAnchorFromLocalToWorldSpace() {
+        val anchor = SceneAnchor3D(
+            localPosition = Vec3(1f, 0f, 0f),
+            transform = Transform(
+                translation = Vec3(3f, 4f, 0f),
+                rotation = Quaternion(0f, 0f, 0.70710677f, 0.70710677f),
+                scale = Vec3(2f, 2f, 2f),
+            ),
+        )
+
+        assertEquals(3f, anchor.worldPosition.x, 0.0001f)
+        assertEquals(6f, anchor.worldPosition.y, 0.0001f)
+        assertEquals(0f, anchor.worldPosition.z, 0.0001f)
+    }
+
+    @Test
+    fun exposesDimensionAsSceneAnchor() {
+        val dimension = LinearDimensionNode(
+            NodeKey("width"), Vec3(-1f, 0f, 0f), Vec3(1f, 0f, 0f),
+            offset = Vec3(0f, 0.5f, 0f), transform = Transform(translation = Vec3(2f, 0f, 0f)),
+        )
+
+        assertEquals(Vec3(2f, 0.5f, 0f), dimension.sceneAnchor().worldPosition)
+    }
 }

@@ -468,9 +468,9 @@ data class LinearDimensionNode(
     override val transform: Transform = Transform(),
     val castShadows: Boolean = false,
     val receiveShadows: Boolean = false,
-) : SceneNode {
+) : EngineeringDimensionNode {
     /** Local-space anchor intended for a Compose text label. */
-    val labelAnchor: Vec3
+    override val labelAnchor: Vec3
         get() = Vec3(
             (start.x + end.x) / 2f + offset.x,
             (start.y + end.y) / 2f + offset.y,
@@ -517,8 +517,8 @@ data class RadialDimensionNode(
     override val transform: Transform = Transform(),
     val castShadows: Boolean = false,
     val receiveShadows: Boolean = false,
-) : SceneNode {
-    val labelAnchor: Vec3 get() = edge + (edge - center).normalizedSceneVector() * labelOffset
+) : EngineeringDimensionNode {
+    override val labelAnchor: Vec3 get() = edge + (edge - center).normalizedSceneVector() * labelOffset
 
     init {
         val measured = center.distanceSquared(edge)
@@ -546,8 +546,8 @@ data class AngularDimensionNode(
     override val transform: Transform = Transform(),
     val castShadows: Boolean = false,
     val receiveShadows: Boolean = false,
-) : SceneNode {
-    val labelAnchor: Vec3 get() = center + (startDirection.normalizedSceneVector() + endDirection.normalizedSceneVector()).normalizedSceneVector() * arcRadius
+) : EngineeringDimensionNode {
+    override val labelAnchor: Vec3 get() = center + (startDirection.normalizedSceneVector() + endDirection.normalizedSceneVector()).normalizedSceneVector() * arcRadius
 
     init {
         require(startDirection.distanceSquared(Vec3.Zero) > 0f && endDirection.distanceSquared(Vec3.Zero) > 0f) { "Angular dimension directions must be non-zero" }

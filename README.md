@@ -264,7 +264,10 @@ linearDimension(
     end = widthDimension.end,
     offset = widthDimension.offset,
 )
-// Project widthDimension.labelAnchor and draw "120 mm" as regular Compose UI.
+val labelPosition by rememberDimensionScreenPosition(
+    widthDimension, cameraState, viewportWidth, viewportHeight,
+)
+// Draw "120 mm" as regular Compose UI at labelPosition.x / labelPosition.y.
 ```
 
 Radius, arrow-head dimensions, extension gap/overshoot, segment count, material, and transforms are
@@ -283,6 +286,10 @@ angularDimension(
 ```
 
 `RadialDimensionNode` and `AngularDimensionNode` expose `labelAnchor` for app-owned Compose text.
+`rememberDimensionScreenPosition` reacts to orbit, pan, zoom, projection, and viewport changes without
+polling the renderer. `rememberScreenPosition(SceneAnchor3D(...))` provides the same mechanism for
+arbitrary instructional labels. Pass `worldTransform` when a dimension also inherits a parent-group
+transform.
 
 World-space clipping planes provide dynamic section views on the Filament Android/iOS backend.
 `ClippedPbrMaterial` accepts one to three half-spaces and can be attached to primitives, custom

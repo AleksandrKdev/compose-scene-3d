@@ -5,7 +5,9 @@ public final class dev/composescene3d/compose/Scene3DKt {
 
 public final class dev/composescene3d/compose/SceneAnchorsKt {
 	public static final fun description (Ldev/composescene3d/compose/SceneCameraState;)Ldev/composescene3d/core/CameraDescription;
+	public static final fun rememberDimensionScreenPosition (Ldev/composescene3d/core/EngineeringDimensionNode;Ldev/composescene3d/compose/SceneCameraState;IILdev/composescene3d/core/Transform;Landroidx/compose/runtime/Composer;II)Landroidx/compose/runtime/State;
 	public static final fun rememberModelPartScreenPosition (Ldev/composescene3d/core/SceneController;Ldev/composescene3d/core/ModelPartAnchor3D;Ldev/composescene3d/compose/SceneCameraState;IILandroidx/compose/runtime/Composer;I)Landroidx/compose/runtime/State;
+	public static final fun rememberScreenPosition (Ldev/composescene3d/core/SceneAnchor3D;Ldev/composescene3d/compose/SceneCameraState;IILandroidx/compose/runtime/Composer;I)Landroidx/compose/runtime/State;
 }
 
 public final class dev/composescene3d/compose/SceneCameraGestureController {

@@ -1,8 +1,9 @@
 public final class dev/composescene3d/core/AnchorsKt {
 	public static final fun projectWorldToScreen (Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/CameraDescription;II)Ldev/composescene3d/core/ScreenPosition3D;
+	public static final fun transformPoint (Ldev/composescene3d/core/Transform;Ldev/composescene3d/core/Vec3;)Ldev/composescene3d/core/Vec3;
 }
 
-public final class dev/composescene3d/core/AngularDimensionNode : dev/composescene3d/core/SceneNode {
+public final class dev/composescene3d/core/AngularDimensionNode : dev/composescene3d/core/EngineeringDimensionNode {
 	public synthetic fun <init> (Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;FFFFIFLdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;FFFFIFLdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-V7PxYp4 ()Ljava/lang/String;
@@ -30,7 +31,7 @@ public final class dev/composescene3d/core/AngularDimensionNode : dev/composesce
 	public final fun getCenter ()Ldev/composescene3d/core/Vec3;
 	public final fun getEndDirection ()Ldev/composescene3d/core/Vec3;
 	public fun getKey-V7PxYp4 ()Ljava/lang/String;
-	public final fun getLabelAnchor ()Ldev/composescene3d/core/Vec3;
+	public fun getLabelAnchor ()Ldev/composescene3d/core/Vec3;
 	public final fun getMaterial ()Ldev/composescene3d/core/Material3D;
 	public final fun getRadialOvershoot ()F
 	public final fun getRadius ()F
@@ -38,6 +39,7 @@ public final class dev/composescene3d/core/AngularDimensionNode : dev/composesce
 	public final fun getStartDirection ()Ldev/composescene3d/core/Vec3;
 	public fun getTransform ()Ldev/composescene3d/core/Transform;
 	public fun hashCode ()I
+	public fun sceneAnchor (Ldev/composescene3d/core/Transform;)Ldev/composescene3d/core/SceneAnchor3D;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -299,6 +301,17 @@ public final class dev/composescene3d/core/EmissiveMaterial : dev/composescene3d
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface class dev/composescene3d/core/EngineeringDimensionNode : dev/composescene3d/core/SceneNode {
+	public abstract fun getLabelAnchor ()Ldev/composescene3d/core/Vec3;
+	public fun sceneAnchor (Ldev/composescene3d/core/Transform;)Ldev/composescene3d/core/SceneAnchor3D;
+	public static synthetic fun sceneAnchor$default (Ldev/composescene3d/core/EngineeringDimensionNode;Ldev/composescene3d/core/Transform;ILjava/lang/Object;)Ldev/composescene3d/core/SceneAnchor3D;
+}
+
+public final class dev/composescene3d/core/EngineeringDimensionNode$DefaultImpls {
+	public static fun sceneAnchor (Ldev/composescene3d/core/EngineeringDimensionNode;Ldev/composescene3d/core/Transform;)Ldev/composescene3d/core/SceneAnchor3D;
+	public static synthetic fun sceneAnchor$default (Ldev/composescene3d/core/EngineeringDimensionNode;Ldev/composescene3d/core/Transform;ILjava/lang/Object;)Ldev/composescene3d/core/SceneAnchor3D;
+}
+
 public final class dev/composescene3d/core/EnvironmentMap {
 	public fun <init> (Ldev/composescene3d/core/TextureSource;Ldev/composescene3d/core/TextureSource;FFF)V
 	public synthetic fun <init> (Ldev/composescene3d/core/TextureSource;Ldev/composescene3d/core/TextureSource;FFFILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -447,7 +460,7 @@ public final class dev/composescene3d/core/LineNode : dev/composescene3d/core/Sc
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class dev/composescene3d/core/LinearDimensionNode : dev/composescene3d/core/SceneNode {
+public final class dev/composescene3d/core/LinearDimensionNode : dev/composescene3d/core/EngineeringDimensionNode {
 	public synthetic fun <init> (Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;FFFFFILdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;FFFFFILdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-V7PxYp4 ()Ljava/lang/String;
@@ -474,7 +487,7 @@ public final class dev/composescene3d/core/LinearDimensionNode : dev/composescen
 	public final fun getExtensionGap ()F
 	public final fun getExtensionOvershoot ()F
 	public fun getKey-V7PxYp4 ()Ljava/lang/String;
-	public final fun getLabelAnchor ()Ldev/composescene3d/core/Vec3;
+	public fun getLabelAnchor ()Ldev/composescene3d/core/Vec3;
 	public final fun getMaterial ()Ldev/composescene3d/core/Material3D;
 	public final fun getOffset ()Ldev/composescene3d/core/Vec3;
 	public final fun getRadius ()F
@@ -483,6 +496,7 @@ public final class dev/composescene3d/core/LinearDimensionNode : dev/composescen
 	public final fun getStart ()Ldev/composescene3d/core/Vec3;
 	public fun getTransform ()Ldev/composescene3d/core/Transform;
 	public fun hashCode ()I
+	public fun sceneAnchor (Ldev/composescene3d/core/Transform;)Ldev/composescene3d/core/SceneAnchor3D;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -781,7 +795,7 @@ public final class dev/composescene3d/core/Quaternion$Companion {
 	public final fun getIdentity ()Ldev/composescene3d/core/Quaternion;
 }
 
-public final class dev/composescene3d/core/RadialDimensionNode : dev/composescene3d/core/SceneNode {
+public final class dev/composescene3d/core/RadialDimensionNode : dev/composescene3d/core/EngineeringDimensionNode {
 	public synthetic fun <init> (Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;FFFFILdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;FFFFILdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-V7PxYp4 ()Ljava/lang/String;
@@ -805,7 +819,7 @@ public final class dev/composescene3d/core/RadialDimensionNode : dev/composescen
 	public final fun getCenter ()Ldev/composescene3d/core/Vec3;
 	public final fun getEdge ()Ldev/composescene3d/core/Vec3;
 	public fun getKey-V7PxYp4 ()Ljava/lang/String;
-	public final fun getLabelAnchor ()Ldev/composescene3d/core/Vec3;
+	public fun getLabelAnchor ()Ldev/composescene3d/core/Vec3;
 	public final fun getLabelOffset ()F
 	public final fun getMaterial ()Ldev/composescene3d/core/Material3D;
 	public final fun getRadius ()F
@@ -813,6 +827,7 @@ public final class dev/composescene3d/core/RadialDimensionNode : dev/composescen
 	public final fun getSegments ()I
 	public fun getTransform ()Ldev/composescene3d/core/Transform;
 	public fun hashCode ()I
+	public fun sceneAnchor (Ldev/composescene3d/core/Transform;)Ldev/composescene3d/core/SceneAnchor3D;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -847,6 +862,21 @@ public final class dev/composescene3d/core/RendererCapabilities {
 
 public final class dev/composescene3d/core/RendererKt {
 	public static final fun reconcile (Ldev/composescene3d/core/SceneDescription;Ldev/composescene3d/core/SceneDescription;)Ljava/util/List;
+}
+
+public final class dev/composescene3d/core/SceneAnchor3D {
+	public fun <init> (Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Transform;)V
+	public synthetic fun <init> (Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Transform;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ldev/composescene3d/core/Vec3;
+	public final fun component2 ()Ldev/composescene3d/core/Transform;
+	public final fun copy (Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Transform;)Ldev/composescene3d/core/SceneAnchor3D;
+	public static synthetic fun copy$default (Ldev/composescene3d/core/SceneAnchor3D;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Transform;ILjava/lang/Object;)Ldev/composescene3d/core/SceneAnchor3D;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLocalPosition ()Ldev/composescene3d/core/Vec3;
+	public final fun getTransform ()Ldev/composescene3d/core/Transform;
+	public final fun getWorldPosition ()Ldev/composescene3d/core/Vec3;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public abstract interface class dev/composescene3d/core/SceneCommand {

@@ -541,12 +541,13 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Continue mobile interactive-textbook support with reusable frame-tracked Compose label anchoring
-for engineering dimensions on Android/iOS.
+Continue mobile interactive-textbook support with dimension text layout/collision handling and
+measurement formatting primitives on Android/iOS.
 Imported hierarchy, picking, part overrides, selection effects, exploded views, frame-tracked
 world-to-screen model-part annotations, solid 3D lines/arrows/callout leaders, and open clipping
 plane section views, CPU-generated concave/multi-contour/holed section caps for custom meshes, and
-procedural hatch cap materials, and linear/radial/angular engineering dimension geometry are done.
+procedural hatch cap materials, linear/radial/angular engineering dimension geometry, and reactive
+Compose screen anchoring for dimensions and arbitrary scene points are done.
 The user explicitly allowed breaking the old empty GroupNode API before alpha03. Do not expose
 backend types in public commonMain API.
 ```
