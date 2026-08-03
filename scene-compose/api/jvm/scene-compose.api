@@ -53,6 +53,8 @@ public final class dev/composescene3d/compose/SceneScope {
 	public static synthetic fun group$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;Ldev/composescene3d/core/Transform;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public final fun line (Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;FILdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZ)V
 	public static synthetic fun line$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;FILdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZILjava/lang/Object;)V
+	public final fun linearDimension (Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;FFFFFILdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZ)V
+	public static synthetic fun linearDimension$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;FFFFFILdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZILjava/lang/Object;)V
 	public final fun mesh (Ljava/lang/String;Ldev/composescene3d/core/Geometry3D;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZ)V
 	public static synthetic fun mesh$default (Ldev/composescene3d/compose/SceneScope;Ljava/lang/String;Ldev/composescene3d/core/Geometry3D;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZILjava/lang/Object;)V
 	public final fun model (Ljava/lang/String;Ldev/composescene3d/core/ModelSource;Ldev/composescene3d/core/Transform;ZZZLjava/util/Map;)V

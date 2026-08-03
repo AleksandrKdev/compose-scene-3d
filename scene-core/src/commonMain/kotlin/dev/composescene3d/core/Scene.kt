@@ -452,6 +452,62 @@ data class ArrowNode(
     }
 }
 
+/** A linear engineering dimension with inward-facing arrows and extension lines. */
+data class LinearDimensionNode(
+    override val key: NodeKey,
+    val start: Vec3,
+    val end: Vec3,
+    val offset: Vec3,
+    val radius: Float = 0.008f,
+    val arrowHeadRadius: Float = 0.028f,
+    val arrowHeadLength: Float = 0.09f,
+    val extensionGap: Float = 0.025f,
+    val extensionOvershoot: Float = 0.04f,
+    val segments: Int = 12,
+    val material: Material3D = UnlitMaterial(Color3D.Yellow),
+    override val transform: Transform = Transform(),
+    val castShadows: Boolean = false,
+    val receiveShadows: Boolean = false,
+) : SceneNode {
+    /** Local-space anchor intended for a Compose text label. */
+    val labelAnchor: Vec3
+        get() = Vec3(
+            (start.x + end.x) / 2f + offset.x,
+            (start.y + end.y) / 2f + offset.y,
+            (start.z + end.z) / 2f + offset.z,
+        )
+
+    init {
+        val measuredLengthSquared = start.distanceSquared(end)
+        val offsetLengthSquared = offset.distanceSquared(Vec3.Zero)
+        require(measuredLengthSquared > 0f && measuredLengthSquared.isFinite()) {
+            "Dimension start and end must be finite and different"
+        }
+        require(offsetLengthSquared > 0f && offsetLengthSquared.isFinite()) {
+            "Dimension offset must be finite and non-zero"
+        }
+        require(radius > 0f && radius.isFinite()) { "Dimension radius must be finite and positive" }
+        require(arrowHeadRadius > 0f && arrowHeadRadius.isFinite()) {
+            "Dimension arrow head radius must be finite and positive"
+        }
+        require(arrowHeadLength > 0f && 4f * arrowHeadLength * arrowHeadLength < measuredLengthSquared) {
+            "Dimension arrow head length must be positive and shorter than half the dimension"
+        }
+        require(extensionGap >= 0f && extensionGap.isFinite()) {
+            "Dimension extension gap must be finite and non-negative"
+        }
+        require(extensionOvershoot >= 0f && extensionOvershoot.isFinite()) {
+            "Dimension extension overshoot must be finite and non-negative"
+        }
+        require(segments >= 3) { "Dimension segments must be at least 3" }
+    }
+}
+
+private fun Vec3.distanceSquared(other: Vec3): Float =
+    (x - other.x) * (x - other.x) +
+        (y - other.y) * (y - other.y) +
+        (z - other.z) * (z - other.z)
+
 /** Indexed triangle geometry stored in backend-neutral, non-interleaved arrays. */
 class Geometry3D(
     val positions: FloatArray,

@@ -44,6 +44,7 @@ import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.Material3D
 import dev.composescene3d.core.MeshNode
 import dev.composescene3d.core.LineNode
+import dev.composescene3d.core.LinearDimensionNode
 import dev.composescene3d.core.NodeKey
 import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.core.PlaneNode
@@ -773,6 +774,15 @@ private fun FilamentSceneScope.FilamentNodes(
                         node.castShadows, node.receiveShadows,
                     ),
                 )
+                is LinearDimensionNode -> node.geometry().forEach { geometry ->
+                    FilamentMesh(
+                        renderer,
+                        MeshNode(
+                            node.key, geometry, node.material, node.transform,
+                            node.castShadows, node.receiveShadows,
+                        ),
+                    )
+                }
                 is SectionedMeshNode -> FilamentSectionedMesh(renderer, node)
                 is MeshNode -> FilamentMesh(renderer, node)
                 is DirectionalLightNode -> FilamentLight(node)

@@ -33,6 +33,7 @@ import dev.composescene3d.core.HatchMaterial
 import dev.composescene3d.core.Material3D
 import dev.composescene3d.core.MeshNode
 import dev.composescene3d.core.LineNode
+import dev.composescene3d.core.LinearDimensionNode
 import dev.composescene3d.core.ModelNode
 import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.NodeKey
@@ -168,6 +169,7 @@ private fun SceneNode.toMesh(): MeshData? = when (this) {
     is LineNode -> geometry().toMeshData(material)
     is ArrowNode -> geometry().toMeshData(material)
     is SectionedMeshNode -> null
+    is LinearDimensionNode -> null
     else -> null
 }
 
@@ -1197,6 +1199,15 @@ private fun buildGpuBatches(
             }
             return
         }
+        if (node is LinearDimensionNode) {
+            node.geometry().forEach { geometry ->
+                appendMesh(
+                    geometry.toMeshData(node.material), transforms,
+                    node.castShadows, node.receiveShadows,
+                )
+            }
+            return
+        }
         val mesh = node.toMesh() ?: return
         appendMesh(mesh, transforms, node.castShadows(), node.receiveShadows())
     }
@@ -1211,6 +1222,7 @@ private fun SceneNode.castShadows() = when (this) {
     is LineNode -> castShadows
     is ArrowNode -> castShadows
     is SectionedMeshNode -> castShadows
+    is LinearDimensionNode -> castShadows
     is MeshNode -> castShadows
     is ModelNode -> castShadows
     else -> false
@@ -1224,6 +1236,7 @@ private fun SceneNode.receiveShadows() = when (this) {
     is LineNode -> receiveShadows
     is ArrowNode -> receiveShadows
     is SectionedMeshNode -> receiveShadows
+    is LinearDimensionNode -> receiveShadows
     is MeshNode -> receiveShadows
     is ModelNode -> receiveShadows
     else -> false

@@ -103,6 +103,11 @@ class PrimitiveTest {
         assertFailsWith<IllegalArgumentException> {
             ArrowNode(NodeKey("arrow"), Vec3.Zero, Vec3(0f, 0f, 0.1f), headLength = 0.1f)
         }
+        assertFailsWith<IllegalArgumentException> {
+            LinearDimensionNode(
+                NodeKey("dimension"), Vec3.Zero, Vec3(1f, 0f, 0f), offset = Vec3.Zero,
+            )
+        }
     }
 
     @Test
@@ -115,5 +120,19 @@ class PrimitiveTest {
         assertTrue(line.geometry().triangleCount > 0)
         assertTrue(arrow.geometry().triangleCount > line.geometry().triangleCount)
         assertTrue(arrow.geometry().positions.all(Float::isFinite))
+    }
+
+    @Test
+    fun buildsDimensionArrowsExtensionsAndLabelAnchor() {
+        val dimension = LinearDimensionNode(
+            NodeKey("width"),
+            start = Vec3(-1f, 0f, 0f),
+            end = Vec3(1f, 0f, 0f),
+            offset = Vec3(0f, 0.5f, 0f),
+        )
+
+        assertEquals(4, dimension.geometry().size)
+        assertEquals(Vec3(0f, 0.5f, 0f), dimension.labelAnchor)
+        assertTrue(dimension.geometry().all { it.triangleCount > 0 })
     }
 }

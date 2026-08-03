@@ -212,6 +212,13 @@ private fun Sample() {
                     headLength = 0.18f,
                     material = UnlitMaterial(Color3D.Yellow),
                 )
+                linearDimension(
+                    key = "showcase-width",
+                    start = Vec3(-1.5f, 0f, 0.45f),
+                    end = Vec3(1.5f, 0f, 0.45f),
+                    offset = Vec3(0f, 1.75f, 0f),
+                    material = UnlitMaterial(Color3D.Yellow),
+                )
             }
             plane(
                 key = "ground",

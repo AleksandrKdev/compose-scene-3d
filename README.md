@@ -246,6 +246,31 @@ Because they are regular scene nodes, transforms, parent groups, picking and opt
 behave exactly like other primitives. `UnlitMaterial` is the default so annotations stay legible
 independently of scene lighting; PBR and other portable materials are also supported.
 
+Linear engineering dimensions combine two inward-facing arrows with extension lines. The measured
+points and offset use local scene coordinates, while `labelAnchor` provides the local midpoint for
+a Compose text label:
+
+```kotlin
+val widthDimension = LinearDimensionNode(
+    key = NodeKey("housing-width"),
+    start = Vec3(-1f, 0f, 0f),
+    end = Vec3(1f, 0f, 0f),
+    offset = Vec3(0f, 0.5f, 0f),
+)
+
+linearDimension(
+    key = widthDimension.key.value,
+    start = widthDimension.start,
+    end = widthDimension.end,
+    offset = widthDimension.offset,
+)
+// Project widthDimension.labelAnchor and draw "120 mm" as regular Compose UI.
+```
+
+Radius, arrow-head dimensions, extension gap/overshoot, segment count, material, and transforms are
+configurable. The node remains domain-neutral: unit formatting, diameter symbols, tolerances, and
+lesson text belong to the consuming application.
+
 World-space clipping planes provide dynamic section views on the Filament Android/iOS backend.
 `ClippedPbrMaterial` accepts one to three half-spaces and can be attached to primitives, custom
 meshes, or imported parts through `ModelPartOverride.material`:

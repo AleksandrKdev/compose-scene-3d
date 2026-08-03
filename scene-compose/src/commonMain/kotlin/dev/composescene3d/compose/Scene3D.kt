@@ -8,6 +8,7 @@ import dev.composescene3d.core.DirectionalLightNode
 import dev.composescene3d.core.BoxNode
 import dev.composescene3d.core.CylinderNode
 import dev.composescene3d.core.LineNode
+import dev.composescene3d.core.LinearDimensionNode
 import dev.composescene3d.core.ArrowNode
 import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.Material3D
@@ -155,6 +156,29 @@ class SceneScope internal constructor() {
         nodes += ArrowNode(
             NodeKey(key), start, end, shaftRadius, headRadius, headLength, segments,
             material, transform, castShadows, receiveShadows,
+        )
+    }
+
+    fun linearDimension(
+        key: String,
+        start: Vec3,
+        end: Vec3,
+        offset: Vec3,
+        radius: Float = 0.008f,
+        arrowHeadRadius: Float = 0.028f,
+        arrowHeadLength: Float = 0.09f,
+        extensionGap: Float = 0.025f,
+        extensionOvershoot: Float = 0.04f,
+        segments: Int = 12,
+        material: Material3D = UnlitMaterial(Color3D.Yellow),
+        transform: Transform = Transform(),
+        castShadows: Boolean = false,
+        receiveShadows: Boolean = false,
+    ) {
+        nodes += LinearDimensionNode(
+            NodeKey(key), start, end, offset, radius, arrowHeadRadius, arrowHeadLength,
+            extensionGap, extensionOvershoot, segments, material, transform,
+            castShadows, receiveShadows,
         )
     }
 

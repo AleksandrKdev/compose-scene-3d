@@ -3,6 +3,7 @@ package dev.composescene3d.compose
 import dev.composescene3d.core.CylinderNode
 import dev.composescene3d.core.ArrowNode
 import dev.composescene3d.core.LineNode
+import dev.composescene3d.core.LinearDimensionNode
 import dev.composescene3d.core.SectionedMeshNode
 import dev.composescene3d.core.ClippingPlane3D
 import dev.composescene3d.core.Color3D
@@ -71,6 +72,18 @@ class SceneScopeTest {
 
         assertEquals(annotation, assertIs<LineNode>(scene.nodes[0]).material)
         assertEquals(0.2f, assertIs<ArrowNode>(scene.nodes[1]).headLength)
+    }
+
+    @Test
+    fun buildsLinearEngineeringDimension() {
+        val scene = SceneScope().apply {
+            linearDimension(
+                "width", Vec3(-1f, 0f, 0f), Vec3(1f, 0f, 0f), Vec3(0f, 0.5f, 0f),
+            )
+        }.build()
+
+        val dimension = assertIs<LinearDimensionNode>(scene.nodes.single())
+        assertEquals(Vec3(0f, 0.5f, 0f), dimension.labelAnchor)
     }
 
     @Test

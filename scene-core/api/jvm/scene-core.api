@@ -219,6 +219,10 @@ public final class dev/composescene3d/core/CylinderNode : dev/composescene3d/cor
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class dev/composescene3d/core/DimensionGeometryKt {
+	public static final fun geometry (Ldev/composescene3d/core/LinearDimensionNode;)Ljava/util/List;
+}
+
 public final class dev/composescene3d/core/DirectionalLightNode : dev/composescene3d/core/SceneNode {
 	public synthetic fun <init> (Ljava/lang/String;FLdev/composescene3d/core/Vec3;Ldev/composescene3d/core/Transform;Ldev/composescene3d/core/ShadowMap3D;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (Ljava/lang/String;FLdev/composescene3d/core/Vec3;Ldev/composescene3d/core/Transform;Ldev/composescene3d/core/ShadowMap3D;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -393,6 +397,45 @@ public final class dev/composescene3d/core/LineNode : dev/composescene3d/core/Sc
 	public final fun getEnd ()Ldev/composescene3d/core/Vec3;
 	public fun getKey-V7PxYp4 ()Ljava/lang/String;
 	public final fun getMaterial ()Ldev/composescene3d/core/Material3D;
+	public final fun getRadius ()F
+	public final fun getReceiveShadows ()Z
+	public final fun getSegments ()I
+	public final fun getStart ()Ldev/composescene3d/core/Vec3;
+	public fun getTransform ()Ldev/composescene3d/core/Transform;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/composescene3d/core/LinearDimensionNode : dev/composescene3d/core/SceneNode {
+	public synthetic fun <init> (Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;FFFFFILdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;FFFFFILdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-V7PxYp4 ()Ljava/lang/String;
+	public final fun component10 ()I
+	public final fun component11 ()Ldev/composescene3d/core/Material3D;
+	public final fun component12 ()Ldev/composescene3d/core/Transform;
+	public final fun component13 ()Z
+	public final fun component14 ()Z
+	public final fun component2 ()Ldev/composescene3d/core/Vec3;
+	public final fun component3 ()Ldev/composescene3d/core/Vec3;
+	public final fun component4 ()Ldev/composescene3d/core/Vec3;
+	public final fun component5 ()F
+	public final fun component6 ()F
+	public final fun component7 ()F
+	public final fun component8 ()F
+	public final fun component9 ()F
+	public final fun copy-nQKG4BQ (Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;FFFFFILdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZ)Ldev/composescene3d/core/LinearDimensionNode;
+	public static synthetic fun copy-nQKG4BQ$default (Ldev/composescene3d/core/LinearDimensionNode;Ljava/lang/String;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;Ldev/composescene3d/core/Vec3;FFFFFILdev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZILjava/lang/Object;)Ldev/composescene3d/core/LinearDimensionNode;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getArrowHeadLength ()F
+	public final fun getArrowHeadRadius ()F
+	public final fun getCastShadows ()Z
+	public final fun getEnd ()Ldev/composescene3d/core/Vec3;
+	public final fun getExtensionGap ()F
+	public final fun getExtensionOvershoot ()F
+	public fun getKey-V7PxYp4 ()Ljava/lang/String;
+	public final fun getLabelAnchor ()Ldev/composescene3d/core/Vec3;
+	public final fun getMaterial ()Ldev/composescene3d/core/Material3D;
+	public final fun getOffset ()Ldev/composescene3d/core/Vec3;
 	public final fun getRadius ()F
 	public final fun getReceiveShadows ()Z
 	public final fun getSegments ()I
