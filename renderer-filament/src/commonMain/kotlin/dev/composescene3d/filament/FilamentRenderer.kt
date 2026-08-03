@@ -31,6 +31,7 @@ import dev.composescene3d.core.ModelNode
 import dev.composescene3d.core.ModelAssetKey
 import dev.composescene3d.core.ModelPart3D
 import dev.composescene3d.core.ModelPartKey
+import dev.composescene3d.core.ModelPartOverride
 import dev.composescene3d.core.ModelPartProvider
 import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.Material3D
@@ -51,6 +52,7 @@ import dev.composescene3d.core.SphereNode
 import dev.composescene3d.core.SpotLightNode
 import dev.composescene3d.core.TextureSource
 import dev.composescene3d.core.TexturedMaterial
+import dev.composescene3d.core.Transform
 import dev.composescene3d.core.TransparentMaterial
 import dev.composescene3d.core.EmissiveMaterial
 import dev.composescene3d.core.EnvironmentMap
@@ -176,6 +178,7 @@ class FilamentRenderer(
     private val nodeToEntities = mutableMapOf<NodeKey, Set<Int>>()
     private val partsByNode = mutableMapOf<NodeKey, List<ModelPart3D>>()
     private val entityToPart = mutableMapOf<Int, ModelPartKey>()
+    private val modelPartBindings = mutableMapOf<NodeKey, List<ModelPartBinding>>()
     private val modelPartListeners = mutableSetOf<(NodeKey, List<ModelPart3D>) -> Unit>()
     private var closed = false
 
@@ -222,6 +225,7 @@ class FilamentRenderer(
         nodeToEntities.clear()
         partsByNode.clear()
         entityToPart.clear()
+        modelPartBindings.clear()
         modelPartListeners.clear()
         closed = true
     }
@@ -291,17 +295,52 @@ class FilamentRenderer(
                 renderable = renderables.hasComponent(entity),
             )
         }
+        modelPartBindings[key] = entities.mapNotNull { entity ->
+            if (!transforms.hasComponent(entity)) return@mapNotNull null
+            val transformInstance = transforms.getInstance(entity)
+            ModelPartBinding(
+                entity = entity,
+                key = keyFor(entity),
+                parentKey = parents[entity]?.let(::keyFor),
+                originalTransform = transforms.getTransform(transformInstance, FloatArray(16)),
+            )
+        }
         partsByNode[key] = result
         modelPartListeners.toList().forEach { it(key, result) }
     }
 
     private fun unregisterEntities(key: NodeKey) {
+        modelPartBindings.remove(key)
         nodeToEntities.remove(key)?.forEach { entity ->
             if (entityToNode[entity] == key) entityToNode.remove(entity)
             entityToPart.remove(entity)
         }
         if (partsByNode.remove(key) != null) {
             modelPartListeners.toList().forEach { it(key, emptyList()) }
+        }
+    }
+
+    internal fun applyModelPartOverrides(
+        key: NodeKey,
+        overrides: Map<ModelPartKey, ModelPartOverride>,
+        engine: Engine,
+    ) {
+        val bindings = modelPartBindings[key].orEmpty()
+        val parentByKey = bindings.associate { it.key to it.parentKey }
+        val transforms = engine.getTransformManager()
+        val renderables = engine.getRenderableManager()
+        bindings.forEach { binding ->
+            val visible = isModelPartVisible(binding.key, parentByKey, overrides)
+            if (renderables.hasComponent(binding.entity)) {
+                renderables.setLayerMask(renderables.getInstance(binding.entity), 0xff, if (visible) 0xff else 0x00)
+            }
+            if (transforms.hasComponent(binding.entity)) {
+                val offset = overrides[binding.key]?.transformOffset ?: Transform()
+                transforms.setTransform(
+                    transforms.getInstance(binding.entity),
+                    multiplyMatrices(binding.originalTransform, offset.toFilamentMatrix()),
+                )
+            }
         }
     }
 
@@ -314,6 +353,54 @@ class FilamentRenderer(
         val nextKeys = next.descendantKeys()
         previous.descendants().filter { it.key !in nextKeys }.forEach { unregisterEntities(it.key) }
     }
+}
+
+private data class ModelPartBinding(
+    val entity: Int,
+    val key: ModelPartKey,
+    val parentKey: ModelPartKey?,
+    val originalTransform: FloatArray,
+)
+
+internal fun isModelPartVisible(
+    key: ModelPartKey,
+    parentByKey: Map<ModelPartKey, ModelPartKey?>,
+    overrides: Map<ModelPartKey, ModelPartOverride>,
+): Boolean {
+    var current: ModelPartKey? = key
+    while (current != null) {
+        if (overrides[current]?.visible == false) return false
+        current = parentByKey[current]
+    }
+    return true
+}
+
+internal fun multiplyMatrices(left: FloatArray, right: FloatArray): FloatArray {
+    require(left.size == 16 && right.size == 16)
+    return FloatArray(16) { index ->
+        val column = index / 4
+        val row = index % 4
+        (0..3).sumOf { k -> (left[k * 4 + row] * right[column * 4 + k]).toDouble() }.toFloat()
+    }
+}
+
+private fun Transform.toFilamentMatrix(): FloatArray {
+    val (x, y, z, w) = rotation
+    return floatArrayOf(
+        (1f - 2f * (y * y + z * z)) * scale.x,
+        (2f * (x * y + w * z)) * scale.x,
+        (2f * (x * z - w * y)) * scale.x,
+        0f,
+        (2f * (x * y - w * z)) * scale.y,
+        (1f - 2f * (x * x + z * z)) * scale.y,
+        (2f * (y * z + w * x)) * scale.y,
+        0f,
+        (2f * (x * z + w * y)) * scale.z,
+        (2f * (y * z - w * x)) * scale.z,
+        (1f - 2f * (x * x + y * y)) * scale.z,
+        0f,
+        translation.x, translation.y, translation.z, 1f,
+    )
 }
 
 private fun SceneNode.descendants(): List<SceneNode> = buildList {
@@ -699,9 +786,13 @@ private fun FilamentSceneScope.FilamentModels(
                 onCreate = {
                     renderer.registerEntities(model.key, instance.getEntities().toList())
                     renderer.registerModelParts(model.key, instance, engine)
+                    renderer.applyModelPartOverrides(model.key, model.partOverrides, engine)
                     applyShadows(model.castShadows, model.receiveShadows)
                 },
-                onUpdate = { applyShadows(model.castShadows, model.receiveShadows) },
+                onUpdate = {
+                    renderer.applyModelPartOverrides(model.key, model.partOverrides, engine)
+                    applyShadows(model.castShadows, model.receiveShadows)
+                },
             )
         }
     }

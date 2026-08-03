@@ -5,6 +5,7 @@ import dev.composescene3d.core.NodeKey
 import dev.composescene3d.core.ModelNode
 import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.ModelPartKey
+import dev.composescene3d.core.ModelPartOverride
 import dev.composescene3d.core.ScenePickResult
 import dev.composescene3d.core.GroupNode
 import dev.composescene3d.core.SceneCommand
@@ -15,6 +16,7 @@ import dev.composescene3d.testkit.RendererConformanceSuite
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertContentEquals
 
 class FilamentRendererTest {
     private val conformance = RendererConformanceSuite(
@@ -125,6 +127,35 @@ class FilamentRendererTest {
         renderer.registerEntities(box.key, listOf(44))
 
         assertEquals(ScenePickResult(box.key), renderer.resolvePick(44))
+    }
+
+    @Test
+    fun hiddenParentHidesItsDescendants() {
+        val root = ModelPartKey("assembly")
+        val shaft = ModelPartKey("assembly/shaft")
+        val bearing = ModelPartKey("assembly/shaft/bearing")
+        val parents = mapOf(root to null, shaft to root, bearing to shaft)
+
+        assertEquals(
+            false,
+            isModelPartVisible(bearing, parents, mapOf(root to ModelPartOverride(visible = false))),
+        )
+        assertEquals(true, isModelPartVisible(bearing, parents, emptyMap()))
+    }
+
+    @Test
+    fun partTransformOffsetIsAppliedAfterAuthoredTransform() {
+        val authored = floatArrayOf(
+            1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f, 0f, 2f, 0f, 0f, 1f,
+        )
+        val offset = floatArrayOf(
+            1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f, 0f, 3f, 0f, 0f, 1f,
+        )
+
+        assertContentEquals(
+            floatArrayOf(1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f, 0f, 5f, 0f, 0f, 1f),
+            multiplyMatrices(authored, offset),
+        )
     }
 
     @Test

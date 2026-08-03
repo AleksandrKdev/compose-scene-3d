@@ -12,6 +12,8 @@ import dev.composescene3d.core.Material3D
 import dev.composescene3d.core.Geometry3D
 import dev.composescene3d.core.MeshNode
 import dev.composescene3d.core.ModelNode
+import dev.composescene3d.core.ModelPartKey
+import dev.composescene3d.core.ModelPartOverride
 import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.NodeKey
 import dev.composescene3d.core.PbrMaterial
@@ -38,8 +40,11 @@ class SceneScope internal constructor() {
         visible: Boolean = true,
         castShadows: Boolean = true,
         receiveShadows: Boolean = true,
+        partOverrides: Map<ModelPartKey, ModelPartOverride> = emptyMap(),
     ) {
-        nodes += ModelNode(NodeKey(key), source, transform, visible, castShadows, receiveShadows)
+        nodes += ModelNode(
+            NodeKey(key), source, transform, visible, castShadows, receiveShadows, partOverrides,
+        )
     }
 
     /**

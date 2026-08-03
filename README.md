@@ -69,8 +69,28 @@ val currentParts = controller.modelParts(NodeKey("gearbox"))
 subscription.dispose()
 ```
 
-The callback receives an empty list when the model instance is removed. Per-part picking and
-visibility/transform/material overrides are the next mobile milestones.
+The callback receives an empty list when the model instance is removed. A part or an entire
+subtree can be hidden, and a local transform offset can be applied without losing the transform
+authored in the model file:
+
+```kotlin
+Scene3D(controller) {
+    model(
+        key = "gearbox",
+        source = ModelSource.Resource("files/gearbox.glb"),
+        partOverrides = mapOf(
+            ModelPartKey("Gearbox/Shaft") to ModelPartOverride(
+                transformOffset = Transform(translation = Vec3(0.4f, 0f, 0f)),
+            ),
+            ModelPartKey("Gearbox/Cover") to ModelPartOverride(visible = false),
+        ),
+    )
+}
+```
+
+Overrides are declarative and work on Android and iOS. Hiding a non-renderable hierarchy node
+hides its renderable descendants as well. Per-part material replacement is the next mobile
+milestone.
 
 ## Example
 

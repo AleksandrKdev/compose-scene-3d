@@ -6,6 +6,10 @@ import dev.composescene3d.core.EmissiveMaterial
 import dev.composescene3d.core.GroupNode
 import dev.composescene3d.core.Geometry3D
 import dev.composescene3d.core.MeshNode
+import dev.composescene3d.core.ModelNode
+import dev.composescene3d.core.ModelPartKey
+import dev.composescene3d.core.ModelPartOverride
+import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.ShadowMap3D
 import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.core.PlaneNode
@@ -20,6 +24,21 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
 class SceneScopeTest {
+    @Test
+    fun attachesImportedModelPartOverrides() {
+        val part = ModelPartKey("assembly/cover")
+        val override = ModelPartOverride(visible = false)
+        val scene = SceneScope().apply {
+            model(
+                key = "assembly",
+                source = ModelSource.Bytes(byteArrayOf(1), "assembly"),
+                partOverrides = mapOf(part to override),
+            )
+        }.build()
+
+        assertEquals(mapOf(part to override), assertIs<ModelNode>(scene.nodes.single()).partOverrides)
+    }
+
     @Test
     fun buildsNewPrimitivesWithBackendNeutralMaterials() {
         val metal = PbrMaterial(baseColor = Color3D(1f, 0.5f, 0f), metallic = 1f)

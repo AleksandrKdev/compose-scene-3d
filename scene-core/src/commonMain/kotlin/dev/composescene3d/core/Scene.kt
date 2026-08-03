@@ -78,6 +78,12 @@ data class ModelPart3D(
     val renderable: Boolean = false,
 )
 
+/** Declarative changes applied to one imported model part after its authored local transform. */
+data class ModelPartOverride(
+    val visible: Boolean = true,
+    val transformOffset: Transform = Transform(),
+)
+
 /** Result of selecting a renderable scene entity. Imported models also identify the selected part. */
 data class ScenePickResult(
     val nodeKey: NodeKey,
@@ -112,6 +118,7 @@ data class ModelNode(
     val visible: Boolean = true,
     val castShadows: Boolean = true,
     val receiveShadows: Boolean = true,
+    val partOverrides: Map<ModelPartKey, ModelPartOverride> = emptyMap(),
 ) : SceneNode
 
 /** Per-light shadow-map quality. A null value on a light disables its shadows. */
