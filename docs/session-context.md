@@ -522,6 +522,15 @@ The original plan before publishing outside the local machine was:
 The original GitHub Packages alpha milestone is complete. Maven Central `0.1.0-alpha02` is the
 current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 
+## Alpha03 stabilization
+
+- The main CI platform smoke test now produces the optimized Web/Wasm sample bundle in addition to
+  testing common code and compiling the Android, Desktop and iOS consumers.
+- `CONTRIBUTING.md` contains one complete pre-push command covering all four supported platforms
+  plus ABI validation. The SwiftUI host remains a separate Xcode CI step.
+- The next stabilization step is a public API documentation and naming audit before cutting
+  `0.1.0-alpha03`.
+
 ## Useful files
 
 - `README.md` — overview and roadmap.

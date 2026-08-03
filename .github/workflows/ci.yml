@@ -27,7 +27,7 @@ jobs:
       - name: Set up Gradle cache
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Test common code and compile Android/Desktop
+      - name: Test common code and compile Android/Desktop/Web
         run: >-
           ./gradlew
           :scene-core:jvmTest
@@ -36,6 +36,7 @@ jobs:
           :renderer-testkit:compileKotlinJvm
           :samples:android-app:assembleDebug
           :samples:desktop-app:compileKotlinJvm
+          :samples:web-app:wasmJsBrowserProductionWebpack
 
       - name: Check binary API compatibility
         run: ./gradlew checkKotlinAbi
