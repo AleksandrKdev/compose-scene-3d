@@ -30,6 +30,7 @@ import dev.composescene3d.core.HighlightMaterial
 import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.TransparentMaterial
+import dev.composescene3d.core.UnlitMaterial
 import dev.composescene3d.core.EnvironmentMap
 import dev.composescene3d.core.TextureSource
 import dev.composescene3d.core.TexturedMaterial
@@ -165,6 +166,22 @@ private fun Sample() {
                     geometry = sampleTriangle,
                     material = PbrMaterial(baseColor = Color3D.Magenta, roughness = 0.35f),
                     transform = Transform(translation = Vec3(0f, 1.35f, 0f)),
+                )
+                line(
+                    key = "duck-callout-leader",
+                    start = Vec3(0.2f, 0.25f, 0f),
+                    end = Vec3(1.25f, 1.25f, 0f),
+                    radius = 0.012f,
+                    material = UnlitMaterial(Color3D.Cyan),
+                )
+                arrow(
+                    key = "vertical-force-arrow",
+                    start = Vec3(-1f, 0.65f, 0f),
+                    end = Vec3(-1f, 1.55f, 0f),
+                    shaftRadius = 0.018f,
+                    headRadius = 0.055f,
+                    headLength = 0.18f,
+                    material = UnlitMaterial(Color3D.Yellow),
                 )
             }
             plane(

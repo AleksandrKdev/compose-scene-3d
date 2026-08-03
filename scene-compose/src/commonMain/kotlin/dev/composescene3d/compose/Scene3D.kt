@@ -7,6 +7,8 @@ import androidx.compose.runtime.remember
 import dev.composescene3d.core.DirectionalLightNode
 import dev.composescene3d.core.BoxNode
 import dev.composescene3d.core.CylinderNode
+import dev.composescene3d.core.LineNode
+import dev.composescene3d.core.ArrowNode
 import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.Material3D
 import dev.composescene3d.core.Geometry3D
@@ -17,6 +19,7 @@ import dev.composescene3d.core.ModelPartOverride
 import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.NodeKey
 import dev.composescene3d.core.PbrMaterial
+import dev.composescene3d.core.UnlitMaterial
 import dev.composescene3d.core.PlaneNode
 import dev.composescene3d.core.PointLightNode
 import dev.composescene3d.core.SceneController
@@ -113,6 +116,42 @@ class SceneScope internal constructor() {
     ) {
         nodes += CylinderNode(
             NodeKey(key), radius, height, segments, material, transform, castShadows, receiveShadows,
+        )
+    }
+
+    fun line(
+        key: String,
+        start: Vec3,
+        end: Vec3,
+        radius: Float = 0.01f,
+        segments: Int = 12,
+        material: Material3D = UnlitMaterial(),
+        transform: Transform = Transform(),
+        castShadows: Boolean = false,
+        receiveShadows: Boolean = false,
+    ) {
+        nodes += LineNode(
+            NodeKey(key), start, end, radius, segments, material, transform,
+            castShadows, receiveShadows,
+        )
+    }
+
+    fun arrow(
+        key: String,
+        start: Vec3,
+        end: Vec3,
+        shaftRadius: Float = 0.01f,
+        headRadius: Float = 0.035f,
+        headLength: Float = 0.12f,
+        segments: Int = 16,
+        material: Material3D = UnlitMaterial(),
+        transform: Transform = Transform(),
+        castShadows: Boolean = false,
+        receiveShadows: Boolean = false,
+    ) {
+        nodes += ArrowNode(
+            NodeKey(key), start, end, shaftRadius, headRadius, headLength, segments,
+            material, transform, castShadows, receiveShadows,
         )
     }
 

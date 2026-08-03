@@ -3,6 +3,7 @@ package dev.composescene3d.core
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 class PrimitiveTest {
     @Test
@@ -83,5 +84,23 @@ class PrimitiveTest {
         assertFailsWith<IllegalArgumentException> { SphereNode(NodeKey("sphere"), radius = 0f) }
         assertFailsWith<IllegalArgumentException> { PlaneNode(NodeKey("plane"), depth = 0f) }
         assertFailsWith<IllegalArgumentException> { CylinderNode(NodeKey("cylinder"), segments = 2) }
+        assertFailsWith<IllegalArgumentException> {
+            LineNode(NodeKey("line"), Vec3.Zero, Vec3.Zero)
+        }
+        assertFailsWith<IllegalArgumentException> {
+            ArrowNode(NodeKey("arrow"), Vec3.Zero, Vec3(0f, 0f, 0.1f), headLength = 0.1f)
+        }
+    }
+
+    @Test
+    fun buildsLineAndArrowGeometryAlongAnyAxis() {
+        val line = LineNode(NodeKey("line"), Vec3(-1f, 2f, 0f), Vec3(2f, 2f, 0f))
+        val arrow = ArrowNode(
+            NodeKey("arrow"), Vec3.Zero, Vec3(0f, -2f, 0f), headLength = 0.4f,
+        )
+
+        assertTrue(line.geometry().triangleCount > 0)
+        assertTrue(arrow.geometry().triangleCount > line.geometry().triangleCount)
+        assertTrue(arrow.geometry().positions.all(Float::isFinite))
     }
 }

@@ -23,6 +23,7 @@ import dev.composescene3d.compose.rememberSceneCameraState
 import dev.composescene3d.compose.sceneCameraGestures
 import dev.composescene3d.core.CameraProjection
 import dev.composescene3d.core.BoxNode
+import dev.composescene3d.core.ArrowNode
 import dev.composescene3d.core.CylinderNode
 import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.DirectionalLightNode
@@ -40,6 +41,7 @@ import dev.composescene3d.core.ModelPartAnchorProvider
 import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.Material3D
 import dev.composescene3d.core.MeshNode
+import dev.composescene3d.core.LineNode
 import dev.composescene3d.core.NodeKey
 import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.core.PlaneNode
@@ -62,6 +64,7 @@ import dev.composescene3d.core.EmissiveMaterial
 import dev.composescene3d.core.EnvironmentMap
 import dev.composescene3d.core.UnlitMaterial
 import dev.composescene3d.core.assetKey
+import dev.composescene3d.core.geometry
 import dev.composescene3d.core.Vec3
 import dev.composescene3d.filament.resources.Res
 import io.github.erkko68.filament.compose.FilamentSceneView
@@ -739,6 +742,20 @@ private fun FilamentSceneScope.FilamentNodes(
                 is SphereNode -> FilamentSphere(renderer, node)
                 is PlaneNode -> FilamentPlane(renderer, node)
                 is CylinderNode -> FilamentCylinder(renderer, node)
+                is LineNode -> FilamentMesh(
+                    renderer,
+                    MeshNode(
+                        node.key, node.geometry(), node.material, node.transform,
+                        node.castShadows, node.receiveShadows,
+                    ),
+                )
+                is ArrowNode -> FilamentMesh(
+                    renderer,
+                    MeshNode(
+                        node.key, node.geometry(), node.material, node.transform,
+                        node.castShadows, node.receiveShadows,
+                    ),
+                )
                 is MeshNode -> FilamentMesh(renderer, node)
                 is DirectionalLightNode -> FilamentLight(node)
                 is PointLightNode -> FilamentLight(node)

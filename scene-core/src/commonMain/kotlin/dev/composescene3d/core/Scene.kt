@@ -339,6 +339,64 @@ data class CylinderNode(
     }
 }
 
+/** A solid, pickable 3D line whose thickness is measured in scene units. */
+data class LineNode(
+    override val key: NodeKey,
+    val start: Vec3,
+    val end: Vec3,
+    val radius: Float = 0.01f,
+    val segments: Int = 12,
+    val material: Material3D = UnlitMaterial(),
+    override val transform: Transform = Transform(),
+    val castShadows: Boolean = false,
+    val receiveShadows: Boolean = false,
+) : SceneNode {
+    init {
+        val lengthSquared = (end.x - start.x) * (end.x - start.x) +
+            (end.y - start.y) * (end.y - start.y) +
+            (end.z - start.z) * (end.z - start.z)
+        require(lengthSquared > 0f && lengthSquared.isFinite()) {
+            "Line start and end must be finite and different"
+        }
+        require(radius > 0f && radius.isFinite()) { "Line radius must be finite and positive" }
+        require(segments >= 3) { "Line segments must be at least 3" }
+    }
+}
+
+/** A solid 3D arrow composed of a shaft and a conical head. */
+data class ArrowNode(
+    override val key: NodeKey,
+    val start: Vec3,
+    val end: Vec3,
+    val shaftRadius: Float = 0.01f,
+    val headRadius: Float = 0.035f,
+    val headLength: Float = 0.12f,
+    val segments: Int = 16,
+    val material: Material3D = UnlitMaterial(),
+    override val transform: Transform = Transform(),
+    val castShadows: Boolean = false,
+    val receiveShadows: Boolean = false,
+) : SceneNode {
+    init {
+        val lengthSquared = (end.x - start.x) * (end.x - start.x) +
+            (end.y - start.y) * (end.y - start.y) +
+            (end.z - start.z) * (end.z - start.z)
+        require(lengthSquared > 0f && lengthSquared.isFinite()) {
+            "Arrow start and end must be finite and different"
+        }
+        require(shaftRadius > 0f && shaftRadius.isFinite()) {
+            "Arrow shaft radius must be finite and positive"
+        }
+        require(headRadius > 0f && headRadius.isFinite()) {
+            "Arrow head radius must be finite and positive"
+        }
+        require(headLength > 0f && headLength * headLength < lengthSquared) {
+            "Arrow head length must be positive and shorter than the arrow"
+        }
+        require(segments >= 3) { "Arrow segments must be at least 3" }
+    }
+}
+
 /** Indexed triangle geometry stored in backend-neutral, non-interleaved arrays. */
 class Geometry3D(
     val positions: FloatArray,

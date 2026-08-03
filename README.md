@@ -221,6 +221,31 @@ The Filament backend calculates the bounding box and tangent-frame quaternions, 
 vertex/index buffers, participates in scene hierarchy and picking, and releases native resources
 when geometry leaves the composition.
 
+Lines and arrows are solid, pickable 3D geometry and work in local group coordinates. Their
+thickness is measured in scene units, so they can be used for callout leaders, dimensions, axes,
+force vectors and animated instructional overlays on Android, iOS and Web:
+
+```kotlin
+line(
+    key = "callout-leader",
+    start = Vec3(0f, 0.4f, 0f),
+    end = Vec3(1.2f, 1.1f, 0f),
+    radius = 0.01f,
+    material = UnlitMaterial(Color3D.Cyan),
+)
+arrow(
+    key = "force-vector",
+    start = Vec3.Zero,
+    end = Vec3(0f, 1.5f, 0f),
+    headLength = 0.2f,
+    material = UnlitMaterial(Color3D.Yellow),
+)
+```
+
+Because they are regular scene nodes, transforms, parent groups, picking and optional shadows
+behave exactly like other primitives. `UnlitMaterial` is the default so annotations stay legible
+independently of scene lighting; PBR and other portable materials are also supported.
+
 `Color3D` distinguishes sRGB input from linear-sRGB values and supports RGB/RGBA/ARGB factories
 and named colors. Primitive materials can be `PbrMaterial`, `UnlitMaterial`, `EmissiveMaterial`,
 `TexturedMaterial` or `TransparentMaterial`.

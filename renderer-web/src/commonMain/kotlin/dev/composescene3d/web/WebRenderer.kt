@@ -20,6 +20,7 @@ import dev.composescene3d.compose.SceneCameraState
 import dev.composescene3d.compose.rememberSceneCameraState
 import dev.composescene3d.compose.sceneCameraGestures
 import dev.composescene3d.core.BoxNode
+import dev.composescene3d.core.ArrowNode
 import dev.composescene3d.core.CameraProjection
 import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.CylinderNode
@@ -29,6 +30,7 @@ import dev.composescene3d.core.GroupNode
 import dev.composescene3d.core.HighlightMaterial
 import dev.composescene3d.core.Material3D
 import dev.composescene3d.core.MeshNode
+import dev.composescene3d.core.LineNode
 import dev.composescene3d.core.ModelNode
 import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.NodeKey
@@ -48,6 +50,7 @@ import dev.composescene3d.core.TransparentMaterial
 import dev.composescene3d.core.TexturedMaterial
 import dev.composescene3d.core.TextureSource
 import dev.composescene3d.core.assetKey
+import dev.composescene3d.core.geometry
 import dev.composescene3d.core.UnlitMaterial
 import dev.composescene3d.core.Vec3
 import kotlin.math.PI
@@ -158,8 +161,14 @@ private fun SceneNode.toMesh(): MeshData? = when (this) {
     is PlaneNode -> planeMesh(width, depth, material)
     is SphereNode -> sphereMesh(radius, rings, segments, material)
     is CylinderNode -> cylinderMesh(radius, height, segments, material)
+    is LineNode -> geometry().toMeshData(material)
+    is ArrowNode -> geometry().toMeshData(material)
     else -> null
 }
+
+private fun dev.composescene3d.core.Geometry3D.toMeshData(material: Material3D) = MeshData(
+    positions.toVec3List(), indices.toList(), normals.toVec3List(), uvs, material,
+)
 
 private fun boxMesh(size: Vec3, material: Material3D): MeshData {
     val x = size.x / 2f; val y = size.y / 2f; val z = size.z / 2f
@@ -1179,6 +1188,8 @@ private fun SceneNode.castShadows() = when (this) {
     is SphereNode -> castShadows
     is PlaneNode -> castShadows
     is CylinderNode -> castShadows
+    is LineNode -> castShadows
+    is ArrowNode -> castShadows
     is MeshNode -> castShadows
     is ModelNode -> castShadows
     else -> false
@@ -1189,6 +1200,8 @@ private fun SceneNode.receiveShadows() = when (this) {
     is SphereNode -> receiveShadows
     is PlaneNode -> receiveShadows
     is CylinderNode -> receiveShadows
+    is LineNode -> receiveShadows
+    is ArrowNode -> receiveShadows
     is MeshNode -> receiveShadows
     is ModelNode -> receiveShadows
     else -> false

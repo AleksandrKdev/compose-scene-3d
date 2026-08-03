@@ -1,6 +1,8 @@
 package dev.composescene3d.compose
 
 import dev.composescene3d.core.CylinderNode
+import dev.composescene3d.core.ArrowNode
+import dev.composescene3d.core.LineNode
 import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.EmissiveMaterial
 import dev.composescene3d.core.GroupNode
@@ -19,6 +21,8 @@ import dev.composescene3d.core.SpotLightNode
 import dev.composescene3d.core.TextureSource
 import dev.composescene3d.core.TexturedMaterial
 import dev.composescene3d.core.TransparentMaterial
+import dev.composescene3d.core.UnlitMaterial
+import dev.composescene3d.core.Vec3
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -52,6 +56,18 @@ class SceneScopeTest {
         assertEquals(metal, assertIs<SphereNode>(scene.nodes[0]).material)
         assertEquals(4f, assertIs<PlaneNode>(scene.nodes[1]).width)
         assertEquals(2f, assertIs<CylinderNode>(scene.nodes[2]).height)
+    }
+
+    @Test
+    fun buildsLinesAndArrowsForInstructionalOverlays() {
+        val annotation = UnlitMaterial(Color3D.Cyan)
+        val scene = SceneScope().apply {
+            line("leader", Vec3.Zero, Vec3(1f, 1f, 0f), material = annotation)
+            arrow("force", Vec3.Zero, Vec3(0f, 1f, 0f), headLength = 0.2f)
+        }.build()
+
+        assertEquals(annotation, assertIs<LineNode>(scene.nodes[0]).material)
+        assertEquals(0.2f, assertIs<ArrowNode>(scene.nodes[1]).headLength)
     }
 
     @Test
