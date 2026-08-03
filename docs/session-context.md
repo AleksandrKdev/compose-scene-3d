@@ -455,6 +455,16 @@ State: unavailable/offline
   and post-opaque `BLEND` rendering. Blend meshes use source-alpha blending without depth writes
   and do not cast falsely solid shadows. `doubleSided` controls face culling. The external glTF
   sample uses a translucent, double-sided textured primitive and was verified in headless Chrome.
+- Context saved on 2026-08-03. Current `main` head is `2605e78` (`Add Web glTF alpha materials`),
+  already pushed to `origin/main`. GitHub Actions run `29693980063` and all five preceding Web
+  milestone runs completed successfully.
+- The user noticed that the cube shadow appears to have cut/beveled corners. In the last verified
+  Web frame this looks like the expected polygonal projection of a box under an angled directional
+  light plus 3x3 PCF edge smoothing, not shadow-map clipping. If the shadow instead ends abruptly
+  on a straight boundary or changes/disappears with a small camera rotation, request a screenshot
+  and treat it as a possible fitted-frustum regression.
+- The only uncommitted workspace change is the user's Xcode UI state file under
+  `samples/ios-app/.../xcuserdata/.../UserInterfaceState.xcuserstate`; do not stage or overwrite it.
 - Next milestone: Web glTF sampler settings and texture-coordinate set selection.
 
 ## Completed local Maven alpha milestone
