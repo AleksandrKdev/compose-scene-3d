@@ -17,6 +17,15 @@ final enum class dev.composescene3d.core/ColorSpace3D : kotlin/Enum<dev.composes
     final fun values(): kotlin/Array<dev.composescene3d.core/ColorSpace3D> // dev.composescene3d.core/ColorSpace3D.values|values#static(){}[0]
 }
 
+abstract fun interface dev.composescene3d.core/SceneSubscription { // dev.composescene3d.core/SceneSubscription|null[0]
+    abstract fun dispose() // dev.composescene3d.core/SceneSubscription.dispose|dispose(){}[0]
+}
+
+abstract interface dev.composescene3d.core/ModelPartProvider { // dev.composescene3d.core/ModelPartProvider|null[0]
+    abstract fun modelParts(dev.composescene3d.core/NodeKey): kotlin.collections/List<dev.composescene3d.core/ModelPart3D> // dev.composescene3d.core/ModelPartProvider.modelParts|modelParts(dev.composescene3d.core.NodeKey){}[0]
+    abstract fun observeModelParts(kotlin/Function2<dev.composescene3d.core/NodeKey, kotlin.collections/List<dev.composescene3d.core/ModelPart3D>, kotlin/Unit>): dev.composescene3d.core/SceneSubscription // dev.composescene3d.core/ModelPartProvider.observeModelParts|observeModelParts(kotlin.Function2<dev.composescene3d.core.NodeKey,kotlin.collections.List<dev.composescene3d.core.ModelPart3D>,kotlin.Unit>){}[0]
+}
+
 abstract interface dev.composescene3d.core/SceneRenderer { // dev.composescene3d.core/SceneRenderer|null[0]
     abstract val capabilities // dev.composescene3d.core/SceneRenderer.capabilities|{}capabilities[0]
         abstract fun <get-capabilities>(): dev.composescene3d.core/RendererCapabilities // dev.composescene3d.core/SceneRenderer.capabilities.<get-capabilities>|<get-capabilities>(){}[0]
@@ -558,6 +567,31 @@ final class dev.composescene3d.core/ModelNode : dev.composescene3d.core/SceneNod
     final fun toString(): kotlin/String // dev.composescene3d.core/ModelNode.toString|toString(){}[0]
 }
 
+final class dev.composescene3d.core/ModelPart3D { // dev.composescene3d.core/ModelPart3D|null[0]
+    constructor <init>(dev.composescene3d.core/ModelPartKey, kotlin/String, dev.composescene3d.core/ModelPartKey? = ..., kotlin.collections/List<dev.composescene3d.core/ModelPartKey> = ..., kotlin/Boolean = ...) // dev.composescene3d.core/ModelPart3D.<init>|<init>(dev.composescene3d.core.ModelPartKey;kotlin.String;dev.composescene3d.core.ModelPartKey?;kotlin.collections.List<dev.composescene3d.core.ModelPartKey>;kotlin.Boolean){}[0]
+
+    final val childKeys // dev.composescene3d.core/ModelPart3D.childKeys|{}childKeys[0]
+        final fun <get-childKeys>(): kotlin.collections/List<dev.composescene3d.core/ModelPartKey> // dev.composescene3d.core/ModelPart3D.childKeys.<get-childKeys>|<get-childKeys>(){}[0]
+    final val key // dev.composescene3d.core/ModelPart3D.key|{}key[0]
+        final fun <get-key>(): dev.composescene3d.core/ModelPartKey // dev.composescene3d.core/ModelPart3D.key.<get-key>|<get-key>(){}[0]
+    final val name // dev.composescene3d.core/ModelPart3D.name|{}name[0]
+        final fun <get-name>(): kotlin/String // dev.composescene3d.core/ModelPart3D.name.<get-name>|<get-name>(){}[0]
+    final val parentKey // dev.composescene3d.core/ModelPart3D.parentKey|{}parentKey[0]
+        final fun <get-parentKey>(): dev.composescene3d.core/ModelPartKey? // dev.composescene3d.core/ModelPart3D.parentKey.<get-parentKey>|<get-parentKey>(){}[0]
+    final val renderable // dev.composescene3d.core/ModelPart3D.renderable|{}renderable[0]
+        final fun <get-renderable>(): kotlin/Boolean // dev.composescene3d.core/ModelPart3D.renderable.<get-renderable>|<get-renderable>(){}[0]
+
+    final fun component1(): dev.composescene3d.core/ModelPartKey // dev.composescene3d.core/ModelPart3D.component1|component1(){}[0]
+    final fun component2(): kotlin/String // dev.composescene3d.core/ModelPart3D.component2|component2(){}[0]
+    final fun component3(): dev.composescene3d.core/ModelPartKey? // dev.composescene3d.core/ModelPart3D.component3|component3(){}[0]
+    final fun component4(): kotlin.collections/List<dev.composescene3d.core/ModelPartKey> // dev.composescene3d.core/ModelPart3D.component4|component4(){}[0]
+    final fun component5(): kotlin/Boolean // dev.composescene3d.core/ModelPart3D.component5|component5(){}[0]
+    final fun copy(dev.composescene3d.core/ModelPartKey = ..., kotlin/String = ..., dev.composescene3d.core/ModelPartKey? = ..., kotlin.collections/List<dev.composescene3d.core/ModelPartKey> = ..., kotlin/Boolean = ...): dev.composescene3d.core/ModelPart3D // dev.composescene3d.core/ModelPart3D.copy|copy(dev.composescene3d.core.ModelPartKey;kotlin.String;dev.composescene3d.core.ModelPartKey?;kotlin.collections.List<dev.composescene3d.core.ModelPartKey>;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/ModelPart3D.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/ModelPart3D.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.composescene3d.core/ModelPart3D.toString|toString(){}[0]
+}
+
 final class dev.composescene3d.core/PbrMaterial : dev.composescene3d.core/Material3D { // dev.composescene3d.core/PbrMaterial|null[0]
     constructor <init>(dev.composescene3d.core/Color3D = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ...) // dev.composescene3d.core/PbrMaterial.<init>|<init>(dev.composescene3d.core.Color3D;kotlin.Float;kotlin.Float;kotlin.Float){}[0]
 
@@ -701,6 +735,8 @@ final class dev.composescene3d.core/SceneController { // dev.composescene3d.core
     constructor <init>(dev.composescene3d.core/SceneRenderer) // dev.composescene3d.core/SceneController.<init>|<init>(dev.composescene3d.core.SceneRenderer){}[0]
 
     final fun close() // dev.composescene3d.core/SceneController.close|close(){}[0]
+    final fun modelParts(dev.composescene3d.core/NodeKey): kotlin.collections/List<dev.composescene3d.core/ModelPart3D> // dev.composescene3d.core/SceneController.modelParts|modelParts(dev.composescene3d.core.NodeKey){}[0]
+    final fun observeModelParts(kotlin/Function2<dev.composescene3d.core/NodeKey, kotlin.collections/List<dev.composescene3d.core/ModelPart3D>, kotlin/Unit>): dev.composescene3d.core/SceneSubscription // dev.composescene3d.core/SceneController.observeModelParts|observeModelParts(kotlin.Function2<dev.composescene3d.core.NodeKey,kotlin.collections.List<dev.composescene3d.core.ModelPart3D>,kotlin.Unit>){}[0]
     final fun submit(dev.composescene3d.core/SceneDescription) // dev.composescene3d.core/SceneController.submit|submit(dev.composescene3d.core.SceneDescription){}[0]
 }
 
@@ -962,6 +998,17 @@ final value class dev.composescene3d.core/ModelAssetKey { // dev.composescene3d.
     final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/ModelAssetKey.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // dev.composescene3d.core/ModelAssetKey.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // dev.composescene3d.core/ModelAssetKey.toString|toString(){}[0]
+}
+
+final value class dev.composescene3d.core/ModelPartKey { // dev.composescene3d.core/ModelPartKey|null[0]
+    constructor <init>(kotlin/String) // dev.composescene3d.core/ModelPartKey.<init>|<init>(kotlin.String){}[0]
+
+    final val value // dev.composescene3d.core/ModelPartKey.value|{}value[0]
+        final fun <get-value>(): kotlin/String // dev.composescene3d.core/ModelPartKey.value.<get-value>|<get-value>(){}[0]
+
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/ModelPartKey.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/ModelPartKey.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.composescene3d.core/ModelPartKey.toString|toString(){}[0]
 }
 
 final value class dev.composescene3d.core/NodeKey { // dev.composescene3d.core/NodeKey|null[0]

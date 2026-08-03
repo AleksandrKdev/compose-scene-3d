@@ -24,6 +24,18 @@ interface SceneRenderer {
     fun close()
 }
 
+/** Optional renderer service for inspecting nodes inside imported model instances. */
+interface ModelPartProvider {
+    fun modelParts(nodeKey: NodeKey): List<ModelPart3D>
+    fun observeModelParts(
+        listener: (nodeKey: NodeKey, parts: List<ModelPart3D>) -> Unit,
+    ): SceneSubscription
+}
+
+fun interface SceneSubscription {
+    fun dispose()
+}
+
 class SceneController(private val renderer: SceneRenderer) {
     private var current = SceneDescription.Empty
     private var closed = false
@@ -34,6 +46,16 @@ class SceneController(private val renderer: SceneRenderer) {
         if (commands.isNotEmpty()) renderer.apply(commands)
         current = scene
     }
+
+    /** Returns the currently loaded hierarchy for [nodeKey], or an empty list while it is loading. */
+    fun modelParts(nodeKey: NodeKey): List<ModelPart3D> =
+        (renderer as? ModelPartProvider)?.modelParts(nodeKey).orEmpty()
+
+    /** Observes model hierarchies as asynchronous model instances are created or removed. */
+    fun observeModelParts(
+        listener: (nodeKey: NodeKey, parts: List<ModelPart3D>) -> Unit,
+    ): SceneSubscription = (renderer as? ModelPartProvider)?.observeModelParts(listener)
+        ?: SceneSubscription { }
 
     fun close() {
         if (closed) return

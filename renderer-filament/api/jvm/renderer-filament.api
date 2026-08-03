@@ -1,4 +1,4 @@
-public final class dev/composescene3d/filament/FilamentRenderer : dev/composescene3d/core/SceneRenderer {
+public final class dev/composescene3d/filament/FilamentRenderer : dev/composescene3d/core/ModelPartProvider, dev/composescene3d/core/SceneRenderer {
 	public static final field $stable I
 	public fun <init> ()V
 	public fun <init> (Ldev/composescene3d/filament/ModelByteLoader;Lkotlin/jvm/functions/Function2;)V
@@ -8,6 +8,8 @@ public final class dev/composescene3d/filament/FilamentRenderer : dev/composesce
 	public fun apply (Ljava/util/List;)V
 	public fun close ()V
 	public fun getCapabilities ()Ldev/composescene3d/core/RendererCapabilities;
+	public fun modelParts-ApBp1Ug (Ljava/lang/String;)Ljava/util/List;
+	public fun observeModelParts (Lkotlin/jvm/functions/Function2;)Ldev/composescene3d/core/SceneSubscription;
 }
 
 public final class dev/composescene3d/filament/FilamentRendererKt {

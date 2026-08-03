@@ -4,8 +4,37 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
+import kotlin.test.assertTrue
 
 class ReconcilerTest {
+    @Test
+    fun controllerExposesOptionalModelPartProvider() {
+        val expected = listOf(ModelPart3D(ModelPartKey("gear"), "Gear", renderable = true))
+        val renderer = object : SceneRenderer, ModelPartProvider {
+            var listener: ((NodeKey, List<ModelPart3D>) -> Unit)? = null
+            override val capabilities = RendererCapabilities()
+            override fun apply(commands: List<SceneCommand>) = Unit
+            override fun close() = Unit
+            override fun modelParts(nodeKey: NodeKey) =
+                if (nodeKey == NodeKey("model")) expected else emptyList()
+            override fun observeModelParts(listener: (NodeKey, List<ModelPart3D>) -> Unit): SceneSubscription {
+                this.listener = listener
+                return SceneSubscription { this.listener = null }
+            }
+        }
+
+        val controller = SceneController(renderer)
+
+        assertEquals(expected, controller.modelParts(NodeKey("model")))
+        assertTrue(controller.modelParts(NodeKey("missing")).isEmpty())
+        var observed = emptyList<ModelPart3D>()
+        val subscription = controller.observeModelParts { _, parts -> observed = parts }
+        renderer.listener?.invoke(NodeKey("model"), expected)
+        assertEquals(expected, observed)
+        subscription.dispose()
+        assertEquals(null, renderer.listener)
+    }
+
     @Test
     fun createsOnlyNewNodesAndUpdatesChangedNodes() {
         val old = SceneDescription(

@@ -29,6 +29,9 @@ import dev.composescene3d.core.DirectionalLightNode
 import dev.composescene3d.core.GroupNode
 import dev.composescene3d.core.ModelNode
 import dev.composescene3d.core.ModelAssetKey
+import dev.composescene3d.core.ModelPart3D
+import dev.composescene3d.core.ModelPartKey
+import dev.composescene3d.core.ModelPartProvider
 import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.Material3D
 import dev.composescene3d.core.MeshNode
@@ -40,6 +43,7 @@ import dev.composescene3d.core.RendererCapabilities
 import dev.composescene3d.core.SceneCommand
 import dev.composescene3d.core.SceneNode
 import dev.composescene3d.core.SceneRenderer
+import dev.composescene3d.core.SceneSubscription
 import dev.composescene3d.core.ShadowMap3D
 import dev.composescene3d.core.ShadowTechnique3D
 import dev.composescene3d.core.SphereNode
@@ -94,6 +98,7 @@ import io.github.erkko68.filament.Engine
 import io.github.erkko68.filament.Texture
 import io.github.erkko68.filament.TextureSampler
 import io.github.erkko68.filament.Renderer
+import io.github.erkko68.filament.gltfio.FilamentInstance
 import io.github.erkko68.filament.utils.TextureLoader
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -142,7 +147,7 @@ private val bytesOnlyTextureLoader = TextureByteLoader { source ->
 class FilamentRenderer(
     internal val modelByteLoader: ModelByteLoader = bytesOnlyModelLoader,
     internal val onModelError: (ModelAssetKey, Throwable) -> Unit = { _, _ -> },
-) : SceneRenderer {
+) : SceneRenderer, ModelPartProvider {
     internal var textureByteLoader: TextureByteLoader = bytesOnlyTextureLoader
         private set
     internal var onTextureError: (TextureSource, Throwable) -> Unit = { _, _ -> }
@@ -168,6 +173,9 @@ class FilamentRenderer(
     private val retainedNodes = mutableStateMapOf<NodeKey, SceneNode>()
     private val entityToNode = mutableMapOf<Int, NodeKey>()
     private val nodeToEntities = mutableMapOf<NodeKey, Set<Int>>()
+    private val partsByNode = mutableMapOf<NodeKey, List<ModelPart3D>>()
+    private val entityToPart = mutableMapOf<Int, ModelPartKey>()
+    private val modelPartListeners = mutableSetOf<(NodeKey, List<ModelPart3D>) -> Unit>()
     private var closed = false
 
     internal val nodes: Collection<SceneNode> get() = retainedNodes.values
@@ -186,6 +194,13 @@ class FilamentRenderer(
                         "Cannot update missing node: ${command.node.key.value}"
                     }
                     unregisterRemovedDescendants(command.previous, command.node)
+                    val previousModel = command.previous as? ModelNode
+                    val nextModel = command.node as? ModelNode
+                    if (previousModel != null && nextModel != null &&
+                        (!nextModel.visible || previousModel.source != nextModel.source)
+                    ) {
+                        unregisterEntities(nextModel.key)
+                    }
                     retainedNodes[command.node.key] = command.node
                 }
                 is SceneCommand.Remove -> {
@@ -204,6 +219,9 @@ class FilamentRenderer(
         retainedNodes.clear()
         entityToNode.clear()
         nodeToEntities.clear()
+        partsByNode.clear()
+        entityToPart.clear()
+        modelPartListeners.clear()
         closed = true
     }
 
@@ -216,9 +234,65 @@ class FilamentRenderer(
 
     internal fun resolveEntity(entity: Int): NodeKey? = entityToNode[entity]
 
+    override fun modelParts(nodeKey: NodeKey): List<ModelPart3D> = partsByNode[nodeKey].orEmpty()
+
+    override fun observeModelParts(
+        listener: (NodeKey, List<ModelPart3D>) -> Unit,
+    ): SceneSubscription {
+        modelPartListeners += listener
+        return SceneSubscription { modelPartListeners -= listener }
+    }
+
+    internal fun registerModelParts(
+        key: NodeKey,
+        instance: FilamentInstance,
+        engine: Engine,
+    ) {
+        val asset = instance.getAsset()
+        partsByNode.remove(key)
+        val entities = instance.getEntities().toList()
+        val entitySet = entities.toSet()
+        val transforms = engine.getTransformManager()
+        val renderables = engine.getRenderableManager()
+        val parents = entities.associateWith { entity ->
+            if (!transforms.hasComponent(entity)) null else {
+                transforms.getParent(transforms.getInstance(entity)).takeIf(entitySet::contains)
+            }
+        }
+        val names = entities.associateWith { entity ->
+            asset.getName(entity).orEmpty().takeIf { it.isNotBlank() } ?: "part"
+        }
+        val keys = mutableMapOf<Int, ModelPartKey>()
+        fun keyFor(entity: Int): ModelPartKey = keys.getOrPut(entity) {
+            val parent = parents[entity]
+            val name = requireNotNull(names[entity]).replace("/", "_")
+            val siblings = entities.filter { parents[it] == parent && names[it] == names[entity] }
+            val occurrence = siblings.indexOf(entity)
+            val segment = if (occurrence == 0) name else "$name#${occurrence + 1}"
+            ModelPartKey(parent?.let { "${keyFor(it).value}/$segment" } ?: segment)
+        }
+        val result = entities.map { entity ->
+            val partKey = keyFor(entity)
+            entityToPart[entity] = partKey
+            ModelPart3D(
+                key = partKey,
+                name = requireNotNull(names[entity]),
+                parentKey = parents[entity]?.let(::keyFor),
+                childKeys = entities.filter { parents[it] == entity }.map(::keyFor),
+                renderable = renderables.hasComponent(entity),
+            )
+        }
+        partsByNode[key] = result
+        modelPartListeners.toList().forEach { it(key, result) }
+    }
+
     private fun unregisterEntities(key: NodeKey) {
         nodeToEntities.remove(key)?.forEach { entity ->
             if (entityToNode[entity] == key) entityToNode.remove(entity)
+            entityToPart.remove(entity)
+        }
+        if (partsByNode.remove(key) != null) {
+            modelPartListeners.toList().forEach { it(key, emptyList()) }
         }
     }
 
@@ -573,6 +647,7 @@ private fun FilamentSceneScope.FilamentModels(
                 ),
                 onCreate = {
                     renderer.registerEntities(model.key, instance.getEntities().toList())
+                    renderer.registerModelParts(model.key, instance, engine)
                     applyShadows(model.castShadows, model.receiveShadows)
                 },
                 onUpdate = { applyShadows(model.castShadows, model.receiveShadows) },

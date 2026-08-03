@@ -50,6 +50,28 @@ Source repository: [AleksandrKdev/compose-scene-3d](https://github.com/Aleksandr
 - Renderer handles and native resources never leak into application state.
 - Animation and per-frame transforms belong to the renderer/frame loop, not recomposition.
 
+## Imported model parts
+
+Android and iOS expose the named node hierarchy of each loaded GLB/glTF instance without leaking
+Filament entities into common code. Keys are stable paths; duplicate sibling names receive a
+numeric suffix. Query an already loaded model or subscribe while it loads:
+
+```kotlin
+val subscription = controller.observeModelParts { modelKey, parts ->
+    if (modelKey == NodeKey("gearbox")) {
+        parts.forEach { part ->
+            println("${part.key.value}: ${part.name}, renderable=${part.renderable}")
+        }
+    }
+}
+
+val currentParts = controller.modelParts(NodeKey("gearbox"))
+subscription.dispose()
+```
+
+The callback receives an empty list when the model instance is removed. Per-part picking and
+visibility/transform/material overrides are the next mobile milestones.
+
 ## Example
 
 ```kotlin

@@ -14,7 +14,7 @@ abstract fun interface dev.composescene3d.filament/TextureByteLoader { // dev.co
     abstract suspend fun load(dev.composescene3d.core/TextureSource): kotlin/ByteArray // dev.composescene3d.filament/TextureByteLoader.load|load(dev.composescene3d.core.TextureSource){}[0]
 }
 
-final class dev.composescene3d.filament/FilamentRenderer : dev.composescene3d.core/SceneRenderer { // dev.composescene3d.filament/FilamentRenderer|null[0]
+final class dev.composescene3d.filament/FilamentRenderer : dev.composescene3d.core/ModelPartProvider, dev.composescene3d.core/SceneRenderer { // dev.composescene3d.filament/FilamentRenderer|null[0]
     constructor <init>(dev.composescene3d.filament/ModelByteLoader = ..., kotlin/Function2<dev.composescene3d.core/ModelAssetKey, kotlin/Throwable, kotlin/Unit> = ...) // dev.composescene3d.filament/FilamentRenderer.<init>|<init>(dev.composescene3d.filament.ModelByteLoader;kotlin.Function2<dev.composescene3d.core.ModelAssetKey,kotlin.Throwable,kotlin.Unit>){}[0]
     constructor <init>(dev.composescene3d.filament/TextureByteLoader, dev.composescene3d.filament/ModelByteLoader = ..., kotlin/Function2<dev.composescene3d.core/ModelAssetKey, kotlin/Throwable, kotlin/Unit> = ..., kotlin/Function2<dev.composescene3d.core/TextureSource, kotlin/Throwable, kotlin/Unit> = ...) // dev.composescene3d.filament/FilamentRenderer.<init>|<init>(dev.composescene3d.filament.TextureByteLoader;dev.composescene3d.filament.ModelByteLoader;kotlin.Function2<dev.composescene3d.core.ModelAssetKey,kotlin.Throwable,kotlin.Unit>;kotlin.Function2<dev.composescene3d.core.TextureSource,kotlin.Throwable,kotlin.Unit>){}[0]
 
@@ -23,6 +23,8 @@ final class dev.composescene3d.filament/FilamentRenderer : dev.composescene3d.co
 
     final fun apply(kotlin.collections/List<dev.composescene3d.core/SceneCommand>) // dev.composescene3d.filament/FilamentRenderer.apply|apply(kotlin.collections.List<dev.composescene3d.core.SceneCommand>){}[0]
     final fun close() // dev.composescene3d.filament/FilamentRenderer.close|close(){}[0]
+    final fun modelParts(dev.composescene3d.core/NodeKey): kotlin.collections/List<dev.composescene3d.core/ModelPart3D> // dev.composescene3d.filament/FilamentRenderer.modelParts|modelParts(dev.composescene3d.core.NodeKey){}[0]
+    final fun observeModelParts(kotlin/Function2<dev.composescene3d.core/NodeKey, kotlin.collections/List<dev.composescene3d.core/ModelPart3D>, kotlin/Unit>): dev.composescene3d.core/SceneSubscription // dev.composescene3d.filament/FilamentRenderer.observeModelParts|observeModelParts(kotlin.Function2<dev.composescene3d.core.NodeKey,kotlin.collections.List<dev.composescene3d.core.ModelPart3D>,kotlin.Unit>){}[0]
 }
 
 final val dev.composescene3d.filament.resources/dev_composescene3d_filament_resources_Res_array$stableprop // dev.composescene3d.filament.resources/dev_composescene3d_filament_resources_Res_array$stableprop|#static{}dev_composescene3d_filament_resources_Res_array$stableprop[0]

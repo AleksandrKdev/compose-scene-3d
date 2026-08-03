@@ -465,7 +465,13 @@ State: unavailable/offline
   and treat it as a possible fitted-frustum regression.
 - The only uncommitted workspace change is the user's Xcode UI state file under
   `samples/ios-app/.../xcuserdata/.../UserInterfaceState.xcuserstate`; do not stage or overwrite it.
-- Next milestone: Web glTF sampler settings and texture-coordinate set selection.
+- Mobile interactive-textbook work now has priority over the previous Web sampler milestone.
+  `ModelPartKey` and `ModelPart3D` provide a backend-neutral imported-node hierarchy. A
+  `SceneController` can query `modelParts(NodeKey)` or subscribe through `observeModelParts`;
+  removal publishes an empty list. The Filament backend builds stable name paths (including
+  duplicate sibling suffixes), parent/child links and `renderable` flags from each native model
+  instance on both Android and iOS. JVM tests, Android debug APK, iOS Simulator framework and ABI
+  validation pass. Next milestone: picking individual imported model parts on Android/iOS.
 
 ## Completed local Maven alpha milestone
 
@@ -535,7 +541,8 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Continue Web glTF coverage with sampler settings and texture-coordinate set selection.
+Continue mobile interactive-textbook support with picking individual imported model parts on
+Android/iOS, then add per-part visibility/transform/material overrides.
 The user explicitly allowed breaking the old empty GroupNode API before alpha03. Do not expose
 backend types in public commonMain API.
 ```

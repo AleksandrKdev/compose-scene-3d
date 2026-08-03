@@ -292,6 +292,45 @@ public final class dev/composescene3d/core/ModelNode : dev/composescene3d/core/S
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class dev/composescene3d/core/ModelPart3D {
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-JTMqkc4 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3-7G4z8aU ()Ljava/lang/String;
+	public final fun component4 ()Ljava/util/List;
+	public final fun component5 ()Z
+	public final fun copy-TZXGpMQ (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Z)Ldev/composescene3d/core/ModelPart3D;
+	public static synthetic fun copy-TZXGpMQ$default (Ldev/composescene3d/core/ModelPart3D;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZILjava/lang/Object;)Ldev/composescene3d/core/ModelPart3D;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getChildKeys ()Ljava/util/List;
+	public final fun getKey-JTMqkc4 ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getParentKey-7G4z8aU ()Ljava/lang/String;
+	public final fun getRenderable ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/composescene3d/core/ModelPartKey {
+	public static final synthetic fun box-impl (Ljava/lang/String;)Ldev/composescene3d/core/ModelPartKey;
+	public static fun constructor-impl (Ljava/lang/String;)Ljava/lang/String;
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (Ljava/lang/String;Ljava/lang/Object;)Z
+	public static final fun equals-impl0 (Ljava/lang/String;Ljava/lang/String;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public static fun hashCode-impl (Ljava/lang/String;)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (Ljava/lang/String;)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()Ljava/lang/String;
+}
+
+public abstract interface class dev/composescene3d/core/ModelPartProvider {
+	public abstract fun modelParts-ApBp1Ug (Ljava/lang/String;)Ljava/util/List;
+	public abstract fun observeModelParts (Lkotlin/jvm/functions/Function2;)Ldev/composescene3d/core/SceneSubscription;
+}
+
 public abstract interface class dev/composescene3d/core/ModelSource {
 }
 
@@ -501,6 +540,8 @@ public final class dev/composescene3d/core/SceneCommand$Update : dev/composescen
 public final class dev/composescene3d/core/SceneController {
 	public fun <init> (Ldev/composescene3d/core/SceneRenderer;)V
 	public final fun close ()V
+	public final fun modelParts-ApBp1Ug (Ljava/lang/String;)Ljava/util/List;
+	public final fun observeModelParts (Lkotlin/jvm/functions/Function2;)Ldev/composescene3d/core/SceneSubscription;
 	public final fun submit (Ldev/composescene3d/core/SceneDescription;)V
 }
 
@@ -535,6 +576,10 @@ public abstract interface class dev/composescene3d/core/SceneRenderer {
 	public abstract fun apply (Ljava/util/List;)V
 	public abstract fun close ()V
 	public abstract fun getCapabilities ()Ldev/composescene3d/core/RendererCapabilities;
+}
+
+public abstract interface class dev/composescene3d/core/SceneSubscription {
+	public abstract fun dispose ()V
 }
 
 public final class dev/composescene3d/core/ShadowMap3D {

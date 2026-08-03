@@ -61,6 +61,23 @@ data class EnvironmentMap(
 @JvmInline
 value class ModelAssetKey(val value: String)
 
+/** Stable backend-neutral identifier of a named node inside one model instance. */
+@JvmInline
+value class ModelPartKey(val value: String) {
+    init {
+        require(value.isNotBlank()) { "Model part key cannot be blank" }
+    }
+}
+
+/** A node in an imported model hierarchy. Transform overrides are added in a later milestone. */
+data class ModelPart3D(
+    val key: ModelPartKey,
+    val name: String,
+    val parentKey: ModelPartKey? = null,
+    val childKeys: List<ModelPartKey> = emptyList(),
+    val renderable: Boolean = false,
+)
+
 fun ModelSource.assetKey(): ModelAssetKey = when (this) {
     is ModelSource.Resource -> ModelAssetKey("resource:$path")
     is ModelSource.Url -> ModelAssetKey("url:$value")
