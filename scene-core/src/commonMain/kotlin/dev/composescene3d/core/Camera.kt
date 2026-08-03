@@ -4,7 +4,9 @@ import kotlin.math.PI
 import kotlin.math.sin
 import kotlin.math.sqrt
 
+/** Projection parameters independent of viewport aspect ratio. */
 sealed interface CameraProjection {
+    /** Perspective projection whose field of view is measured vertically in degrees. */
     data class Perspective(
         val verticalFovDegrees: Double = 45.0,
         val near: Double = 0.1,
@@ -16,6 +18,7 @@ sealed interface CameraProjection {
         }
     }
 
+    /** Orthographic projection whose [verticalSize] is expressed in scene units. */
     data class Orthographic(
         val verticalSize: Double = 10.0,
         val near: Double = -100.0,
@@ -28,6 +31,7 @@ sealed interface CameraProjection {
     }
 }
 
+/** Right-handed look-at camera shared by every renderer backend. */
 data class CameraDescription(
     val eye: Vec3 = Vec3(0f, 1f, 10f),
     val target: Vec3 = Vec3.Zero,

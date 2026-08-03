@@ -528,7 +528,10 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
   testing common code and compiling the Android, Desktop and iOS consumers.
 - `CONTRIBUTING.md` contains one complete pre-push command covering all four supported platforms
   plus ABI validation. The SwiftUI host remains a separate Xcode CI step.
-- The next stabilization step is a public API documentation and naming audit before cutting
+- Documented the backend contract, retained command lifecycle, all renderer capability semantics,
+  shared camera/math conventions and imported hierarchy behavior. Removed the stale statement that
+  model-part transform overrides were still planned. This changed no ABI.
+- The next stabilization step is auditing the Compose-facing public API and examples before cutting
   `0.1.0-alpha03`.
 
 ## Useful files

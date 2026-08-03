@@ -2,6 +2,7 @@ package dev.composescene3d.core
 
 import kotlin.jvm.JvmInline
 
+/** Stable identity of a scene node across recompositions and retained updates. */
 @JvmInline
 value class NodeKey(val value: String) {
     init {
@@ -9,6 +10,7 @@ value class NodeKey(val value: String) {
     }
 }
 
+/** Portable source of a glTF or GLB model. */
 sealed interface ModelSource {
     data class Resource(val path: String) : ModelSource
     data class Url(val value: String) : ModelSource
@@ -20,6 +22,7 @@ sealed interface ModelSource {
     }
 }
 
+/** Portable source of an image consumed by a material or environment map. */
 sealed interface TextureSource {
     data class Resource(val path: String) : TextureSource
     data class Url(val value: String) : TextureSource
@@ -69,7 +72,12 @@ value class ModelPartKey(val value: String) {
     }
 }
 
-/** A node in an imported model hierarchy. Transform overrides are added in a later milestone. */
+/**
+ * A node in an imported model hierarchy.
+ *
+ * [key] is stable for one model asset hierarchy and can be used with [ModelPartOverride].
+ * Non-renderable nodes can still own renderable descendants and receive subtree overrides.
+ */
 data class ModelPart3D(
     val key: ModelPartKey,
     val name: String,
