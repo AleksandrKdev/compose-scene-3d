@@ -274,10 +274,27 @@ class SceneScope internal constructor() {
     internal fun build(): SceneDescription = SceneDescription(nodes.toList())
 }
 
+/**
+ * Remembers a controller owned by the current composition and closes it when this call leaves the
+ * composition or [renderer] changes. The controller can safely outlive conditional [Scene3D]
+ * content declared below this call.
+ */
 @Composable
-fun rememberSceneController(renderer: SceneRenderer): SceneController =
-    remember(renderer) { SceneController(renderer) }
+fun rememberSceneController(renderer: SceneRenderer): SceneController {
+    val controller = remember(renderer) { SceneController(renderer) }
+    DisposableEffect(controller) {
+        onDispose(controller::close)
+    }
+    return controller
+}
 
+/**
+ * Submits the scene declared by [content] after a successful composition.
+ *
+ * This composable borrows [controller] and does not close it. Controllers created with
+ * [rememberSceneController] are closed by their owner; manually created controllers must be closed
+ * by their caller.
+ */
 @Composable
 fun Scene3D(
     controller: SceneController,
@@ -287,8 +304,5 @@ fun Scene3D(
 
     SideEffect {
         controller.submit(description)
-    }
-    DisposableEffect(controller) {
-        onDispose(controller::close)
     }
 }

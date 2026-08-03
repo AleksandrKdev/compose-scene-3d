@@ -25,6 +25,7 @@ class SceneCameraGestureController(
     private val minimumDistance: Float = 0.1f,
     private val maximumDistance: Float = 1_000f,
 ) {
+    /** Orbits the eye around the target using pointer deltas measured in pixels. */
     fun orbit(deltaX: Float, deltaY: Float) {
         camera.notifyInteraction()
         val offset = camera.eye - camera.target
@@ -42,6 +43,7 @@ class SceneCameraGestureController(
         camera.up = Vec3(0f, 1f, 0f)
     }
 
+    /** Pans eye and target together using pointer deltas measured in pixels. */
     fun pan(deltaX: Float, deltaY: Float, viewportHeight: Int) {
         if (viewportHeight <= 0) return
         camera.notifyInteraction()
@@ -78,6 +80,7 @@ class SceneCameraGestureController(
 
 /**
  * One pointer orbits. Two pointers pan with their centroid and zoom with their separation.
+ * A secondary-button drag pans and a mouse/trackpad scroll zooms on desktop targets.
  * The implementation updates [SceneCameraState] directly and therefore works with every backend.
  */
 fun Modifier.sceneCameraGestures(

@@ -85,7 +85,7 @@ Existing modules:
   - `rememberSceneController`;
   - `Scene3D`;
   - renderer submission through `SideEffect`;
-  - cleanup through `DisposableEffect`.
+  - composition-owned controller cleanup through `rememberSceneController`.
 
 The core project and Filament renderer target Android, JVM, iOS arm64 and iOS simulator arm64.
 Primitive and GLB rendering work on Android, Desktop and iOS/Metal.
@@ -535,8 +535,13 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
   `Material3D` contract used by every other primitive. Filament and Web now render boxes through
   their normal material paths, enabling textures, PBR, emissive, unlit and opacity materials.
   This is an intentional alpha02-to-alpha03 source/ABI break and is documented in README.
-- The next stabilization step is documenting the remaining Compose-facing state, lifecycle,
-  gestures and annotation APIs before cutting `0.1.0-alpha03`.
+- Fixed Compose ownership: `rememberSceneController` now closes the controller it creates, while
+  `Scene3D` only borrows it. Conditional removal and reinsertion of `Scene3D` therefore no longer
+  permanently closes a controller remembered by its parent. Manual controllers remain caller-owned.
+- Documented camera state initialization/cancellation, gesture units and desktop input, annotation
+  selection state, and controller lifecycle.
+- The next stabilization step is a final README/sample/publication audit before cutting
+  `0.1.0-alpha03`.
 
 ## Useful files
 

@@ -209,6 +209,11 @@ Scene3D(controller) {
 }
 ```
 
+`rememberSceneController` owns and closes its controller when the call leaves composition or its
+renderer changes. `Scene3D` only borrows the controller, so the scene can be conditionally hidden
+and shown again without invalidating it. If you construct `SceneController` manually, close it from
+the same lifecycle owner that created it.
+
 `group { ... }` creates a real scene-graph node. Child transforms are local to their parent;
 translation, quaternion rotation and scale are inherited through any number of nested groups.
 Node keys remain unique across the entire tree, and picking still reports the leaf node key.

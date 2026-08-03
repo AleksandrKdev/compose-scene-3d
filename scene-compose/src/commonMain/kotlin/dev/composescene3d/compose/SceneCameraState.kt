@@ -12,6 +12,7 @@ import dev.composescene3d.core.Vec3
 import dev.composescene3d.core.CameraFocus3D
 import dev.composescene3d.core.focusedOn
 
+/** Mutable Compose state for a backend-neutral scene camera. */
 class SceneCameraState internal constructor(initial: CameraDescription) {
     private var interactionVersion = 0L
     var eye: Vec3 by mutableStateOf(initial.eye)
@@ -19,6 +20,7 @@ class SceneCameraState internal constructor(initial: CameraDescription) {
     var up: Vec3 by mutableStateOf(initial.up)
     var projection: CameraProjection by mutableStateOf(initial.projection)
 
+    /** Immediately applies [description] and cancels an active [animateTo] operation. */
     fun reset(description: CameraDescription) {
         interactionVersion++
         apply(description)
@@ -49,6 +51,7 @@ class SceneCameraState internal constructor(initial: CameraDescription) {
         }
     }
 
+    /** Smoothly frames [focus]. Returns false when cancelled by camera interaction. */
     suspend fun focusOn(focus: CameraFocus3D, durationMillis: Int = 600): Boolean =
         animateTo(description().focusedOn(focus), durationMillis)
 
@@ -91,6 +94,7 @@ private fun Vec3.lerp(other: Vec3, progress: Float) = Vec3(
     z + (other.z - z) * progress,
 )
 
+/** Remembers camera state initialized once from [initial]. Later changes to [initial] are ignored. */
 @Composable
 fun rememberSceneCameraState(
     initial: CameraDescription = CameraDescription(),

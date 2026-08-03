@@ -16,6 +16,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import dev.composescene3d.core.SceneAnnotation3D
 
+/** Single-selection state for Compose labels associated with scene annotations. */
 class AnnotationSelectionState(initialSelectedKey: String? = null) {
     var selectedKey: String? by mutableStateOf(initialSelectedKey)
         private set
@@ -35,6 +36,7 @@ class AnnotationSelectionState(initialSelectedKey: String? = null) {
     fun isSelected(key: String): Boolean = selectedKey == key
 }
 
+/** Remembers annotation selection initialized once from [initialSelectedKey]. */
 @Composable
 fun rememberAnnotationSelectionState(initialSelectedKey: String? = null): AnnotationSelectionState =
     remember { AnnotationSelectionState(initialSelectedKey) }
