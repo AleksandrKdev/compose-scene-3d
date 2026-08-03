@@ -308,6 +308,26 @@ The layout keeps labels inside the viewport, resolves overlaps by priority and c
 marks labels as hidden when no collision-free position is available. Compose remains responsible
 for measuring and drawing the actual text.
 
+Interactive annotations share selection and accessibility behavior on Android and iOS:
+
+```kotlin
+val selection = rememberAnnotationSelectionState()
+val bearing = SceneAnnotation3D(
+    key = "bearing",
+    anchor = SceneAnchor3D(Vec3(0f, 0.7f, 0f)),
+    label = "Bearing",
+    contentDescription = "Deep groove ball bearing, opens construction details",
+)
+
+Text(
+    bearing.label,
+    Modifier.sceneAnnotationInteraction(bearing, selection) { openDetails(it.key) },
+)
+```
+
+The modifier exposes button role, selected/disabled state, and descriptions to TalkBack and
+VoiceOver. Visual styling of selected annotations stays application-owned.
+
 World-space clipping planes provide dynamic section views on the Filament Android/iOS backend.
 `ClippedPbrMaterial` accepts one to three half-spaces and can be attached to primitives, custom
 meshes, or imported parts through `ModelPartOverride.material`:

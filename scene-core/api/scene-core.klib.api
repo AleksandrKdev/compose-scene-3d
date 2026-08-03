@@ -1246,6 +1246,38 @@ final class dev.composescene3d.core/SceneAnchor3D { // dev.composescene3d.core/S
     final fun toString(): kotlin/String // dev.composescene3d.core/SceneAnchor3D.toString|toString(){}[0]
 }
 
+final class dev.composescene3d.core/SceneAnnotation3D { // dev.composescene3d.core/SceneAnnotation3D|null[0]
+    constructor <init>(kotlin/String, dev.composescene3d.core/SceneAnchor3D, kotlin/String, kotlin/String = ..., kotlin/String? = ..., kotlin/Boolean = ..., kotlin/Int = ...) // dev.composescene3d.core/SceneAnnotation3D.<init>|<init>(kotlin.String;dev.composescene3d.core.SceneAnchor3D;kotlin.String;kotlin.String;kotlin.String?;kotlin.Boolean;kotlin.Int){}[0]
+
+    final val anchor // dev.composescene3d.core/SceneAnnotation3D.anchor|{}anchor[0]
+        final fun <get-anchor>(): dev.composescene3d.core/SceneAnchor3D // dev.composescene3d.core/SceneAnnotation3D.anchor.<get-anchor>|<get-anchor>(){}[0]
+    final val contentDescription // dev.composescene3d.core/SceneAnnotation3D.contentDescription|{}contentDescription[0]
+        final fun <get-contentDescription>(): kotlin/String // dev.composescene3d.core/SceneAnnotation3D.contentDescription.<get-contentDescription>|<get-contentDescription>(){}[0]
+    final val enabled // dev.composescene3d.core/SceneAnnotation3D.enabled|{}enabled[0]
+        final fun <get-enabled>(): kotlin/Boolean // dev.composescene3d.core/SceneAnnotation3D.enabled.<get-enabled>|<get-enabled>(){}[0]
+    final val key // dev.composescene3d.core/SceneAnnotation3D.key|{}key[0]
+        final fun <get-key>(): kotlin/String // dev.composescene3d.core/SceneAnnotation3D.key.<get-key>|<get-key>(){}[0]
+    final val label // dev.composescene3d.core/SceneAnnotation3D.label|{}label[0]
+        final fun <get-label>(): kotlin/String // dev.composescene3d.core/SceneAnnotation3D.label.<get-label>|<get-label>(){}[0]
+    final val priority // dev.composescene3d.core/SceneAnnotation3D.priority|{}priority[0]
+        final fun <get-priority>(): kotlin/Int // dev.composescene3d.core/SceneAnnotation3D.priority.<get-priority>|<get-priority>(){}[0]
+    final val stateDescription // dev.composescene3d.core/SceneAnnotation3D.stateDescription|{}stateDescription[0]
+        final fun <get-stateDescription>(): kotlin/String? // dev.composescene3d.core/SceneAnnotation3D.stateDescription.<get-stateDescription>|<get-stateDescription>(){}[0]
+
+    final fun component1(): kotlin/String // dev.composescene3d.core/SceneAnnotation3D.component1|component1(){}[0]
+    final fun component2(): dev.composescene3d.core/SceneAnchor3D // dev.composescene3d.core/SceneAnnotation3D.component2|component2(){}[0]
+    final fun component3(): kotlin/String // dev.composescene3d.core/SceneAnnotation3D.component3|component3(){}[0]
+    final fun component4(): kotlin/String // dev.composescene3d.core/SceneAnnotation3D.component4|component4(){}[0]
+    final fun component5(): kotlin/String? // dev.composescene3d.core/SceneAnnotation3D.component5|component5(){}[0]
+    final fun component6(): kotlin/Boolean // dev.composescene3d.core/SceneAnnotation3D.component6|component6(){}[0]
+    final fun component7(): kotlin/Int // dev.composescene3d.core/SceneAnnotation3D.component7|component7(){}[0]
+    final fun copy(kotlin/String = ..., dev.composescene3d.core/SceneAnchor3D = ..., kotlin/String = ..., kotlin/String = ..., kotlin/String? = ..., kotlin/Boolean = ..., kotlin/Int = ...): dev.composescene3d.core/SceneAnnotation3D // dev.composescene3d.core/SceneAnnotation3D.copy|copy(kotlin.String;dev.composescene3d.core.SceneAnchor3D;kotlin.String;kotlin.String;kotlin.String?;kotlin.Boolean;kotlin.Int){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/SceneAnnotation3D.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/SceneAnnotation3D.hashCode|hashCode(){}[0]
+    final fun screenLabel(dev.composescene3d.core/ScreenPosition3D, kotlin/Float, kotlin/Float): dev.composescene3d.core/ScreenLabel3D // dev.composescene3d.core/SceneAnnotation3D.screenLabel|screenLabel(dev.composescene3d.core.ScreenPosition3D;kotlin.Float;kotlin.Float){}[0]
+    final fun toString(): kotlin/String // dev.composescene3d.core/SceneAnnotation3D.toString|toString(){}[0]
+}
+
 final class dev.composescene3d.core/SceneController { // dev.composescene3d.core/SceneController|null[0]
     constructor <init>(dev.composescene3d.core/SceneRenderer) // dev.composescene3d.core/SceneController.<init>|<init>(dev.composescene3d.core.SceneRenderer){}[0]
 
