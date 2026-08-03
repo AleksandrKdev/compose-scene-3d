@@ -4,6 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.test.assertEquals
 
 class SectionGeometryTest {
     private val tetrahedron = Geometry3D(
@@ -40,4 +41,63 @@ class SectionGeometryTest {
         assertNotNull(result.surface)
         assertNull(result.cap)
     }
+
+    @Test
+    fun triangulatesConcaveCutContourWithoutFillingItsNotch() {
+        val outline = listOf(
+            0f to 0f, 2f to 0f, 2f to 1f,
+            1f to 1f, 1f to 2f, 0f to 2f,
+        )
+        val cap = assertNotNull(
+            prism(outline).section(ClippingPlane3D(Vec3(0f, 0f, 1f))).cap,
+        )
+
+        assertEquals(4, cap.triangleCount)
+        assertEquals(3f, cap.areaInXy(), absoluteTolerance = 0.0001f)
+    }
+
+    @Test
+    fun closesMultipleDisconnectedContoursIndependently() {
+        val first = prism(listOf(0f to 0f, 1f to 0f, 1f to 1f, 0f to 1f))
+        val second = prism(listOf(3f to 0f, 4f to 0f, 4f to 1f, 3f to 1f))
+        val cap = assertNotNull(
+            merge(first, second).section(ClippingPlane3D(Vec3(0f, 0f, 1f))).cap,
+        )
+
+        assertEquals(4, cap.triangleCount)
+        assertEquals(2f, cap.areaInXy(), absoluteTolerance = 0.0001f)
+    }
+
+    private fun prism(outline: List<Pair<Float, Float>>): Geometry3D {
+        val positions = buildList {
+            listOf(-1f, 1f).forEach { z ->
+                outline.forEach { (x, y) -> addAll(listOf(x, y, z)) }
+            }
+        }.toFloatArray()
+        val vertexCount = outline.size
+        val indices = buildList {
+            outline.indices.forEach { index ->
+                val next = (index + 1) % vertexCount
+                addAll(listOf(index, next, next + vertexCount))
+                addAll(listOf(index, next + vertexCount, index + vertexCount))
+            }
+        }.toIntArray()
+        return Geometry3D(positions, indices, FloatArray(positions.size) { index ->
+            if (index % 3 == 2) 1f else 0f
+        })
+    }
+
+    private fun merge(first: Geometry3D, second: Geometry3D): Geometry3D = Geometry3D(
+        first.positions + second.positions,
+        first.indices + second.indices.map { it + first.vertexCount },
+        first.normals + second.normals,
+    )
+
+    private fun Geometry3D.areaInXy(): Float = positions.asList().chunked(9).sumOf { triangle ->
+        val ax = triangle[3] - triangle[0]
+        val ay = triangle[4] - triangle[1]
+        val bx = triangle[6] - triangle[0]
+        val by = triangle[7] - triangle[1]
+        (kotlin.math.abs(ax * by - ay * bx) / 2f).toDouble()
+    }.toFloat()
 }

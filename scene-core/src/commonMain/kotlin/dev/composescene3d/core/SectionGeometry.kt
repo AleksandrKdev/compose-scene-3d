@@ -1,7 +1,6 @@
 package dev.composescene3d.core
 
 import kotlin.math.abs
-import kotlin.math.atan2
 import kotlin.math.sqrt
 
 /** CPU geometry produced by clipping a mesh and optionally closing its cut contour. */
@@ -11,8 +10,8 @@ data class SectionGeometry3D(
 )
 
 /**
- * Clips triangles against [plane] and closes a convex cut contour. The plane uses local mesh
- * coordinates. Multiple disconnected contours and contours with holes require separate meshes.
+ * Clips triangles against [plane] and closes concave or disconnected cut contours. The plane uses
+ * local mesh coordinates. Nested contours (holes) are not filled by this overload.
  */
 fun Geometry3D.section(plane: ClippingPlane3D): SectionGeometry3D {
     val normalLength = sqrt(
@@ -23,11 +22,12 @@ fun Geometry3D.section(plane: ClippingPlane3D): SectionGeometry3D {
     val normal = plane.normal * (sign / normalLength)
     val offset = plane.offset * sign / normalLength
     val output = VertexCollector(uvs != null)
-    val intersections = mutableListOf<Vec3>()
+    val cutSegments = mutableListOf<CutSegment>()
 
     for (triangle in indices.indices step 3) {
         val polygon = indices.sliceArray(triangle..triangle + 2).map { vertex(it) }
         val clipped = mutableListOf<SectionVertex>()
+        val triangleIntersections = mutableListOf<Vec3>()
         polygon.forEachIndexed { index, current ->
             val previous = polygon[(index + polygon.lastIndex) % polygon.size]
             val currentDistance = normal.dot(current.position) - offset
@@ -38,45 +38,126 @@ fun Geometry3D.section(plane: ClippingPlane3D): SectionGeometry3D {
                 val amount = previousDistance / (previousDistance - currentDistance)
                 val intersection = previous.interpolate(current, amount)
                 clipped += intersection
-                intersections += intersection.position
+                triangleIntersections += intersection.position
             }
             if (currentInside) clipped += current
         }
         if (clipped.size >= 3) {
             for (index in 1 until clipped.lastIndex) output.triangle(clipped[0], clipped[index], clipped[index + 1])
         }
+        val endpoints = triangleIntersections.distinctWithin(1e-5f)
+        if (endpoints.size == 2) cutSegments += CutSegment(endpoints[0], endpoints[1])
     }
 
     val surface = output.buildOrNull()
-    val unique = intersections.distinctWithin(1e-4f)
-    if (unique.size < 3) return SectionGeometry3D(surface, null)
+    val contours = cutSegments.closedContours(1e-4f)
+    if (contours.isEmpty()) return SectionGeometry3D(surface, null)
 
-    val center = unique.reduce(Vec3::plus) * (1f / unique.size)
     val reference = if (abs(normal.y) < 0.9f) Vec3(0f, 1f, 0f) else Vec3(1f, 0f, 0f)
     val u = reference.cross(normal).normalized()
     val v = normal.cross(u).normalized()
-    val ring = unique.sortedBy { point ->
-        val relative = point - center
-        atan2(relative.dot(v), relative.dot(u))
-    }
     val capNormal = normal * -1f
     val cap = VertexCollector(hasUvs = true)
-    val centerVertex = SectionVertex(center, capNormal, 0.5f, 0.5f)
-    val extent = ring.maxOf { (it - center).length() }.coerceAtLeast(1e-6f)
-    ring.forEachIndexed { index, point ->
-        val next = ring[(index + 1) % ring.size]
-        fun capVertex(value: Vec3): SectionVertex {
-            val relative = value - center
-            return SectionVertex(
-                value, capNormal,
-                0.5f + relative.dot(u) / (2f * extent),
-                0.5f + relative.dot(v) / (2f * extent),
-            )
+    val allPoints = contours.flatten()
+    val minU = allPoints.minOf { it.dot(u) }
+    val minV = allPoints.minOf { it.dot(v) }
+    val extent = maxOf(
+        allPoints.maxOf { it.dot(u) } - minU,
+        allPoints.maxOf { it.dot(v) } - minV,
+    ).coerceAtLeast(1e-6f)
+    contours.forEach { contour ->
+        val projected = contour.map { Point2D(it.dot(u), it.dot(v)) }
+        projected.earTriangles().forEach { triangle ->
+            fun capVertex(index: Int): SectionVertex {
+                val point = contour[index]
+                return SectionVertex(
+                    point, capNormal,
+                    (point.dot(u) - minU) / extent,
+                    (point.dot(v) - minV) / extent,
+                )
+            }
+            // Ear clipping returns counter-clockwise triangles facing +normal; reverse for the cap.
+            cap.triangle(capVertex(triangle[0]), capVertex(triangle[2]), capVertex(triangle[1]))
         }
-        cap.triangle(centerVertex, capVertex(next), capVertex(point))
     }
     return SectionGeometry3D(surface, cap.buildOrNull())
 }
+
+private data class CutSegment(val first: Vec3, val second: Vec3)
+
+private fun List<CutSegment>.closedContours(epsilon: Float): List<List<Vec3>> {
+    val remaining = toMutableList()
+    val contours = mutableListOf<List<Vec3>>()
+    while (remaining.isNotEmpty()) {
+        val seed = remaining.removeAt(remaining.lastIndex)
+        val contour = mutableListOf(seed.first, seed.second)
+        while ((contour.last() - contour.first()).length() > epsilon) {
+            val end = contour.last()
+            val index = remaining.indexOfFirst {
+                (it.first - end).length() <= epsilon || (it.second - end).length() <= epsilon
+            }
+            if (index < 0) break
+            val segment = remaining.removeAt(index)
+            contour += if ((segment.first - end).length() <= epsilon) segment.second else segment.first
+        }
+        if (contour.size >= 4 && (contour.last() - contour.first()).length() <= epsilon) {
+            contours += contour.dropLast(1).removeCollinear(epsilon)
+        }
+    }
+    return contours.filter { it.size >= 3 }
+}
+
+private fun List<Vec3>.removeCollinear(epsilon: Float): List<Vec3> = filterIndexed { index, point ->
+    val previous = this[(index + lastIndex) % size]
+    val next = this[(index + 1) % size]
+    (point - previous).cross(next - point).length() > epsilon
+}
+
+private data class Point2D(val x: Float, val y: Float)
+
+private fun List<Point2D>.earTriangles(): List<IntArray> {
+    if (size < 3) return emptyList()
+    val remaining = indices.toMutableList()
+    if (signedArea() < 0f) remaining.reverse()
+    val triangles = mutableListOf<IntArray>()
+    var attempts = 0
+    while (remaining.size > 3 && attempts < size * size) {
+        var earFound = false
+        for (position in remaining.indices) {
+            val previous = remaining[(position + remaining.lastIndex) % remaining.size]
+            val current = remaining[position]
+            val next = remaining[(position + 1) % remaining.size]
+            if (cross(this[previous], this[current], this[next]) <= 1e-7f) continue
+            if (remaining.any { candidate ->
+                    candidate != previous && candidate != current && candidate != next &&
+                        this[candidate].insideTriangle(this[previous], this[current], this[next])
+                }) continue
+            triangles += intArrayOf(previous, current, next)
+            remaining.removeAt(position)
+            earFound = true
+            break
+        }
+        if (!earFound) break
+        attempts++
+    }
+    if (remaining.size == 3) triangles += remaining.toIntArray()
+    return triangles
+}
+
+private fun List<Point2D>.signedArea(): Float = indices.sumOf { index ->
+    val next = this[(index + 1) % size]
+    (this[index].x * next.y - next.x * this[index].y).toDouble()
+}.toFloat() / 2f
+
+private fun Point2D.insideTriangle(a: Point2D, b: Point2D, c: Point2D): Boolean {
+    val first = cross(a, b, this)
+    val second = cross(b, c, this)
+    val third = cross(c, a, this)
+    return first >= -1e-7f && second >= -1e-7f && third >= -1e-7f
+}
+
+private fun cross(a: Point2D, b: Point2D, c: Point2D) =
+    (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)
 
 private data class SectionVertex(
     val position: Vec3,
