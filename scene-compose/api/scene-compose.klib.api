@@ -41,6 +41,8 @@ final class dev.composescene3d.compose/SceneCameraState { // dev.composescene3d.
         final fun <set-up>(dev.composescene3d.core/Vec3) // dev.composescene3d.compose/SceneCameraState.up.<set-up>|<set-up>(dev.composescene3d.core.Vec3){}[0]
 
     final fun reset(dev.composescene3d.core/CameraDescription) // dev.composescene3d.compose/SceneCameraState.reset|reset(dev.composescene3d.core.CameraDescription){}[0]
+    final suspend fun animateTo(dev.composescene3d.core/CameraDescription, kotlin/Int = ...): kotlin/Boolean // dev.composescene3d.compose/SceneCameraState.animateTo|animateTo(dev.composescene3d.core.CameraDescription;kotlin.Int){}[0]
+    final suspend fun focusOn(dev.composescene3d.core/CameraFocus3D, kotlin/Int = ...): kotlin/Boolean // dev.composescene3d.compose/SceneCameraState.focusOn|focusOn(dev.composescene3d.core.CameraFocus3D;kotlin.Int){}[0]
 }
 
 final class dev.composescene3d.compose/SceneScope { // dev.composescene3d.compose/SceneScope|null[0]

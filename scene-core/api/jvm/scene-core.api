@@ -116,6 +116,26 @@ public final class dev/composescene3d/core/CameraDescription {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class dev/composescene3d/core/CameraFocus3D {
+	public fun <init> (Ldev/composescene3d/core/Vec3;FF)V
+	public synthetic fun <init> (Ldev/composescene3d/core/Vec3;FFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ldev/composescene3d/core/Vec3;
+	public final fun component2 ()F
+	public final fun component3 ()F
+	public final fun copy (Ldev/composescene3d/core/Vec3;FF)Ldev/composescene3d/core/CameraFocus3D;
+	public static synthetic fun copy$default (Ldev/composescene3d/core/CameraFocus3D;Ldev/composescene3d/core/Vec3;FFILjava/lang/Object;)Ldev/composescene3d/core/CameraFocus3D;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCenter ()Ldev/composescene3d/core/Vec3;
+	public final fun getPadding ()F
+	public final fun getRadius ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/composescene3d/core/CameraKt {
+	public static final fun focusedOn (Ldev/composescene3d/core/CameraDescription;Ldev/composescene3d/core/CameraFocus3D;)Ldev/composescene3d/core/CameraDescription;
+}
+
 public abstract interface class dev/composescene3d/core/CameraProjection {
 }
 

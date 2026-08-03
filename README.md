@@ -328,6 +328,21 @@ Text(
 The modifier exposes button role, selected/disabled state, and descriptions to TalkBack and
 VoiceOver. Visual styling of selected annotations stays application-owned.
 
+Programmatic camera focus frames a point or bounding sphere on every backend:
+
+```kotlin
+scope.launch {
+    cameraState.focusOn(
+        CameraFocus3D(center = bearingCenter, radius = bearingRadius, padding = 1.3f),
+        durationMillis = 700,
+    )
+}
+```
+
+Perspective distance is derived from vertical FOV; orthographic focus adjusts `verticalSize`.
+`animateTo` supports arbitrary camera destinations and returns `false` when a user orbit, pan, zoom,
+or reset cancels the flight.
+
 World-space clipping planes provide dynamic section views on the Filament Android/iOS backend.
 `ClippedPbrMaterial` accepts one to three half-spaces and can be attached to primitives, custom
 meshes, or imported parts through `ModelPartOverride.material`:

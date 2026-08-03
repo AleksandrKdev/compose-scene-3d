@@ -429,6 +429,25 @@ final class dev.composescene3d.core/CameraDescription { // dev.composescene3d.co
     final fun toString(): kotlin/String // dev.composescene3d.core/CameraDescription.toString|toString(){}[0]
 }
 
+final class dev.composescene3d.core/CameraFocus3D { // dev.composescene3d.core/CameraFocus3D|null[0]
+    constructor <init>(dev.composescene3d.core/Vec3, kotlin/Float = ..., kotlin/Float = ...) // dev.composescene3d.core/CameraFocus3D.<init>|<init>(dev.composescene3d.core.Vec3;kotlin.Float;kotlin.Float){}[0]
+
+    final val center // dev.composescene3d.core/CameraFocus3D.center|{}center[0]
+        final fun <get-center>(): dev.composescene3d.core/Vec3 // dev.composescene3d.core/CameraFocus3D.center.<get-center>|<get-center>(){}[0]
+    final val padding // dev.composescene3d.core/CameraFocus3D.padding|{}padding[0]
+        final fun <get-padding>(): kotlin/Float // dev.composescene3d.core/CameraFocus3D.padding.<get-padding>|<get-padding>(){}[0]
+    final val radius // dev.composescene3d.core/CameraFocus3D.radius|{}radius[0]
+        final fun <get-radius>(): kotlin/Float // dev.composescene3d.core/CameraFocus3D.radius.<get-radius>|<get-radius>(){}[0]
+
+    final fun component1(): dev.composescene3d.core/Vec3 // dev.composescene3d.core/CameraFocus3D.component1|component1(){}[0]
+    final fun component2(): kotlin/Float // dev.composescene3d.core/CameraFocus3D.component2|component2(){}[0]
+    final fun component3(): kotlin/Float // dev.composescene3d.core/CameraFocus3D.component3|component3(){}[0]
+    final fun copy(dev.composescene3d.core/Vec3 = ..., kotlin/Float = ..., kotlin/Float = ...): dev.composescene3d.core/CameraFocus3D // dev.composescene3d.core/CameraFocus3D.copy|copy(dev.composescene3d.core.Vec3;kotlin.Float;kotlin.Float){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/CameraFocus3D.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/CameraFocus3D.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.composescene3d.core/CameraFocus3D.toString|toString(){}[0]
+}
+
 final class dev.composescene3d.core/ClippedPbrMaterial : dev.composescene3d.core/Material3D { // dev.composescene3d.core/ClippedPbrMaterial|null[0]
     constructor <init>(kotlin.collections/List<dev.composescene3d.core/ClippingPlane3D>, dev.composescene3d.core/Color3D = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ...) // dev.composescene3d.core/ClippedPbrMaterial.<init>|<init>(kotlin.collections.List<dev.composescene3d.core.ClippingPlane3D>;dev.composescene3d.core.Color3D;kotlin.Float;kotlin.Float;kotlin.Float){}[0]
 
@@ -1696,6 +1715,7 @@ final value class dev.composescene3d.core/TextureAssetKey { // dev.composescene3
 
 final fun (dev.composescene3d.core/AngularDimensionNode).dev.composescene3d.core/geometry(): kotlin.collections/List<dev.composescene3d.core/Geometry3D> // dev.composescene3d.core/geometry|geometry@dev.composescene3d.core.AngularDimensionNode(){}[0]
 final fun (dev.composescene3d.core/ArrowNode).dev.composescene3d.core/geometry(): dev.composescene3d.core/Geometry3D // dev.composescene3d.core/geometry|geometry@dev.composescene3d.core.ArrowNode(){}[0]
+final fun (dev.composescene3d.core/CameraDescription).dev.composescene3d.core/focusedOn(dev.composescene3d.core/CameraFocus3D): dev.composescene3d.core/CameraDescription // dev.composescene3d.core/focusedOn|focusedOn@dev.composescene3d.core.CameraDescription(dev.composescene3d.core.CameraFocus3D){}[0]
 final fun (dev.composescene3d.core/Geometry3D).dev.composescene3d.core/section(dev.composescene3d.core/ClippingPlane3D): dev.composescene3d.core/SectionGeometry3D // dev.composescene3d.core/section|section@dev.composescene3d.core.Geometry3D(dev.composescene3d.core.ClippingPlane3D){}[0]
 final fun (dev.composescene3d.core/LineNode).dev.composescene3d.core/geometry(): dev.composescene3d.core/Geometry3D // dev.composescene3d.core/geometry|geometry@dev.composescene3d.core.LineNode(){}[0]
 final fun (dev.composescene3d.core/LinearDimensionNode).dev.composescene3d.core/geometry(): kotlin.collections/List<dev.composescene3d.core/Geometry3D> // dev.composescene3d.core/geometry|geometry@dev.composescene3d.core.LinearDimensionNode(){}[0]

@@ -26,6 +26,7 @@ class SceneCameraGestureController(
     private val maximumDistance: Float = 1_000f,
 ) {
     fun orbit(deltaX: Float, deltaY: Float) {
+        camera.notifyInteraction()
         val offset = camera.eye - camera.target
         val radius = offset.length().coerceIn(minimumDistance, maximumDistance)
         var yaw = atan2(offset.x, offset.z) - deltaX * orbitSpeed
@@ -43,6 +44,7 @@ class SceneCameraGestureController(
 
     fun pan(deltaX: Float, deltaY: Float, viewportHeight: Int) {
         if (viewportHeight <= 0) return
+        camera.notifyInteraction()
         val forward = (camera.target - camera.eye).normalized()
         val right = forward.cross(camera.up).normalized()
         val screenUp = right.cross(forward).normalized()
@@ -66,6 +68,7 @@ class SceneCameraGestureController(
         val offset = camera.eye - camera.target
         val distance = offset.length()
         if (distance == 0f) return
+        camera.notifyInteraction()
         val exponent = zoomSpeed * 8.333333f
         val nextDistance = (distance * kotlin.math.exp(-ln(scale) * exponent))
             .coerceIn(minimumDistance, maximumDistance)

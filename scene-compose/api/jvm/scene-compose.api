@@ -44,6 +44,10 @@ public final class dev/composescene3d/compose/SceneCameraGesturesKt {
 
 public final class dev/composescene3d/compose/SceneCameraState {
 	public static final field $stable I
+	public final fun animateTo (Ldev/composescene3d/core/CameraDescription;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun animateTo$default (Ldev/composescene3d/compose/SceneCameraState;Ldev/composescene3d/core/CameraDescription;ILkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun focusOn (Ldev/composescene3d/core/CameraFocus3D;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun focusOn$default (Ldev/composescene3d/compose/SceneCameraState;Ldev/composescene3d/core/CameraFocus3D;ILkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun getEye ()Ldev/composescene3d/core/Vec3;
 	public final fun getProjection ()Ldev/composescene3d/core/CameraProjection;
 	public final fun getTarget ()Ldev/composescene3d/core/Vec3;
