@@ -22,6 +22,7 @@ import dev.composescene3d.compose.SceneCameraState
 import dev.composescene3d.compose.rememberSceneCameraState
 import dev.composescene3d.compose.sceneCameraGestures
 import dev.composescene3d.core.CameraProjection
+import dev.composescene3d.core.ClippedPbrMaterial
 import dev.composescene3d.core.BoxNode
 import dev.composescene3d.core.ArrowNode
 import dev.composescene3d.core.CylinderNode
@@ -179,6 +180,7 @@ class FilamentRenderer(
         shadows = true,
         physicallyBasedRendering = true,
         skeletalAnimation = true,
+        clippingPlanes = true,
     )
 
     private val retainedNodes = mutableStateMapOf<NodeKey, SceneNode>()
@@ -1078,10 +1080,54 @@ internal fun rememberSceneMaterial(renderer: FilamentRenderer, material: Materia
         color = material.color.toFilamentColor(),
         intensity = material.intensity,
     )
+    is ClippedPbrMaterial -> rememberClippedPbrMaterial(material)
     is TexturedMaterial -> {
         rememberPbrTexturedMaterial(renderer, material)
     }
     is TransparentMaterial -> rememberTransparentMaterial(material)
+}
+
+@Composable
+private fun rememberClippedPbrMaterial(material: ClippedPbrMaterial): MaterialInstance {
+    val compiled = rememberMaterial(key = "compose-scene-3d-clipped-pbr-v1.72") {
+        Res.readBytes("files/materials/clipped_pbr.filamat")
+    }
+    if (compiled == null) {
+        return rememberColorMaterialInstance(
+            color = material.baseColor.toFilamentColor(),
+            metallic = material.metallic,
+            roughness = material.roughness,
+            reflectance = material.reflectance,
+        )
+    }
+    val linear = material.baseColor.toLinearSrgb()
+    return rememberMaterialInstance(compiled, material) {
+        setParameter("baseColor", linear.red, linear.green, linear.blue, linear.alpha)
+        setParameter("metallic", material.metallic)
+        setParameter("roughness", material.roughness)
+        setParameter("reflectance", material.reflectance)
+        setParameter("planeCount", material.planes.size.toFloat())
+        val equations = material.planes.map { plane ->
+            val length = kotlin.math.sqrt(
+                plane.normal.x * plane.normal.x +
+                    plane.normal.y * plane.normal.y +
+                    plane.normal.z * plane.normal.z,
+            )
+            val sign = if (plane.keepPositive) 1f else -1f
+            floatArrayOf(
+                sign * plane.normal.x / length,
+                sign * plane.normal.y / length,
+                sign * plane.normal.z / length,
+                sign * plane.offset / length,
+            )
+        }
+        repeat(3) { index ->
+            val equation = equations.getOrNull(index) ?: floatArrayOf(0f, 1f, 0f, 0f)
+            setParameter(
+                "plane$index", equation[0], equation[1], equation[2], equation[3],
+            )
+        }
+    }
 }
 
 @Composable

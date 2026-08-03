@@ -9,6 +9,7 @@ data class RendererCapabilities(
     val bloom: Boolean = false,
     val skeletalAnimation: Boolean = false,
     val picking: Boolean = false,
+    val clippingPlanes: Boolean = false,
 )
 
 sealed interface SceneCommand {

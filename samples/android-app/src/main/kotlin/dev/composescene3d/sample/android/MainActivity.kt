@@ -29,6 +29,8 @@ import dev.composescene3d.core.ModelPartOutline
 import dev.composescene3d.core.HighlightMaterial
 import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.core.Color3D
+import dev.composescene3d.core.ClippedPbrMaterial
+import dev.composescene3d.core.ClippingPlane3D
 import dev.composescene3d.core.TransparentMaterial
 import dev.composescene3d.core.UnlitMaterial
 import dev.composescene3d.core.EnvironmentMap
@@ -95,13 +97,6 @@ private fun Sample() {
             ambientOcclusionStrength = 0.8f,
         )
     }
-    val albedoOnlyMaterial = floorMaterial.copy(
-        metallic = 0f,
-        normalTexture = null,
-        metallicRoughnessTexture = null,
-        emissiveTexture = null,
-        ambientOcclusionTexture = null,
-    )
     var moved by remember { mutableStateOf(false) }
     var selected by remember { mutableStateOf<String?>(null) }
     var selectedPart by remember { mutableStateOf<ModelPartKey?>(null) }
@@ -149,7 +144,15 @@ private fun Sample() {
                 )
                 cylinder(
                     key = "rough-cylinder",
-                    material = albedoOnlyMaterial,
+                    material = ClippedPbrMaterial(
+                        planes = listOf(ClippingPlane3D(
+                            normal = Vec3(1f, 0f, 0f),
+                            offset = if (moved) 2.2f else 1.8f,
+                        )),
+                        baseColor = Color3D(0.9f, 0.35f, 0.12f),
+                        metallic = 0.35f,
+                        roughness = 0.4f,
+                    ),
                     transform = Transform(translation = Vec3(2f, 0f, 0f)),
                 )
                 sphere(
@@ -214,7 +217,7 @@ private fun Sample() {
             onClick = { moved = !moved },
             modifier = Modifier.align(Alignment.BottomCenter).padding(24.dp),
         ) {
-            Text("Move retained box")
+            Text("Move box / slide section")
         }
         Text(
             text = "Drag: orbit · Scroll/pinch: zoom · Selected: ${selected ?: "none"}",

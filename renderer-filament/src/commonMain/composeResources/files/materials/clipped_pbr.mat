@@ -1,0 +1,37 @@
+// Lit material with up to three user-world-space clipping planes.
+// Compile with the matc version matching the runtime:
+// matc -p all -a all -o clipped_pbr.filamat clipped_pbr.mat
+
+material {
+    name : ComposeScene3DClippedPbr,
+    shadingModel : lit,
+    culling : none,
+    doubleSided : true,
+    parameters : [
+        { type : float4, name : baseColor },
+        { type : float, name : metallic },
+        { type : float, name : roughness },
+        { type : float, name : reflectance },
+        { type : float, name : planeCount },
+        { type : float4, name : plane0 },
+        { type : float4, name : plane1 },
+        { type : float4, name : plane2 }
+    ]
+}
+
+fragment {
+    void material(inout MaterialInputs material) {
+        vec3 position = getUserWorldPosition();
+        if (materialParams.planeCount > 0.5 &&
+                dot(materialParams.plane0.xyz, position) < materialParams.plane0.w) discard;
+        if (materialParams.planeCount > 1.5 &&
+                dot(materialParams.plane1.xyz, position) < materialParams.plane1.w) discard;
+        if (materialParams.planeCount > 2.5 &&
+                dot(materialParams.plane2.xyz, position) < materialParams.plane2.w) discard;
+        prepareMaterial(material);
+        material.baseColor = materialParams.baseColor;
+        material.metallic = materialParams.metallic;
+        material.roughness = materialParams.roughness;
+        material.reflectance = materialParams.reflectance;
+    }
+}

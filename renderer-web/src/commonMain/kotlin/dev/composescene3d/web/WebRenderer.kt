@@ -22,6 +22,7 @@ import dev.composescene3d.compose.sceneCameraGestures
 import dev.composescene3d.core.BoxNode
 import dev.composescene3d.core.ArrowNode
 import dev.composescene3d.core.CameraProjection
+import dev.composescene3d.core.ClippedPbrMaterial
 import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.CylinderNode
 import dev.composescene3d.core.DirectionalLightNode
@@ -244,23 +245,27 @@ private fun Material3D.color(): Color = when (this) {
     is EmissiveMaterial -> color.toColor(intensity)
     is HighlightMaterial -> color.toColor(intensity)
     is TransparentMaterial -> color.toColor()
+    is ClippedPbrMaterial -> baseColor.toColor()
     is TexturedMaterial -> Color.White
 }
 private fun Material3D.metallic() = when (this) {
     is PbrMaterial -> metallic
     is TransparentMaterial -> metallic
     is TexturedMaterial -> metallic
+    is ClippedPbrMaterial -> metallic
     else -> 0f
 }
 private fun Material3D.roughness() = when (this) {
     is PbrMaterial -> roughness
     is TransparentMaterial -> roughness
     is TexturedMaterial -> roughness
+    is ClippedPbrMaterial -> roughness
     else -> 1f
 }
 private fun Material3D.reflectance() = when (this) {
     is PbrMaterial -> reflectance
     is TransparentMaterial -> reflectance
+    is ClippedPbrMaterial -> reflectance
     else -> 0.5f
 }
 private fun Material3D.shadingModel() = when (this) {

@@ -31,6 +31,7 @@ class FilamentRendererTest {
             shadows = true,
             physicallyBasedRendering = true,
             skeletalAnimation = true,
+            clippingPlanes = true,
         ),
     )
 

@@ -235,6 +235,42 @@ data class HighlightMaterial(
     }
 }
 
+/**
+ * A world-space half-space used by [ClippedPbrMaterial]. Points for which
+ * `dot(normal, position) >= offset` are retained unless [keepPositive] is false.
+ */
+data class ClippingPlane3D(
+    val normal: Vec3,
+    val offset: Float = 0f,
+    val keepPositive: Boolean = true,
+) {
+    init {
+        val lengthSquared = normal.x * normal.x + normal.y * normal.y + normal.z * normal.z
+        require(lengthSquared > 0f && lengthSquared.isFinite()) {
+            "Clipping plane normal must be finite and non-zero"
+        }
+        require(offset.isFinite()) { "Clipping plane offset must be finite" }
+    }
+}
+
+/** Lit material that discards fragments outside up to three world-space clipping planes. */
+data class ClippedPbrMaterial(
+    val planes: List<ClippingPlane3D>,
+    val baseColor: Color3D = Color3D(0.7f, 0.7f, 0.7f),
+    val metallic: Float = 0f,
+    val roughness: Float = 0.5f,
+    val reflectance: Float = 0.5f,
+) : Material3D {
+    init {
+        require(planes.isNotEmpty() && planes.size <= 3) {
+            "Clipped material requires between one and three clipping planes"
+        }
+        require(metallic in 0f..1f) { "Metallic must be between 0 and 1" }
+        require(roughness in 0f..1f) { "Roughness must be between 0 and 1" }
+        require(reflectance in 0f..1f) { "Reflectance must be between 0 and 1" }
+    }
+}
+
 data class TexturedMaterial(
     val baseColorTexture: TextureSource,
     val metallic: Float = 0f,

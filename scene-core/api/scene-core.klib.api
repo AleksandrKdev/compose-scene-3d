@@ -368,6 +368,50 @@ final class dev.composescene3d.core/CameraDescription { // dev.composescene3d.co
     final fun toString(): kotlin/String // dev.composescene3d.core/CameraDescription.toString|toString(){}[0]
 }
 
+final class dev.composescene3d.core/ClippedPbrMaterial : dev.composescene3d.core/Material3D { // dev.composescene3d.core/ClippedPbrMaterial|null[0]
+    constructor <init>(kotlin.collections/List<dev.composescene3d.core/ClippingPlane3D>, dev.composescene3d.core/Color3D = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ...) // dev.composescene3d.core/ClippedPbrMaterial.<init>|<init>(kotlin.collections.List<dev.composescene3d.core.ClippingPlane3D>;dev.composescene3d.core.Color3D;kotlin.Float;kotlin.Float;kotlin.Float){}[0]
+
+    final val baseColor // dev.composescene3d.core/ClippedPbrMaterial.baseColor|{}baseColor[0]
+        final fun <get-baseColor>(): dev.composescene3d.core/Color3D // dev.composescene3d.core/ClippedPbrMaterial.baseColor.<get-baseColor>|<get-baseColor>(){}[0]
+    final val metallic // dev.composescene3d.core/ClippedPbrMaterial.metallic|{}metallic[0]
+        final fun <get-metallic>(): kotlin/Float // dev.composescene3d.core/ClippedPbrMaterial.metallic.<get-metallic>|<get-metallic>(){}[0]
+    final val planes // dev.composescene3d.core/ClippedPbrMaterial.planes|{}planes[0]
+        final fun <get-planes>(): kotlin.collections/List<dev.composescene3d.core/ClippingPlane3D> // dev.composescene3d.core/ClippedPbrMaterial.planes.<get-planes>|<get-planes>(){}[0]
+    final val reflectance // dev.composescene3d.core/ClippedPbrMaterial.reflectance|{}reflectance[0]
+        final fun <get-reflectance>(): kotlin/Float // dev.composescene3d.core/ClippedPbrMaterial.reflectance.<get-reflectance>|<get-reflectance>(){}[0]
+    final val roughness // dev.composescene3d.core/ClippedPbrMaterial.roughness|{}roughness[0]
+        final fun <get-roughness>(): kotlin/Float // dev.composescene3d.core/ClippedPbrMaterial.roughness.<get-roughness>|<get-roughness>(){}[0]
+
+    final fun component1(): kotlin.collections/List<dev.composescene3d.core/ClippingPlane3D> // dev.composescene3d.core/ClippedPbrMaterial.component1|component1(){}[0]
+    final fun component2(): dev.composescene3d.core/Color3D // dev.composescene3d.core/ClippedPbrMaterial.component2|component2(){}[0]
+    final fun component3(): kotlin/Float // dev.composescene3d.core/ClippedPbrMaterial.component3|component3(){}[0]
+    final fun component4(): kotlin/Float // dev.composescene3d.core/ClippedPbrMaterial.component4|component4(){}[0]
+    final fun component5(): kotlin/Float // dev.composescene3d.core/ClippedPbrMaterial.component5|component5(){}[0]
+    final fun copy(kotlin.collections/List<dev.composescene3d.core/ClippingPlane3D> = ..., dev.composescene3d.core/Color3D = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ...): dev.composescene3d.core/ClippedPbrMaterial // dev.composescene3d.core/ClippedPbrMaterial.copy|copy(kotlin.collections.List<dev.composescene3d.core.ClippingPlane3D>;dev.composescene3d.core.Color3D;kotlin.Float;kotlin.Float;kotlin.Float){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/ClippedPbrMaterial.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/ClippedPbrMaterial.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.composescene3d.core/ClippedPbrMaterial.toString|toString(){}[0]
+}
+
+final class dev.composescene3d.core/ClippingPlane3D { // dev.composescene3d.core/ClippingPlane3D|null[0]
+    constructor <init>(dev.composescene3d.core/Vec3, kotlin/Float = ..., kotlin/Boolean = ...) // dev.composescene3d.core/ClippingPlane3D.<init>|<init>(dev.composescene3d.core.Vec3;kotlin.Float;kotlin.Boolean){}[0]
+
+    final val keepPositive // dev.composescene3d.core/ClippingPlane3D.keepPositive|{}keepPositive[0]
+        final fun <get-keepPositive>(): kotlin/Boolean // dev.composescene3d.core/ClippingPlane3D.keepPositive.<get-keepPositive>|<get-keepPositive>(){}[0]
+    final val normal // dev.composescene3d.core/ClippingPlane3D.normal|{}normal[0]
+        final fun <get-normal>(): dev.composescene3d.core/Vec3 // dev.composescene3d.core/ClippingPlane3D.normal.<get-normal>|<get-normal>(){}[0]
+    final val offset // dev.composescene3d.core/ClippingPlane3D.offset|{}offset[0]
+        final fun <get-offset>(): kotlin/Float // dev.composescene3d.core/ClippingPlane3D.offset.<get-offset>|<get-offset>(){}[0]
+
+    final fun component1(): dev.composescene3d.core/Vec3 // dev.composescene3d.core/ClippingPlane3D.component1|component1(){}[0]
+    final fun component2(): kotlin/Float // dev.composescene3d.core/ClippingPlane3D.component2|component2(){}[0]
+    final fun component3(): kotlin/Boolean // dev.composescene3d.core/ClippingPlane3D.component3|component3(){}[0]
+    final fun copy(dev.composescene3d.core/Vec3 = ..., kotlin/Float = ..., kotlin/Boolean = ...): dev.composescene3d.core/ClippingPlane3D // dev.composescene3d.core/ClippingPlane3D.copy|copy(dev.composescene3d.core.Vec3;kotlin.Float;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/ClippingPlane3D.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.composescene3d.core/ClippingPlane3D.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.composescene3d.core/ClippingPlane3D.toString|toString(){}[0]
+}
+
 final class dev.composescene3d.core/Color3D { // dev.composescene3d.core/Color3D|null[0]
     constructor <init>(kotlin/Float, kotlin/Float, kotlin/Float, kotlin/Float = ..., dev.composescene3d.core/ColorSpace3D = ...) // dev.composescene3d.core/Color3D.<init>|<init>(kotlin.Float;kotlin.Float;kotlin.Float;kotlin.Float;dev.composescene3d.core.ColorSpace3D){}[0]
 
@@ -891,10 +935,12 @@ final class dev.composescene3d.core/Quaternion { // dev.composescene3d.core/Quat
 }
 
 final class dev.composescene3d.core/RendererCapabilities { // dev.composescene3d.core/RendererCapabilities|null[0]
-    constructor <init>(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...) // dev.composescene3d.core/RendererCapabilities.<init>|<init>(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
+    constructor <init>(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...) // dev.composescene3d.core/RendererCapabilities.<init>|<init>(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
 
     final val bloom // dev.composescene3d.core/RendererCapabilities.bloom|{}bloom[0]
         final fun <get-bloom>(): kotlin/Boolean // dev.composescene3d.core/RendererCapabilities.bloom.<get-bloom>|<get-bloom>(){}[0]
+    final val clippingPlanes // dev.composescene3d.core/RendererCapabilities.clippingPlanes|{}clippingPlanes[0]
+        final fun <get-clippingPlanes>(): kotlin/Boolean // dev.composescene3d.core/RendererCapabilities.clippingPlanes.<get-clippingPlanes>|<get-clippingPlanes>(){}[0]
     final val customGeometry // dev.composescene3d.core/RendererCapabilities.customGeometry|{}customGeometry[0]
         final fun <get-customGeometry>(): kotlin/Boolean // dev.composescene3d.core/RendererCapabilities.customGeometry.<get-customGeometry>|<get-customGeometry>(){}[0]
     final val physicallyBasedRendering // dev.composescene3d.core/RendererCapabilities.physicallyBasedRendering|{}physicallyBasedRendering[0]
@@ -915,7 +961,8 @@ final class dev.composescene3d.core/RendererCapabilities { // dev.composescene3d
     final fun component5(): kotlin/Boolean // dev.composescene3d.core/RendererCapabilities.component5|component5(){}[0]
     final fun component6(): kotlin/Boolean // dev.composescene3d.core/RendererCapabilities.component6|component6(){}[0]
     final fun component7(): kotlin/Boolean // dev.composescene3d.core/RendererCapabilities.component7|component7(){}[0]
-    final fun copy(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...): dev.composescene3d.core/RendererCapabilities // dev.composescene3d.core/RendererCapabilities.copy|copy(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
+    final fun component8(): kotlin/Boolean // dev.composescene3d.core/RendererCapabilities.component8|component8(){}[0]
+    final fun copy(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...): dev.composescene3d.core/RendererCapabilities // dev.composescene3d.core/RendererCapabilities.copy|copy(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/RendererCapabilities.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // dev.composescene3d.core/RendererCapabilities.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // dev.composescene3d.core/RendererCapabilities.toString|toString(){}[0]

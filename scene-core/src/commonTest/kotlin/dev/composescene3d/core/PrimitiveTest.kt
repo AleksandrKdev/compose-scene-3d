@@ -51,6 +51,15 @@ class PrimitiveTest {
         assertFailsWith<IllegalArgumentException> {
             TransparentMaterial(Color3D.White, reflectance = 1.1f)
         }
+        assertFailsWith<IllegalArgumentException> {
+            ClippingPlane3D(Vec3.Zero)
+        }
+        assertFailsWith<IllegalArgumentException> {
+            ClippedPbrMaterial(emptyList())
+        }
+        assertFailsWith<IllegalArgumentException> {
+            ClippedPbrMaterial(List(4) { ClippingPlane3D(Vec3(0f, 1f, 0f)) })
+        }
     }
 
     @Test

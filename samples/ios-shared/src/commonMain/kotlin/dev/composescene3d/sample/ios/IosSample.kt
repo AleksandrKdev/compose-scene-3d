@@ -24,6 +24,8 @@ import dev.composescene3d.core.ModelPartOutline
 import dev.composescene3d.core.HighlightMaterial
 import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.core.Color3D
+import dev.composescene3d.core.ClippedPbrMaterial
+import dev.composescene3d.core.ClippingPlane3D
 import dev.composescene3d.core.TransparentMaterial
 import dev.composescene3d.core.UnlitMaterial
 import dev.composescene3d.core.EnvironmentMap
@@ -93,13 +95,6 @@ fun IosSample(
             ambientOcclusionStrength = 0.8f,
         )
     }
-    val albedoOnlyMaterial = floorMaterial.copy(
-        metallic = 0f,
-        normalTexture = null,
-        metallicRoughnessTexture = null,
-        emissiveTexture = null,
-        ambientOcclusionTexture = null,
-    )
     var selected by remember { mutableStateOf<String?>(null) }
     var selectedPart by remember { mutableStateOf<ModelPartKey?>(null) }
 
@@ -144,7 +139,15 @@ fun IosSample(
                 )
                 cylinder(
                     key = "rough-cylinder",
-                    material = albedoOnlyMaterial,
+                    material = ClippedPbrMaterial(
+                        planes = listOf(ClippingPlane3D(
+                            normal = Vec3(1f, 0f, 0f),
+                            offset = 2f,
+                        )),
+                        baseColor = Color3D(0.9f, 0.35f, 0.12f),
+                        metallic = 0.35f,
+                        roughness = 0.4f,
+                    ),
                     transform = Transform(translation = Vec3(2f, 0f, 0f)),
                 )
                 sphere(

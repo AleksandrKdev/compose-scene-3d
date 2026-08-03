@@ -246,6 +246,30 @@ Because they are regular scene nodes, transforms, parent groups, picking and opt
 behave exactly like other primitives. `UnlitMaterial` is the default so annotations stay legible
 independently of scene lighting; PBR and other portable materials are also supported.
 
+World-space clipping planes provide dynamic section views on the Filament Android/iOS backend.
+`ClippedPbrMaterial` accepts one to three half-spaces and can be attached to primitives, custom
+meshes, or imported parts through `ModelPartOverride.material`:
+
+```kotlin
+val section = ClippedPbrMaterial(
+    planes = listOf(
+        ClippingPlane3D(
+            normal = Vec3(1f, 0f, 0f),
+            offset = sectionPosition,
+        ),
+    ),
+    baseColor = Color3D(0.8f, 0.35f, 0.12f),
+    metallic = 0.25f,
+    roughness = 0.45f,
+)
+
+mesh("housing-section", geometry = housing, material = section)
+```
+
+The plane retains points where `dot(normal, worldPosition) >= offset`; set `keepPositive = false`
+to retain the opposite side. Changing `offset` from Compose state animates or scrubs the cut. The
+current milestone renders an open section surface; generated caps and hatch fills are planned next.
+
 `Color3D` distinguishes sRGB input from linear-sRGB values and supports RGB/RGBA/ARGB factories
 and named colors. Primitive materials can be `PbrMaterial`, `UnlitMaterial`, `EmissiveMaterial`,
 `TexturedMaterial` or `TransparentMaterial`.
