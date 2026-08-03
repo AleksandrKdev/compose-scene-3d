@@ -122,7 +122,10 @@ data class GroupNode(
     val children: List<SceneNode>,
     override val transform: Transform = Transform(),
     val visible: Boolean = true,
-) : SceneNode
+    val opacity: Float = 1f,
+) : SceneNode {
+    init { require(opacity in 0f..1f) { "Group opacity must be between 0 and 1" } }
+}
 
 data class ModelNode(
     override val key: NodeKey,
@@ -335,6 +338,13 @@ data class TransparentMaterial(
 /** Multiplies a material's alpha while retaining its shading and texture inputs. */
 data class OpacityMaterial(val material: Material3D, val opacity: Float) : Material3D {
     init { require(opacity in 0f..1f) { "Material opacity must be between 0 and 1" } }
+}
+
+fun Material3D.withOpacity(opacity: Float): Material3D {
+    require(opacity in 0f..1f) { "Material opacity must be between 0 and 1" }
+    if (opacity == 1f) return this
+    return if (this is OpacityMaterial) OpacityMaterial(material, this.opacity * opacity)
+    else OpacityMaterial(this, opacity)
 }
 
 data class BoxNode(

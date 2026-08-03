@@ -58,6 +58,7 @@ import dev.composescene3d.core.TexturedMaterial
 import dev.composescene3d.core.TextureSource
 import dev.composescene3d.core.assetKey
 import dev.composescene3d.core.geometry
+import dev.composescene3d.core.withOpacity
 import dev.composescene3d.core.section
 import dev.composescene3d.core.UnlitMaterial
 import dev.composescene3d.core.Vec3
@@ -1190,51 +1191,51 @@ private fun buildGpuBatches(
             doubleSided = mesh.doubleSided || mesh.material is TransparentMaterial || mesh.material is OpacityMaterial,
         ))
     }
-    fun append(node: SceneNode, parents: List<Transform>) {
+    fun append(node: SceneNode, parents: List<Transform>, opacity: Float) {
         val transforms = listOf(node.transform) + parents
+        fun emit(mesh: MeshData, cast: Boolean, receive: Boolean) = appendMesh(
+            mesh.copy(material = mesh.material.withOpacity(opacity)), transforms, cast, receive,
+        )
         if (node is GroupNode) {
             if (!node.visible) return
-            node.children.forEach { append(it, transforms) }
+            node.children.forEach { append(it, transforms, opacity * node.opacity) }
             return
         }
         if (node is ModelNode) {
             if (!node.visible) return
             resolveModel(node)?.forEach {
-                appendMesh(it, transforms, node.castShadows, node.receiveShadows)
+                emit(it, node.castShadows, node.receiveShadows)
             }
             return
         }
         if (node is SectionedMeshNode) {
             val section = node.geometry.section(node.plane)
             section.surface?.let {
-                appendMesh(it.toMeshData(node.material), transforms, node.castShadows, node.receiveShadows)
+                emit(it.toMeshData(node.material), node.castShadows, node.receiveShadows)
             }
             section.cap?.let {
-                appendMesh(it.toMeshData(node.capMaterial), transforms, node.castShadows, node.receiveShadows)
+                emit(it.toMeshData(node.capMaterial), node.castShadows, node.receiveShadows)
             }
             return
         }
         if (node is LinearDimensionNode) {
             node.geometry().forEach { geometry ->
-                appendMesh(
-                    geometry.toMeshData(node.material), transforms,
-                    node.castShadows, node.receiveShadows,
-                )
+                emit(geometry.toMeshData(node.material), node.castShadows, node.receiveShadows)
             }
             return
         }
         if (node is RadialDimensionNode) {
-            node.geometry().forEach { appendMesh(it.toMeshData(node.material), transforms, node.castShadows, node.receiveShadows) }
+            node.geometry().forEach { emit(it.toMeshData(node.material), node.castShadows, node.receiveShadows) }
             return
         }
         if (node is AngularDimensionNode) {
-            node.geometry().forEach { appendMesh(it.toMeshData(node.material), transforms, node.castShadows, node.receiveShadows) }
+            node.geometry().forEach { emit(it.toMeshData(node.material), node.castShadows, node.receiveShadows) }
             return
         }
         val mesh = node.toMesh() ?: return
-        appendMesh(mesh, transforms, node.castShadows(), node.receiveShadows())
+        emit(mesh, node.castShadows(), node.receiveShadows())
     }
-    nodes.forEach { append(it, emptyList()) }
+    nodes.forEach { append(it, emptyList(), 1f) }
 }
 
 private fun SceneNode.castShadows() = when (this) {

@@ -741,12 +741,14 @@ final class dev.composescene3d.core/Geometry3D { // dev.composescene3d.core/Geom
 }
 
 final class dev.composescene3d.core/GroupNode : dev.composescene3d.core/SceneNode { // dev.composescene3d.core/GroupNode|null[0]
-    constructor <init>(dev.composescene3d.core/NodeKey, kotlin.collections/List<dev.composescene3d.core/SceneNode>, dev.composescene3d.core/Transform = ..., kotlin/Boolean = ...) // dev.composescene3d.core/GroupNode.<init>|<init>(dev.composescene3d.core.NodeKey;kotlin.collections.List<dev.composescene3d.core.SceneNode>;dev.composescene3d.core.Transform;kotlin.Boolean){}[0]
+    constructor <init>(dev.composescene3d.core/NodeKey, kotlin.collections/List<dev.composescene3d.core/SceneNode>, dev.composescene3d.core/Transform = ..., kotlin/Boolean = ..., kotlin/Float = ...) // dev.composescene3d.core/GroupNode.<init>|<init>(dev.composescene3d.core.NodeKey;kotlin.collections.List<dev.composescene3d.core.SceneNode>;dev.composescene3d.core.Transform;kotlin.Boolean;kotlin.Float){}[0]
 
     final val children // dev.composescene3d.core/GroupNode.children|{}children[0]
         final fun <get-children>(): kotlin.collections/List<dev.composescene3d.core/SceneNode> // dev.composescene3d.core/GroupNode.children.<get-children>|<get-children>(){}[0]
     final val key // dev.composescene3d.core/GroupNode.key|{}key[0]
         final fun <get-key>(): dev.composescene3d.core/NodeKey // dev.composescene3d.core/GroupNode.key.<get-key>|<get-key>(){}[0]
+    final val opacity // dev.composescene3d.core/GroupNode.opacity|{}opacity[0]
+        final fun <get-opacity>(): kotlin/Float // dev.composescene3d.core/GroupNode.opacity.<get-opacity>|<get-opacity>(){}[0]
     final val transform // dev.composescene3d.core/GroupNode.transform|{}transform[0]
         final fun <get-transform>(): dev.composescene3d.core/Transform // dev.composescene3d.core/GroupNode.transform.<get-transform>|<get-transform>(){}[0]
     final val visible // dev.composescene3d.core/GroupNode.visible|{}visible[0]
@@ -756,7 +758,8 @@ final class dev.composescene3d.core/GroupNode : dev.composescene3d.core/SceneNod
     final fun component2(): kotlin.collections/List<dev.composescene3d.core/SceneNode> // dev.composescene3d.core/GroupNode.component2|component2(){}[0]
     final fun component3(): dev.composescene3d.core/Transform // dev.composescene3d.core/GroupNode.component3|component3(){}[0]
     final fun component4(): kotlin/Boolean // dev.composescene3d.core/GroupNode.component4|component4(){}[0]
-    final fun copy(dev.composescene3d.core/NodeKey = ..., kotlin.collections/List<dev.composescene3d.core/SceneNode> = ..., dev.composescene3d.core/Transform = ..., kotlin/Boolean = ...): dev.composescene3d.core/GroupNode // dev.composescene3d.core/GroupNode.copy|copy(dev.composescene3d.core.NodeKey;kotlin.collections.List<dev.composescene3d.core.SceneNode>;dev.composescene3d.core.Transform;kotlin.Boolean){}[0]
+    final fun component5(): kotlin/Float // dev.composescene3d.core/GroupNode.component5|component5(){}[0]
+    final fun copy(dev.composescene3d.core/NodeKey = ..., kotlin.collections/List<dev.composescene3d.core/SceneNode> = ..., dev.composescene3d.core/Transform = ..., kotlin/Boolean = ..., kotlin/Float = ...): dev.composescene3d.core/GroupNode // dev.composescene3d.core/GroupNode.copy|copy(dev.composescene3d.core.NodeKey;kotlin.collections.List<dev.composescene3d.core.SceneNode>;dev.composescene3d.core.Transform;kotlin.Boolean;kotlin.Float){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // dev.composescene3d.core/GroupNode.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // dev.composescene3d.core/GroupNode.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // dev.composescene3d.core/GroupNode.toString|toString(){}[0]
@@ -1738,6 +1741,7 @@ final fun (dev.composescene3d.core/CameraDescription).dev.composescene3d.core/fo
 final fun (dev.composescene3d.core/Geometry3D).dev.composescene3d.core/section(dev.composescene3d.core/ClippingPlane3D): dev.composescene3d.core/SectionGeometry3D // dev.composescene3d.core/section|section@dev.composescene3d.core.Geometry3D(dev.composescene3d.core.ClippingPlane3D){}[0]
 final fun (dev.composescene3d.core/LineNode).dev.composescene3d.core/geometry(): dev.composescene3d.core/Geometry3D // dev.composescene3d.core/geometry|geometry@dev.composescene3d.core.LineNode(){}[0]
 final fun (dev.composescene3d.core/LinearDimensionNode).dev.composescene3d.core/geometry(): kotlin.collections/List<dev.composescene3d.core/Geometry3D> // dev.composescene3d.core/geometry|geometry@dev.composescene3d.core.LinearDimensionNode(){}[0]
+final fun (dev.composescene3d.core/Material3D).dev.composescene3d.core/withOpacity(kotlin/Float): dev.composescene3d.core/Material3D // dev.composescene3d.core/withOpacity|withOpacity@dev.composescene3d.core.Material3D(kotlin.Float){}[0]
 final fun (dev.composescene3d.core/ModelNode).dev.composescene3d.core/withExplodedView(dev.composescene3d.core/ExplodedView3D, kotlin/Float): dev.composescene3d.core/ModelNode // dev.composescene3d.core/withExplodedView|withExplodedView@dev.composescene3d.core.ModelNode(dev.composescene3d.core.ExplodedView3D;kotlin.Float){}[0]
 final fun (dev.composescene3d.core/ModelSource).dev.composescene3d.core/assetKey(): dev.composescene3d.core/ModelAssetKey // dev.composescene3d.core/assetKey|assetKey@dev.composescene3d.core.ModelSource(){}[0]
 final fun (dev.composescene3d.core/RadialDimensionNode).dev.composescene3d.core/geometry(): kotlin.collections/List<dev.composescene3d.core/Geometry3D> // dev.composescene3d.core/geometry|geometry@dev.composescene3d.core.RadialDimensionNode(){}[0]

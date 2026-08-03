@@ -442,17 +442,19 @@ public final class dev/composescene3d/core/Geometry3D {
 }
 
 public final class dev/composescene3d/core/GroupNode : dev/composescene3d/core/SceneNode {
-	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;Ldev/composescene3d/core/Transform;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;Ldev/composescene3d/core/Transform;ZLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;Ldev/composescene3d/core/Transform;ZFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;Ldev/composescene3d/core/Transform;ZFLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-V7PxYp4 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/util/List;
 	public final fun component3 ()Ldev/composescene3d/core/Transform;
 	public final fun component4 ()Z
-	public final fun copy-dKfVh_c (Ljava/lang/String;Ljava/util/List;Ldev/composescene3d/core/Transform;Z)Ldev/composescene3d/core/GroupNode;
-	public static synthetic fun copy-dKfVh_c$default (Ldev/composescene3d/core/GroupNode;Ljava/lang/String;Ljava/util/List;Ldev/composescene3d/core/Transform;ZILjava/lang/Object;)Ldev/composescene3d/core/GroupNode;
+	public final fun component5 ()F
+	public final fun copy-IkvKhLo (Ljava/lang/String;Ljava/util/List;Ldev/composescene3d/core/Transform;ZF)Ldev/composescene3d/core/GroupNode;
+	public static synthetic fun copy-IkvKhLo$default (Ldev/composescene3d/core/GroupNode;Ljava/lang/String;Ljava/util/List;Ldev/composescene3d/core/Transform;ZFILjava/lang/Object;)Ldev/composescene3d/core/GroupNode;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getChildren ()Ljava/util/List;
 	public fun getKey-V7PxYp4 ()Ljava/lang/String;
+	public final fun getOpacity ()F
 	public fun getTransform ()Ldev/composescene3d/core/Transform;
 	public final fun getVisible ()Z
 	public fun hashCode ()I
@@ -1069,6 +1071,7 @@ public final class dev/composescene3d/core/SceneKt {
 	public static final fun assetKey (Ldev/composescene3d/core/ModelSource;)Ljava/lang/String;
 	public static final fun assetKey (Ldev/composescene3d/core/TextureSource;)Ljava/lang/String;
 	public static final fun flattenSceneNodes (Ljava/lang/Iterable;)Ljava/util/List;
+	public static final fun withOpacity (Ldev/composescene3d/core/Material3D;F)Ldev/composescene3d/core/Material3D;
 }
 
 public abstract interface class dev/composescene3d/core/SceneNode {

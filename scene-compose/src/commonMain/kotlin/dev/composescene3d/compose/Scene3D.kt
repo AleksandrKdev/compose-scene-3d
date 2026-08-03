@@ -47,6 +47,7 @@ class SceneScope internal constructor() {
         source: ModelSource,
         transform: Transform = Transform(),
         visible: Boolean = true,
+        opacity: Float = 1f,
         castShadows: Boolean = true,
         receiveShadows: Boolean = true,
         partOverrides: Map<ModelPartKey, ModelPartOverride> = emptyMap(),
@@ -64,10 +65,11 @@ class SceneScope internal constructor() {
         key: String,
         transform: Transform = Transform(),
         visible: Boolean = true,
+        opacity: Float = 1f,
         content: SceneScope.() -> Unit,
     ) {
         val children = SceneScope().apply(content).nodes.toList()
-        nodes += GroupNode(NodeKey(key), children, transform, visible)
+        nodes += GroupNode(NodeKey(key), children, transform, visible, opacity)
     }
 
     fun box(

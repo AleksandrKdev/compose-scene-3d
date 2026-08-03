@@ -102,10 +102,11 @@ class SceneScopeTest {
     @Test
     fun buildsHiddenSceneSubtree() {
         val scene = SceneScope().apply {
-            group("internals", visible = false) { box("bearing") }
+            group("internals", visible = false, opacity = 0.4f) { box("bearing") }
         }.build()
         val group = assertIs<GroupNode>(scene.nodes.single())
         assertFalse(group.visible)
+        assertEquals(0.4f, group.opacity)
         assertEquals(1, group.children.size)
     }
 

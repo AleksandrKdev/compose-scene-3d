@@ -365,6 +365,15 @@ mesh("cover", coverGeometry, material = OpacityMaterial(coverMaterial, opacity =
 albedo texture and PBR metallic/roughness factors; color materials retain their shading parameters.
 Imported glTF material fading requires the forthcoming custom glTF material-provider path.
 
+Opacity can also be inherited by a complete declarative subtree; nested values multiply:
+
+```kotlin
+group("housing", opacity = 0.35f) {
+    mesh("cover", coverGeometry, material = coverMaterial)
+    group("fasteners", opacity = 0.5f) { /* effective opacity: 0.175 */ }
+}
+```
+
 World-space clipping planes provide dynamic section views on the Filament Android/iOS backend.
 `ClippedPbrMaterial` accepts one to three half-spaces and can be attached to primitives, custom
 meshes, or imported parts through `ModelPartOverride.material`:

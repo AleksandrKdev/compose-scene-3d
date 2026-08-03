@@ -95,6 +95,7 @@ class PrimitiveTest {
     @Test
     fun validatesPrimitiveGeometry() {
         assertFailsWith<IllegalArgumentException> { OpacityMaterial(PbrMaterial(), 1.1f) }
+        assertFailsWith<IllegalArgumentException> { GroupNode(NodeKey("group"), emptyList(), opacity = -0.1f) }
         assertFailsWith<IllegalArgumentException> { SphereNode(NodeKey("sphere"), radius = 0f) }
         assertFailsWith<IllegalArgumentException> { PlaneNode(NodeKey("plane"), depth = 0f) }
         assertFailsWith<IllegalArgumentException> { CylinderNode(NodeKey("cylinder"), segments = 2) }

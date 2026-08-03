@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import dev.composescene3d.compose.SceneCameraState
@@ -72,6 +73,7 @@ import dev.composescene3d.core.EnvironmentMap
 import dev.composescene3d.core.UnlitMaterial
 import dev.composescene3d.core.assetKey
 import dev.composescene3d.core.geometry
+import dev.composescene3d.core.withOpacity
 import dev.composescene3d.core.section
 import dev.composescene3d.core.Vec3
 import dev.composescene3d.filament.resources.Res
@@ -748,6 +750,8 @@ private fun FilamentViewportContent(
     }
 }
 
+private val LocalSceneOpacity = compositionLocalOf { 1f }
+
 @Composable
 private fun FilamentSceneScope.FilamentNodes(
     renderer: FilamentRenderer,
@@ -806,7 +810,10 @@ private fun FilamentSceneScope.FilamentNodes(
                             scale = node.transform.scale.toFilamentScale(),
                             onCreate = { groupEntity.value = it },
                         ) {
-                            CompositionLocalProvider(LocalComposeScene3DParent provides groupEntity.value) {
+                            CompositionLocalProvider(
+                                LocalComposeScene3DParent provides groupEntity.value,
+                                LocalSceneOpacity provides LocalSceneOpacity.current * node.opacity,
+                            ) {
                                 FilamentNodes(renderer, node.children)
                             }
                         }
@@ -1127,29 +1134,32 @@ private fun FilamentSceneScope.FilamentCylinder(renderer: FilamentRenderer, node
 }
 
 @Composable
-internal fun rememberSceneMaterial(renderer: FilamentRenderer, material: Material3D) = when (material) {
+internal fun rememberSceneMaterial(renderer: FilamentRenderer, material: Material3D): MaterialInstance {
+    val effective = material.withOpacity(LocalSceneOpacity.current)
+    return when (effective) {
     is PbrMaterial -> rememberColorMaterialInstance(
-        color = material.baseColor.toFilamentColor(),
-        metallic = material.metallic,
-        roughness = material.roughness,
-        reflectance = material.reflectance,
+        color = effective.baseColor.toFilamentColor(),
+        metallic = effective.metallic,
+        roughness = effective.roughness,
+        reflectance = effective.reflectance,
     )
-    is UnlitMaterial -> rememberUnlitColorMaterialInstance(material.color.toFilamentColor())
+    is UnlitMaterial -> rememberUnlitColorMaterialInstance(effective.color.toFilamentColor())
     is EmissiveMaterial -> rememberEmissiveMaterialInstance(
-        color = material.color.toFilamentColor(),
-        intensity = material.intensity,
+        color = effective.color.toFilamentColor(),
+        intensity = effective.intensity,
     )
     is HighlightMaterial -> rememberEmissiveMaterialInstance(
-        color = material.color.toFilamentColor(),
-        intensity = material.intensity,
+        color = effective.color.toFilamentColor(),
+        intensity = effective.intensity,
     )
-    is HatchMaterial -> rememberHatchMaterial(material)
-    is ClippedPbrMaterial -> rememberClippedPbrMaterial(material)
+    is HatchMaterial -> rememberHatchMaterial(effective)
+    is ClippedPbrMaterial -> rememberClippedPbrMaterial(effective)
     is TexturedMaterial -> {
-        rememberPbrTexturedMaterial(renderer, material)
+        rememberPbrTexturedMaterial(renderer, effective)
     }
-    is TransparentMaterial -> rememberTransparentMaterial(material)
-    is OpacityMaterial -> rememberOpacityMaterial(renderer, material)
+    is TransparentMaterial -> rememberTransparentMaterial(effective)
+    is OpacityMaterial -> rememberOpacityMaterial(renderer, effective)
+    }
 }
 
 @Composable
