@@ -283,9 +283,10 @@ sectionedMesh(
 )
 ```
 
-The cap implementation reconstructs actual cut-edge loops, triangulates concave contours, and
-handles multiple disconnected contours in one mesh. Generated UVs make the result ready for hatch
-textures. Nested contours that represent holes are the remaining topology limitation.
+The cap implementation reconstructs actual cut-edge loops, triangulates concave contours, handles
+multiple disconnected regions, and preserves nested contours as holes. This covers hollow shafts,
+tubes, and housings with internal openings. Generated planar UVs make the result ready for hatch
+materials.
 
 `Color3D` distinguishes sRGB input from linear-sRGB values and supports RGB/RGBA/ARGB factories
 and named colors. Primitive materials can be `PbrMaterial`, `UnlitMaterial`, `EmissiveMaterial`,

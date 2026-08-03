@@ -541,11 +541,11 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Continue mobile interactive-textbook support with nested section-contour holes and procedural hatch
-fills on Android/iOS.
+Continue mobile interactive-textbook support with procedural section hatch fills on Android/iOS.
 Imported hierarchy, picking, part overrides, selection effects, exploded views, frame-tracked
 world-to-screen model-part annotations, solid 3D lines/arrows/callout leaders, and open clipping
-plane section views and CPU-generated concave/multi-contour section caps for custom meshes are done.
+plane section views and CPU-generated concave/multi-contour/holed section caps for custom meshes are
+done.
 The user explicitly allowed breaking the old empty GroupNode API before alpha03. Do not expose
 backend types in public commonMain API.
 ```

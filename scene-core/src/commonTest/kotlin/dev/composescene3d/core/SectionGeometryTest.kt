@@ -68,6 +68,18 @@ class SectionGeometryTest {
         assertEquals(2f, cap.areaInXy(), absoluteTolerance = 0.0001f)
     }
 
+    @Test
+    fun preservesNestedContourAsASectionHole() {
+        val outer = prism(listOf(-2f to -2f, 2f to -2f, 2f to 2f, -2f to 2f))
+        val bore = prism(listOf(-1f to -1f, -1f to 1f, 1f to 1f, 1f to -1f))
+        val cap = assertNotNull(
+            merge(outer, bore).section(ClippingPlane3D(Vec3(0f, 0f, 1f))).cap,
+        )
+
+        assertEquals(12f, cap.areaInXy(), absoluteTolerance = 0.0001f)
+        assertTrue(cap.positions.asList().chunked(9).none { it.containsXy(0f, 0f) })
+    }
+
     private fun prism(outline: List<Pair<Float, Float>>): Geometry3D {
         val positions = buildList {
             listOf(-1f, 1f).forEach { z ->
@@ -100,4 +112,16 @@ class SectionGeometryTest {
         val by = triangle[7] - triangle[1]
         (kotlin.math.abs(ax * by - ay * bx) / 2f).toDouble()
     }.toFloat()
+
+    private fun List<Float>.containsXy(x: Float, y: Float): Boolean {
+        fun cross(ax: Float, ay: Float, bx: Float, by: Float) = ax * by - ay * bx
+        val signs = (0..2).map { index ->
+            val next = (index + 1) % 3
+            cross(
+                this[next * 3] - this[index * 3], this[next * 3 + 1] - this[index * 3 + 1],
+                x - this[index * 3], y - this[index * 3 + 1],
+            )
+        }
+        return signs.all { it >= -0.0001f } || signs.all { it <= 0.0001f }
+    }
 }

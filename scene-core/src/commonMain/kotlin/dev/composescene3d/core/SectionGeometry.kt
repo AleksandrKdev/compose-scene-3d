@@ -10,8 +10,8 @@ data class SectionGeometry3D(
 )
 
 /**
- * Clips triangles against [plane] and closes concave or disconnected cut contours. The plane uses
- * local mesh coordinates. Nested contours (holes) are not filled by this overload.
+ * Clips triangles against [plane] and closes concave, disconnected, or nested cut contours. The
+ * plane uses local mesh coordinates.
  */
 fun Geometry3D.section(plane: ClippingPlane3D): SectionGeometry3D {
     val normalLength = sqrt(
@@ -65,20 +65,19 @@ fun Geometry3D.section(plane: ClippingPlane3D): SectionGeometry3D {
         allPoints.maxOf { it.dot(u) } - minU,
         allPoints.maxOf { it.dot(v) } - minV,
     ).coerceAtLeast(1e-6f)
-    contours.forEach { contour ->
-        val projected = contour.map { Point2D(it.dot(u), it.dot(v)) }
-        projected.earTriangles().forEach { triangle ->
-            fun capVertex(index: Int): SectionVertex {
-                val point = contour[index]
-                return SectionVertex(
-                    point, capNormal,
-                    (point.dot(u) - minU) / extent,
-                    (point.dot(v) - minV) / extent,
-                )
-            }
-            // Ear clipping returns counter-clockwise triangles facing +normal; reverse for the cap.
-            cap.triangle(capVertex(triangle[0]), capVertex(triangle[2]), capVertex(triangle[1]))
+    val planarContours = contours.map { contour ->
+        contour.map { point -> PlanarPoint(point, Point2D(point.dot(u), point.dot(v))) }
+    }
+    planarContours.triangulateNestedContours().forEach { triangle ->
+        fun capVertex(point: PlanarPoint): SectionVertex {
+            return SectionVertex(
+                point.position, capNormal,
+                (point.point.x - minU) / extent,
+                (point.point.y - minV) / extent,
+            )
         }
+        // Ear clipping returns counter-clockwise triangles facing +normal; reverse for the cap.
+        cap.triangle(capVertex(triangle[0]), capVertex(triangle[2]), capVertex(triangle[1]))
     }
     return SectionGeometry3D(surface, cap.buildOrNull())
 }
@@ -114,6 +113,88 @@ private fun List<Vec3>.removeCollinear(epsilon: Float): List<Vec3> = filterIndex
 }
 
 private data class Point2D(val x: Float, val y: Float)
+private data class PlanarPoint(val position: Vec3, val point: Point2D)
+
+private fun List<List<PlanarPoint>>.triangulateNestedContours(): List<List<PlanarPoint>> {
+    val depths = map { contour ->
+        count { candidate -> candidate !== contour && contour[0].point.insidePolygon(candidate.map { it.point }) }
+    }
+    val triangles = mutableListOf<List<PlanarPoint>>()
+    indices.filter { depths[it] % 2 == 0 }.forEach { outerIndex ->
+        var polygon = this[outerIndex].counterClockwise()
+        val holes = indices.filter { holeIndex ->
+            depths[holeIndex] == depths[outerIndex] + 1 &&
+                this[holeIndex][0].point.insidePolygon(this[outerIndex].map { it.point })
+        }
+        holes.sortedByDescending { hole -> this[hole].maxOf { it.point.x } }.forEach { holeIndex ->
+            polygon = polygon.bridge(this[holeIndex].clockwise())
+        }
+        polygon.map { it.point }.earTriangles().forEach { triangle ->
+            triangles += triangle.map(polygon::get)
+        }
+    }
+    return triangles
+}
+
+private fun List<PlanarPoint>.counterClockwise() =
+    if (map { it.point }.signedArea() >= 0f) this else reversed()
+private fun List<PlanarPoint>.clockwise() =
+    if (map { it.point }.signedArea() <= 0f) this else reversed()
+
+private fun List<PlanarPoint>.bridge(hole: List<PlanarPoint>): List<PlanarPoint> {
+    val holeIndex = hole.indices.maxBy { hole[it].point.x }
+    val holePoint = hole[holeIndex].point
+    val candidates = indices.sortedBy { index -> holePoint.distanceSquared(this[index].point) }
+    val outerIndex = candidates.firstOrNull { index ->
+        val outerPoint = this[index].point
+        val midpoint = Point2D((holePoint.x + outerPoint.x) / 2f, (holePoint.y + outerPoint.y) / 2f)
+        midpoint.insidePolygon(map { it.point }) && !midpoint.insidePolygon(hole.map { it.point }) &&
+            bridgeDoesNotCross(holePoint, outerPoint, map { it.point }, hole.map { it.point })
+    } ?: candidates.first()
+    return buildList {
+        addAll(this@bridge.take(outerIndex + 1))
+        addAll(hole.drop(holeIndex))
+        addAll(hole.take(holeIndex + 1))
+        addAll(this@bridge.drop(outerIndex))
+    }
+}
+
+private fun bridgeDoesNotCross(
+    first: Point2D,
+    second: Point2D,
+    outer: List<Point2D>,
+    hole: List<Point2D>,
+): Boolean = listOf(outer, hole).all { polygon ->
+    polygon.indices.all { index ->
+        val edgeFirst = polygon[index]
+        val edgeSecond = polygon[(index + 1) % polygon.size]
+        edgeFirst == first || edgeSecond == first || edgeFirst == second || edgeSecond == second ||
+            !segmentsIntersect(first, second, edgeFirst, edgeSecond)
+    }
+}
+
+private fun segmentsIntersect(a: Point2D, b: Point2D, c: Point2D, d: Point2D): Boolean {
+    val abC = cross(a, b, c)
+    val abD = cross(a, b, d)
+    val cdA = cross(c, d, a)
+    val cdB = cross(c, d, b)
+    return abC * abD < -1e-7f && cdA * cdB < -1e-7f
+}
+
+private fun Point2D.insidePolygon(polygon: List<Point2D>): Boolean {
+    var inside = false
+    var previous = polygon.last()
+    polygon.forEach { current ->
+        if ((current.y > y) != (previous.y > y) &&
+            x < (previous.x - current.x) * (y - current.y) / (previous.y - current.y) + current.x
+        ) inside = !inside
+        previous = current
+    }
+    return inside
+}
+
+private fun Point2D.distanceSquared(other: Point2D): Float =
+    (x - other.x) * (x - other.x) + (y - other.y) * (y - other.y)
 
 private fun List<Point2D>.earTriangles(): List<IntArray> {
     if (size < 3) return emptyList()
@@ -153,7 +234,7 @@ private fun Point2D.insideTriangle(a: Point2D, b: Point2D, c: Point2D): Boolean 
     val first = cross(a, b, this)
     val second = cross(b, c, this)
     val third = cross(c, a, this)
-    return first >= -1e-7f && second >= -1e-7f && third >= -1e-7f
+    return first > 1e-7f && second > 1e-7f && third > 1e-7f
 }
 
 private fun cross(a: Point2D, b: Point2D, c: Point2D) =
