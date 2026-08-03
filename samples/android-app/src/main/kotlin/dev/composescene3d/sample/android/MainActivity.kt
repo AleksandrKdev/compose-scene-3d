@@ -27,6 +27,7 @@ import dev.composescene3d.core.ModelPartKey
 import dev.composescene3d.core.ModelPartOverride
 import dev.composescene3d.core.ModelPartOutline
 import dev.composescene3d.core.HighlightMaterial
+import dev.composescene3d.core.HatchMaterial
 import dev.composescene3d.core.PbrMaterial
 import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.ClippedPbrMaterial
@@ -187,7 +188,12 @@ private fun Sample() {
                     geometry = sampleSectionSolid,
                     plane = ClippingPlane3D(Vec3(1f, 0f, 0f), offset = 0f),
                     material = PbrMaterial(baseColor = Color3D.Blue, roughness = 0.45f),
-                    capMaterial = UnlitMaterial(Color3D.Yellow),
+                    capMaterial = HatchMaterial(
+                        backgroundColor = Color3D(0.95f, 0.75f, 0.2f),
+                        lineColor = Color3D(0.12f, 0.1f, 0.06f),
+                        spacing = 0.09f,
+                        lineWidth = 0.009f,
+                    ),
                     transform = Transform(translation = Vec3(0f, 2.2f, 0f)),
                 )
                 line(

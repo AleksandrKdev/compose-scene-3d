@@ -15,6 +15,7 @@ import dev.composescene3d.core.Geometry3D
 import dev.composescene3d.core.MeshNode
 import dev.composescene3d.core.SectionedMeshNode
 import dev.composescene3d.core.ClippingPlane3D
+import dev.composescene3d.core.HatchMaterial
 import dev.composescene3d.core.ModelNode
 import dev.composescene3d.core.ModelPartKey
 import dev.composescene3d.core.ModelPartOverride
@@ -173,7 +174,7 @@ class SceneScope internal constructor() {
         geometry: Geometry3D,
         plane: ClippingPlane3D,
         material: Material3D = PbrMaterial(),
-        capMaterial: Material3D = UnlitMaterial(Color3D(0.9f, 0.35f, 0.12f)),
+        capMaterial: Material3D = HatchMaterial(),
         transform: Transform = Transform(),
         castShadows: Boolean = true,
         receiveShadows: Boolean = true,

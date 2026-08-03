@@ -24,6 +24,7 @@ import dev.composescene3d.core.TextureSource
 import dev.composescene3d.core.TexturedMaterial
 import dev.composescene3d.core.TransparentMaterial
 import dev.composescene3d.core.UnlitMaterial
+import dev.composescene3d.core.HatchMaterial
 import dev.composescene3d.core.Vec3
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -159,6 +160,20 @@ class SceneScopeTest {
         }.build()
 
         assertEquals(cap, assertIs<SectionedMeshNode>(scene.nodes.single()).capMaterial)
+    }
+
+    @Test
+    fun usesProceduralHatchingForSectionCapsByDefault() {
+        val geometry = Geometry3D(
+            positions = floatArrayOf(-1f, 0f, 0f, 1f, 0f, 0f, 0f, 1f, 0f),
+            indices = intArrayOf(0, 1, 2),
+            normals = floatArrayOf(0f, 0f, 1f, 0f, 0f, 1f, 0f, 0f, 1f),
+        )
+        val scene = SceneScope().apply {
+            sectionedMesh("hatched", geometry, ClippingPlane3D(Vec3(1f, 0f, 0f)))
+        }.build()
+
+        assertIs<HatchMaterial>(assertIs<SectionedMeshNode>(scene.nodes.single()).capMaterial)
     }
 
     @Test

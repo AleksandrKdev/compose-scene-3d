@@ -30,6 +30,7 @@ import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.DirectionalLightNode
 import dev.composescene3d.core.GroupNode
 import dev.composescene3d.core.HighlightMaterial
+import dev.composescene3d.core.HatchMaterial
 import dev.composescene3d.core.ModelNode
 import dev.composescene3d.core.ModelAssetKey
 import dev.composescene3d.core.ModelPart3D
@@ -183,6 +184,7 @@ class FilamentRenderer(
         physicallyBasedRendering = true,
         skeletalAnimation = true,
         clippingPlanes = true,
+        sectionHatching = true,
     )
 
     private val retainedNodes = mutableStateMapOf<NodeKey, SceneNode>()
@@ -1120,11 +1122,33 @@ internal fun rememberSceneMaterial(renderer: FilamentRenderer, material: Materia
         color = material.color.toFilamentColor(),
         intensity = material.intensity,
     )
+    is HatchMaterial -> rememberHatchMaterial(material)
     is ClippedPbrMaterial -> rememberClippedPbrMaterial(material)
     is TexturedMaterial -> {
         rememberPbrTexturedMaterial(renderer, material)
     }
     is TransparentMaterial -> rememberTransparentMaterial(material)
+}
+
+@Composable
+private fun rememberHatchMaterial(material: HatchMaterial): MaterialInstance {
+    val compiled = rememberMaterial(key = "compose-scene-3d-hatch-v1.72") {
+        Res.readBytes("files/materials/hatch.filamat")
+    }
+    if (compiled == null) {
+        return rememberUnlitColorMaterialInstance(material.backgroundColor.toFilamentColor())
+    }
+    val background = material.backgroundColor.toLinearSrgb()
+    val line = material.lineColor.toLinearSrgb()
+    return rememberMaterialInstance(compiled, material) {
+        setParameter(
+            "backgroundColor", background.red, background.green, background.blue, background.alpha,
+        )
+        setParameter("lineColor", line.red, line.green, line.blue, line.alpha)
+        setParameter("spacing", material.spacing)
+        setParameter("lineWidth", material.lineWidth)
+        setParameter("angleRadians", material.angleRadians)
+    }
 }
 
 @Composable

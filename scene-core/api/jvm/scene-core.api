@@ -333,6 +333,27 @@ public final class dev/composescene3d/core/GroupNode : dev/composescene3d/core/S
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class dev/composescene3d/core/HatchMaterial : dev/composescene3d/core/Material3D {
+	public fun <init> ()V
+	public fun <init> (Ldev/composescene3d/core/Color3D;Ldev/composescene3d/core/Color3D;FFF)V
+	public synthetic fun <init> (Ldev/composescene3d/core/Color3D;Ldev/composescene3d/core/Color3D;FFFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ldev/composescene3d/core/Color3D;
+	public final fun component2 ()Ldev/composescene3d/core/Color3D;
+	public final fun component3 ()F
+	public final fun component4 ()F
+	public final fun component5 ()F
+	public final fun copy (Ldev/composescene3d/core/Color3D;Ldev/composescene3d/core/Color3D;FFF)Ldev/composescene3d/core/HatchMaterial;
+	public static synthetic fun copy$default (Ldev/composescene3d/core/HatchMaterial;Ldev/composescene3d/core/Color3D;Ldev/composescene3d/core/Color3D;FFFILjava/lang/Object;)Ldev/composescene3d/core/HatchMaterial;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAngleRadians ()F
+	public final fun getBackgroundColor ()Ldev/composescene3d/core/Color3D;
+	public final fun getLineColor ()Ldev/composescene3d/core/Color3D;
+	public final fun getLineWidth ()F
+	public final fun getSpacing ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class dev/composescene3d/core/HighlightMaterial : dev/composescene3d/core/Material3D {
 	public fun <init> ()V
 	public fun <init> (Ldev/composescene3d/core/Color3D;F)V
@@ -678,8 +699,8 @@ public final class dev/composescene3d/core/Quaternion$Companion {
 
 public final class dev/composescene3d/core/RendererCapabilities {
 	public fun <init> ()V
-	public fun <init> (ZZZZZZZZ)V
-	public synthetic fun <init> (ZZZZZZZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZZZZZZZZZ)V
+	public synthetic fun <init> (ZZZZZZZZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
 	public final fun component2 ()Z
 	public final fun component3 ()Z
@@ -688,8 +709,9 @@ public final class dev/composescene3d/core/RendererCapabilities {
 	public final fun component6 ()Z
 	public final fun component7 ()Z
 	public final fun component8 ()Z
-	public final fun copy (ZZZZZZZZ)Ldev/composescene3d/core/RendererCapabilities;
-	public static synthetic fun copy$default (Ldev/composescene3d/core/RendererCapabilities;ZZZZZZZZILjava/lang/Object;)Ldev/composescene3d/core/RendererCapabilities;
+	public final fun component9 ()Z
+	public final fun copy (ZZZZZZZZZ)Ldev/composescene3d/core/RendererCapabilities;
+	public static synthetic fun copy$default (Ldev/composescene3d/core/RendererCapabilities;ZZZZZZZZZILjava/lang/Object;)Ldev/composescene3d/core/RendererCapabilities;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBloom ()Z
 	public final fun getClippingPlanes ()Z
@@ -697,6 +719,7 @@ public final class dev/composescene3d/core/RendererCapabilities {
 	public final fun getPhysicallyBasedRendering ()Z
 	public final fun getPicking ()Z
 	public final fun getPrimitiveGeometry ()Z
+	public final fun getSectionHatching ()Z
 	public final fun getShadows ()Z
 	public final fun getSkeletalAnimation ()Z
 	public fun hashCode ()I

@@ -279,7 +279,13 @@ sectionedMesh(
     geometry = housingGeometry,
     plane = ClippingPlane3D(Vec3(1f, 0f, 0f), offset = sectionPosition),
     material = PbrMaterial(baseColor = Color3D.Blue),
-    capMaterial = UnlitMaterial(Color3D.Yellow),
+    capMaterial = HatchMaterial(
+        backgroundColor = Color3D(0.95f, 0.75f, 0.2f),
+        lineColor = Color3D(0.12f, 0.1f, 0.06f),
+        spacing = 0.09f,
+        lineWidth = 0.009f,
+        angleRadians = 0.7853982f,
+    ),
 )
 ```
 
@@ -287,6 +293,11 @@ The cap implementation reconstructs actual cut-edge loops, triangulates concave 
 multiple disconnected regions, and preserves nested contours as holes. This covers hollow shafts,
 tubes, and housings with internal openings. Generated planar UVs make the result ready for hatch
 materials.
+
+`HatchMaterial` is the default cap material. Its pattern is generated directly by the Android/iOS
+Filament shader from the cap's planar UVs, so no texture asset is required. Angle, spacing, line
+width, background, and line colors are declarative and can be animated from Compose state. Use
+opposite angles for adjacent parts to keep an assembly section visually unambiguous.
 
 `Color3D` distinguishes sRGB input from linear-sRGB values and supports RGB/RGBA/ARGB factories
 and named colors. Primitive materials can be `PbrMaterial`, `UnlitMaterial`, `EmissiveMaterial`,

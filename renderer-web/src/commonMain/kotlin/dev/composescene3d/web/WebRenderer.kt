@@ -29,6 +29,7 @@ import dev.composescene3d.core.DirectionalLightNode
 import dev.composescene3d.core.EmissiveMaterial
 import dev.composescene3d.core.GroupNode
 import dev.composescene3d.core.HighlightMaterial
+import dev.composescene3d.core.HatchMaterial
 import dev.composescene3d.core.Material3D
 import dev.composescene3d.core.MeshNode
 import dev.composescene3d.core.LineNode
@@ -247,6 +248,7 @@ private fun Material3D.color(): Color = when (this) {
     is UnlitMaterial -> color.toColor()
     is EmissiveMaterial -> color.toColor(intensity)
     is HighlightMaterial -> color.toColor(intensity)
+    is HatchMaterial -> backgroundColor.toColor()
     is TransparentMaterial -> color.toColor()
     is ClippedPbrMaterial -> baseColor.toColor()
     is TexturedMaterial -> Color.White
@@ -272,7 +274,7 @@ private fun Material3D.reflectance() = when (this) {
     else -> 0.5f
 }
 private fun Material3D.shadingModel() = when (this) {
-    is UnlitMaterial, is EmissiveMaterial, is HighlightMaterial -> 1
+    is UnlitMaterial, is EmissiveMaterial, is HighlightMaterial, is HatchMaterial -> 1
     else -> 0
 }
 private fun Material3D.normalScale() = (this as? TexturedMaterial)?.normalScale ?: 1f

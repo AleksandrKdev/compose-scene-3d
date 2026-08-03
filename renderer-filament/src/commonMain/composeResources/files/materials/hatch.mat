@@ -1,0 +1,35 @@
+// Procedural UV-space engineering hatch for generated section caps.
+// Compile with the matc version matching the runtime:
+// matc -p all -a all -o hatch.filamat hatch.mat
+
+material {
+    name : ComposeScene3DHatch,
+    shadingModel : unlit,
+    requires : [ uv0 ],
+    culling : none,
+    doubleSided : true,
+    parameters : [
+        { type : float4, name : backgroundColor },
+        { type : float4, name : lineColor },
+        { type : float, name : spacing },
+        { type : float, name : lineWidth },
+        { type : float, name : angleRadians }
+    ]
+}
+
+fragment {
+    void material(inout MaterialInputs material) {
+        prepareMaterial(material);
+        vec2 direction = vec2(cos(materialParams.angleRadians), sin(materialParams.angleRadians));
+        float coordinate = dot(getUV0(), direction);
+        float phase = fract(coordinate / materialParams.spacing);
+        float distanceToLine = min(phase, 1.0 - phase) * materialParams.spacing;
+        float antialias = max(fwidth(distanceToLine), 0.0001);
+        float hatch = 1.0 - smoothstep(
+            materialParams.lineWidth, materialParams.lineWidth + antialias, distanceToLine
+        );
+        material.baseColor = mix(
+            materialParams.backgroundColor, materialParams.lineColor, hatch
+        );
+    }
+}

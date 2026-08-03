@@ -10,6 +10,7 @@ data class RendererCapabilities(
     val skeletalAnimation: Boolean = false,
     val picking: Boolean = false,
     val clippingPlanes: Boolean = false,
+    val sectionHatching: Boolean = false,
 )
 
 sealed interface SceneCommand {

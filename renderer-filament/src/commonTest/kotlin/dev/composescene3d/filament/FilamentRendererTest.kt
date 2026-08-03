@@ -32,6 +32,7 @@ class FilamentRendererTest {
             physicallyBasedRendering = true,
             skeletalAnimation = true,
             clippingPlanes = true,
+            sectionHatching = true,
         ),
     )
 

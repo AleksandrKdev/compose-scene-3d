@@ -60,6 +60,10 @@ class PrimitiveTest {
         assertFailsWith<IllegalArgumentException> {
             ClippedPbrMaterial(List(4) { ClippingPlane3D(Vec3(0f, 1f, 0f)) })
         }
+        assertFailsWith<IllegalArgumentException> { HatchMaterial(spacing = 0f) }
+        assertFailsWith<IllegalArgumentException> {
+            HatchMaterial(spacing = 0.1f, lineWidth = 0.06f)
+        }
     }
 
     @Test

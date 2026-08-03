@@ -271,6 +271,25 @@ data class ClippedPbrMaterial(
     }
 }
 
+/** Procedural, unlit engineering hatch pattern evaluated from mesh UV coordinates. */
+data class HatchMaterial(
+    val backgroundColor: Color3D = Color3D(0.95f, 0.75f, 0.25f),
+    val lineColor: Color3D = Color3D(0.15f, 0.12f, 0.08f),
+    val spacing: Float = 0.1f,
+    val lineWidth: Float = 0.012f,
+    val angleRadians: Float = 0.7853982f,
+) : Material3D {
+    init {
+        require(spacing > 0f && spacing.isFinite()) {
+            "Hatch spacing must be finite and positive"
+        }
+        require(lineWidth > 0f && lineWidth.isFinite() && lineWidth <= spacing / 2f) {
+            "Hatch line width must be finite, positive, and no greater than half the spacing"
+        }
+        require(angleRadians.isFinite()) { "Hatch angle must be finite" }
+    }
+}
+
 data class TexturedMaterial(
     val baseColorTexture: TextureSource,
     val metallic: Float = 0f,
@@ -505,7 +524,7 @@ data class SectionedMeshNode(
     val geometry: Geometry3D,
     val plane: ClippingPlane3D,
     val material: Material3D = PbrMaterial(),
-    val capMaterial: Material3D = UnlitMaterial(Color3D(0.9f, 0.35f, 0.12f)),
+    val capMaterial: Material3D = HatchMaterial(),
     override val transform: Transform = Transform(),
     val castShadows: Boolean = true,
     val receiveShadows: Boolean = true,
