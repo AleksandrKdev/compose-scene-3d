@@ -499,6 +499,18 @@ data class MeshNode(
     }
 }
 
+/** A custom triangle mesh clipped and closed by one plane in the mesh's local coordinates. */
+data class SectionedMeshNode(
+    override val key: NodeKey,
+    val geometry: Geometry3D,
+    val plane: ClippingPlane3D,
+    val material: Material3D = PbrMaterial(),
+    val capMaterial: Material3D = UnlitMaterial(Color3D(0.9f, 0.35f, 0.12f)),
+    override val transform: Transform = Transform(),
+    val castShadows: Boolean = true,
+    val receiveShadows: Boolean = true,
+) : SceneNode
+
 data class DirectionalLightNode(
     override val key: NodeKey,
     val intensity: Float,

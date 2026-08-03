@@ -49,6 +49,18 @@ private val sampleTriangle = Geometry3D(
     uvs = floatArrayOf(0f, 0f, 1f, 0f, 0.5f, 1f),
 )
 
+private val sampleSectionSolid = Geometry3D(
+    positions = floatArrayOf(
+        0.7f, 0f, 0f, -0.7f, -0.6f, -0.6f,
+        -0.7f, 0.6f, -0.6f, -0.7f, 0f, 0.6f,
+    ),
+    indices = intArrayOf(0, 1, 2, 0, 3, 1, 0, 2, 3, 1, 3, 2),
+    normals = floatArrayOf(
+        1f, 0f, 0f, -1f, -1f, -1f,
+        -1f, 1f, -1f, -1f, 0f, 1f,
+    ),
+)
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -169,6 +181,14 @@ private fun Sample() {
                     geometry = sampleTriangle,
                     material = PbrMaterial(baseColor = Color3D.Magenta, roughness = 0.35f),
                     transform = Transform(translation = Vec3(0f, 1.35f, 0f)),
+                )
+                sectionedMesh(
+                    key = "closed-section",
+                    geometry = sampleSectionSolid,
+                    plane = ClippingPlane3D(Vec3(1f, 0f, 0f), offset = 0f),
+                    material = PbrMaterial(baseColor = Color3D.Blue, roughness = 0.45f),
+                    capMaterial = UnlitMaterial(Color3D.Yellow),
+                    transform = Transform(translation = Vec3(0f, 2.2f, 0f)),
                 )
                 line(
                     key = "duck-callout-leader",

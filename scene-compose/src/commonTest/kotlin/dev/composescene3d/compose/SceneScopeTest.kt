@@ -3,6 +3,8 @@ package dev.composescene3d.compose
 import dev.composescene3d.core.CylinderNode
 import dev.composescene3d.core.ArrowNode
 import dev.composescene3d.core.LineNode
+import dev.composescene3d.core.SectionedMeshNode
+import dev.composescene3d.core.ClippingPlane3D
 import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.EmissiveMaterial
 import dev.composescene3d.core.GroupNode
@@ -140,6 +142,23 @@ class SceneScopeTest {
         val scene = SceneScope().apply { mesh("triangle", geometry) }.build()
 
         assertEquals(geometry, assertIs<MeshNode>(scene.nodes.single()).geometry)
+    }
+
+    @Test
+    fun buildsClosedSectionMeshWithSeparateCapMaterial() {
+        val geometry = Geometry3D(
+            positions = floatArrayOf(-1f, 0f, 0f, 1f, 0f, 0f, 0f, 1f, 0f),
+            indices = intArrayOf(0, 1, 2),
+            normals = floatArrayOf(0f, 0f, 1f, 0f, 0f, 1f, 0f, 0f, 1f),
+        )
+        val cap = UnlitMaterial(Color3D.Yellow)
+        val scene = SceneScope().apply {
+            sectionedMesh(
+                "section", geometry, ClippingPlane3D(Vec3(1f, 0f, 0f)), capMaterial = cap,
+            )
+        }.build()
+
+        assertEquals(cap, assertIs<SectionedMeshNode>(scene.nodes.single()).capMaterial)
     }
 
     @Test

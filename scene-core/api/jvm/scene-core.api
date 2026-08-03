@@ -822,6 +822,49 @@ public final class dev/composescene3d/core/ScreenPosition3D {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class dev/composescene3d/core/SectionGeometry3D {
+	public fun <init> (Ldev/composescene3d/core/Geometry3D;Ldev/composescene3d/core/Geometry3D;)V
+	public final fun component1 ()Ldev/composescene3d/core/Geometry3D;
+	public final fun component2 ()Ldev/composescene3d/core/Geometry3D;
+	public final fun copy (Ldev/composescene3d/core/Geometry3D;Ldev/composescene3d/core/Geometry3D;)Ldev/composescene3d/core/SectionGeometry3D;
+	public static synthetic fun copy$default (Ldev/composescene3d/core/SectionGeometry3D;Ldev/composescene3d/core/Geometry3D;Ldev/composescene3d/core/Geometry3D;ILjava/lang/Object;)Ldev/composescene3d/core/SectionGeometry3D;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCap ()Ldev/composescene3d/core/Geometry3D;
+	public final fun getSurface ()Ldev/composescene3d/core/Geometry3D;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/composescene3d/core/SectionGeometryKt {
+	public static final fun section (Ldev/composescene3d/core/Geometry3D;Ldev/composescene3d/core/ClippingPlane3D;)Ldev/composescene3d/core/SectionGeometry3D;
+}
+
+public final class dev/composescene3d/core/SectionedMeshNode : dev/composescene3d/core/SceneNode {
+	public synthetic fun <init> (Ljava/lang/String;Ldev/composescene3d/core/Geometry3D;Ldev/composescene3d/core/ClippingPlane3D;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ldev/composescene3d/core/Geometry3D;Ldev/composescene3d/core/ClippingPlane3D;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-V7PxYp4 ()Ljava/lang/String;
+	public final fun component2 ()Ldev/composescene3d/core/Geometry3D;
+	public final fun component3 ()Ldev/composescene3d/core/ClippingPlane3D;
+	public final fun component4 ()Ldev/composescene3d/core/Material3D;
+	public final fun component5 ()Ldev/composescene3d/core/Material3D;
+	public final fun component6 ()Ldev/composescene3d/core/Transform;
+	public final fun component7 ()Z
+	public final fun component8 ()Z
+	public final fun copy-8ezuCfA (Ljava/lang/String;Ldev/composescene3d/core/Geometry3D;Ldev/composescene3d/core/ClippingPlane3D;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZ)Ldev/composescene3d/core/SectionedMeshNode;
+	public static synthetic fun copy-8ezuCfA$default (Ldev/composescene3d/core/SectionedMeshNode;Ljava/lang/String;Ldev/composescene3d/core/Geometry3D;Ldev/composescene3d/core/ClippingPlane3D;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ZZILjava/lang/Object;)Ldev/composescene3d/core/SectionedMeshNode;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCapMaterial ()Ldev/composescene3d/core/Material3D;
+	public final fun getCastShadows ()Z
+	public final fun getGeometry ()Ldev/composescene3d/core/Geometry3D;
+	public fun getKey-V7PxYp4 ()Ljava/lang/String;
+	public final fun getMaterial ()Ldev/composescene3d/core/Material3D;
+	public final fun getPlane ()Ldev/composescene3d/core/ClippingPlane3D;
+	public final fun getReceiveShadows ()Z
+	public fun getTransform ()Ldev/composescene3d/core/Transform;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class dev/composescene3d/core/ShadowMap3D {
 	public fun <init> ()V
 	public fun <init> (IFFFIZFIF)V

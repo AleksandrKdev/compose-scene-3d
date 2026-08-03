@@ -64,8 +64,9 @@ internal fun FilamentSceneScope.FilamentMesh(renderer: FilamentRenderer, node: M
 
     DisposableEffect(entity) {
         scene.addEntity(entity)
-        renderer.registerEntities(node.key, listOf(entity))
+        renderer.registerEntity(node.key, entity)
         onDispose {
+            renderer.unregisterEntity(node.key, entity)
             scene.removeEntity(entity)
             engine.getRenderableManager().destroy(entity)
             engine.getTransformManager().destroy(entity)

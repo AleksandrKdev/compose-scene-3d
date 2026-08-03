@@ -268,7 +268,24 @@ mesh("housing-section", geometry = housing, material = section)
 
 The plane retains points where `dot(normal, worldPosition) >= offset`; set `keepPositive = false`
 to retain the opposite side. Changing `offset` from Compose state animates or scrubs the cut. The
-current milestone renders an open section surface; generated caps and hatch fills are planned next.
+Shader-clipped primitives and imported parts currently render an open section surface.
+
+For custom geometry, `sectionedMesh` performs the cut on the CPU and generates a real cap mesh with
+its own material and planar UV coordinates:
+
+```kotlin
+sectionedMesh(
+    key = "housing-section",
+    geometry = housingGeometry,
+    plane = ClippingPlane3D(Vec3(1f, 0f, 0f), offset = sectionPosition),
+    material = PbrMaterial(baseColor = Color3D.Blue),
+    capMaterial = UnlitMaterial(Color3D.Yellow),
+)
+```
+
+The first cap implementation supports a closed convex cut contour. The generated UVs make it ready
+for hatch textures. Disconnected contours and holes should currently be supplied as separate
+sectioned meshes; robust multi-contour triangulation is the next geometry milestone.
 
 `Color3D` distinguishes sRGB input from linear-sRGB values and supports RGB/RGBA/ARGB factories
 and named colors. Primitive materials can be `PbrMaterial`, `UnlitMaterial`, `EmissiveMaterial`,

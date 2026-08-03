@@ -52,6 +52,7 @@ import dev.composescene3d.core.SceneCommand
 import dev.composescene3d.core.SceneNode
 import dev.composescene3d.core.ScenePickResult
 import dev.composescene3d.core.SceneRenderer
+import dev.composescene3d.core.SectionedMeshNode
 import dev.composescene3d.core.SceneSubscription
 import dev.composescene3d.core.ShadowMap3D
 import dev.composescene3d.core.ShadowTechnique3D
@@ -66,6 +67,7 @@ import dev.composescene3d.core.EnvironmentMap
 import dev.composescene3d.core.UnlitMaterial
 import dev.composescene3d.core.assetKey
 import dev.composescene3d.core.geometry
+import dev.composescene3d.core.section
 import dev.composescene3d.core.Vec3
 import dev.composescene3d.filament.resources.Res
 import io.github.erkko68.filament.compose.FilamentSceneView
@@ -247,6 +249,17 @@ class FilamentRenderer(
         val stableEntities = entities.toSet()
         nodeToEntities[key] = stableEntities
         stableEntities.forEach { entityToNode[it] = key }
+    }
+
+    internal fun registerEntity(key: NodeKey, entity: Int) {
+        entityToNode[entity] = key
+        nodeToEntities[key] = nodeToEntities[key].orEmpty() + entity
+    }
+
+    internal fun unregisterEntity(key: NodeKey, entity: Int) {
+        entityToNode.remove(entity)
+        val remaining = nodeToEntities[key].orEmpty() - entity
+        if (remaining.isEmpty()) nodeToEntities.remove(key) else nodeToEntities[key] = remaining
     }
 
     internal fun resolveEntity(entity: Int): NodeKey? = entityToNode[entity]
@@ -758,6 +771,7 @@ private fun FilamentSceneScope.FilamentNodes(
                         node.castShadows, node.receiveShadows,
                     ),
                 )
+                is SectionedMeshNode -> FilamentSectionedMesh(renderer, node)
                 is MeshNode -> FilamentMesh(renderer, node)
                 is DirectionalLightNode -> FilamentLight(node)
                 is PointLightNode -> FilamentLight(node)
@@ -778,6 +792,32 @@ private fun FilamentSceneScope.FilamentNodes(
                 is ModelNode -> error("Model nodes are rendered in shared asset groups")
             }
         }
+    }
+}
+
+@Composable
+private fun FilamentSceneScope.FilamentSectionedMesh(
+    renderer: FilamentRenderer,
+    node: SectionedMeshNode,
+) {
+    val section = remember(node.geometry, node.plane) { node.geometry.section(node.plane) }
+    section.surface?.let { geometry ->
+        FilamentMesh(
+            renderer,
+            MeshNode(
+                node.key, geometry, node.material, node.transform,
+                node.castShadows, node.receiveShadows,
+            ),
+        )
+    }
+    section.cap?.let { geometry ->
+        FilamentMesh(
+            renderer,
+            MeshNode(
+                node.key, geometry, node.capMaterial, node.transform,
+                node.castShadows, node.receiveShadows,
+            ),
+        )
     }
 }
 

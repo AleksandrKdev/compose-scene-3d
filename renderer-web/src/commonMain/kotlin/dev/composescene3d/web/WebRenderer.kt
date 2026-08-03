@@ -43,6 +43,7 @@ import dev.composescene3d.core.RendererCapabilities
 import dev.composescene3d.core.SceneCommand
 import dev.composescene3d.core.SceneNode
 import dev.composescene3d.core.SceneRenderer
+import dev.composescene3d.core.SectionedMeshNode
 import dev.composescene3d.core.ShadowMap3D
 import dev.composescene3d.core.SphereNode
 import dev.composescene3d.core.SpotLightNode
@@ -52,6 +53,7 @@ import dev.composescene3d.core.TexturedMaterial
 import dev.composescene3d.core.TextureSource
 import dev.composescene3d.core.assetKey
 import dev.composescene3d.core.geometry
+import dev.composescene3d.core.section
 import dev.composescene3d.core.UnlitMaterial
 import dev.composescene3d.core.Vec3
 import kotlin.math.PI
@@ -164,6 +166,7 @@ private fun SceneNode.toMesh(): MeshData? = when (this) {
     is CylinderNode -> cylinderMesh(radius, height, segments, material)
     is LineNode -> geometry().toMeshData(material)
     is ArrowNode -> geometry().toMeshData(material)
+    is SectionedMeshNode -> null
     else -> null
 }
 
@@ -1182,6 +1185,16 @@ private fun buildGpuBatches(
             }
             return
         }
+        if (node is SectionedMeshNode) {
+            val section = node.geometry.section(node.plane)
+            section.surface?.let {
+                appendMesh(it.toMeshData(node.material), transforms, node.castShadows, node.receiveShadows)
+            }
+            section.cap?.let {
+                appendMesh(it.toMeshData(node.capMaterial), transforms, node.castShadows, node.receiveShadows)
+            }
+            return
+        }
         val mesh = node.toMesh() ?: return
         appendMesh(mesh, transforms, node.castShadows(), node.receiveShadows())
     }
@@ -1195,6 +1208,7 @@ private fun SceneNode.castShadows() = when (this) {
     is CylinderNode -> castShadows
     is LineNode -> castShadows
     is ArrowNode -> castShadows
+    is SectionedMeshNode -> castShadows
     is MeshNode -> castShadows
     is ModelNode -> castShadows
     else -> false
@@ -1207,6 +1221,7 @@ private fun SceneNode.receiveShadows() = when (this) {
     is CylinderNode -> receiveShadows
     is LineNode -> receiveShadows
     is ArrowNode -> receiveShadows
+    is SectionedMeshNode -> receiveShadows
     is MeshNode -> receiveShadows
     is ModelNode -> receiveShadows
     else -> false
