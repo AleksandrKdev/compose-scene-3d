@@ -128,6 +128,36 @@ Scene3D(controller) {
 An entry pointing to a hierarchy node moves its complete subtree, which is useful for nested
 assemblies. Translation vectors are expressed in that part's authored local coordinate system.
 
+## Model-part annotations
+
+Resolve any point in a model part and keep a Compose label attached while the camera or assembly
+moves. Coordinates use the viewport's top-left corner and `visible` includes frustum checks:
+
+```kotlin
+var viewportSize by remember { mutableStateOf(IntSize.Zero) }
+val labelPosition by rememberModelPartScreenPosition(
+    controller = controller,
+    anchor = ModelPartAnchor3D(
+        nodeKey = NodeKey("gearbox"),
+        partKey = ModelPartKey("Gearbox/Shaft"),
+        localPosition = Vec3(0f, 0.2f, 0f),
+    ),
+    cameraState = cameraState,
+    viewportWidth = viewportSize.width,
+    viewportHeight = viewportSize.height,
+)
+
+Box(Modifier.fillMaxSize().onSizeChanged { viewportSize = it }) {
+    FilamentViewport(renderer, cameraState = cameraState)
+    labelPosition?.takeIf { it.visible }?.let { position ->
+        Text(
+            "Drive shaft",
+            Modifier.offset { IntOffset(position.x.toInt(), position.y.toInt()) },
+        )
+    }
+}
+```
+
 ## Example
 
 ```kotlin

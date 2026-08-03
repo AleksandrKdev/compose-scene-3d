@@ -3,6 +3,11 @@ public final class dev/composescene3d/compose/Scene3DKt {
 	public static final fun rememberSceneController (Ldev/composescene3d/core/SceneRenderer;Landroidx/compose/runtime/Composer;I)Ldev/composescene3d/core/SceneController;
 }
 
+public final class dev/composescene3d/compose/SceneAnchorsKt {
+	public static final fun description (Ldev/composescene3d/compose/SceneCameraState;)Ldev/composescene3d/core/CameraDescription;
+	public static final fun rememberModelPartScreenPosition (Ldev/composescene3d/core/SceneController;Ldev/composescene3d/core/ModelPartAnchor3D;Ldev/composescene3d/compose/SceneCameraState;IILandroidx/compose/runtime/Composer;I)Landroidx/compose/runtime/State;
+}
+
 public final class dev/composescene3d/compose/SceneCameraGestureController {
 	public static final field $stable I
 	public fun <init> (Ldev/composescene3d/compose/SceneCameraState;FFFF)V

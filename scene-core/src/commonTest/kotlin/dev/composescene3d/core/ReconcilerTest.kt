@@ -10,7 +10,7 @@ class ReconcilerTest {
     @Test
     fun controllerExposesOptionalModelPartProvider() {
         val expected = listOf(ModelPart3D(ModelPartKey("gear"), "Gear", renderable = true))
-        val renderer = object : SceneRenderer, ModelPartProvider {
+        val renderer = object : SceneRenderer, ModelPartProvider, ModelPartAnchorProvider {
             var listener: ((NodeKey, List<ModelPart3D>) -> Unit)? = null
             override val capabilities = RendererCapabilities()
             override fun apply(commands: List<SceneCommand>) = Unit
@@ -21,12 +21,20 @@ class ReconcilerTest {
                 this.listener = listener
                 return SceneSubscription { this.listener = null }
             }
+            override fun modelPartWorldPosition(anchor: ModelPartAnchor3D) =
+                if (anchor.partKey == ModelPartKey("gear")) Vec3(1f, 2f, 3f) else null
         }
 
         val controller = SceneController(renderer)
 
         assertEquals(expected, controller.modelParts(NodeKey("model")))
         assertTrue(controller.modelParts(NodeKey("missing")).isEmpty())
+        assertEquals(
+            Vec3(1f, 2f, 3f),
+            controller.modelPartWorldPosition(
+                ModelPartAnchor3D(NodeKey("model"), ModelPartKey("gear")),
+            ),
+        )
         var observed = emptyList<ModelPart3D>()
         val subscription = controller.observeModelParts { _, parts -> observed = parts }
         renderer.listener?.invoke(NodeKey("model"), expected)

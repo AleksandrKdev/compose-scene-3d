@@ -35,6 +35,8 @@ import dev.composescene3d.core.ModelPartKey
 import dev.composescene3d.core.ModelPartOverride
 import dev.composescene3d.core.ModelPartOutline
 import dev.composescene3d.core.ModelPartProvider
+import dev.composescene3d.core.ModelPartAnchor3D
+import dev.composescene3d.core.ModelPartAnchorProvider
 import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.Material3D
 import dev.composescene3d.core.MeshNode
@@ -153,7 +155,7 @@ private val bytesOnlyTextureLoader = TextureByteLoader { source ->
 class FilamentRenderer(
     internal val modelByteLoader: ModelByteLoader = bytesOnlyModelLoader,
     internal val onModelError: (ModelAssetKey, Throwable) -> Unit = { _, _ -> },
-) : SceneRenderer, ModelPartProvider {
+) : SceneRenderer, ModelPartProvider, ModelPartAnchorProvider {
     internal var textureByteLoader: TextureByteLoader = bytesOnlyTextureLoader
         private set
     internal var onTextureError: (TextureSource, Throwable) -> Unit = { _, _ -> }
@@ -182,6 +184,7 @@ class FilamentRenderer(
     private val partsByNode = mutableMapOf<NodeKey, List<ModelPart3D>>()
     private val entityToPart = mutableMapOf<Int, ModelPartKey>()
     private val modelPartBindings = mutableMapOf<NodeKey, List<ModelPartBinding>>()
+    private val modelPartEngines = mutableMapOf<NodeKey, Engine>()
     private val modelPartListeners = mutableSetOf<(NodeKey, List<ModelPart3D>) -> Unit>()
     private var closed = false
 
@@ -229,6 +232,7 @@ class FilamentRenderer(
         partsByNode.clear()
         entityToPart.clear()
         modelPartBindings.clear()
+        modelPartEngines.clear()
         modelPartListeners.clear()
         closed = true
     }
@@ -285,6 +289,7 @@ class FilamentRenderer(
                 originalMaterials = part.originalMaterials,
             )
         }
+        modelPartEngines[key] = engine
         partsByNode[key] = result
         modelPartListeners.toList().forEach { it(key, result) }
     }
@@ -326,6 +331,7 @@ class FilamentRenderer(
 
     private fun unregisterEntities(key: NodeKey) {
         modelPartBindings.remove(key)
+        modelPartEngines.remove(key)
         nodeToEntities.remove(key)?.forEach { entity ->
             if (entityToNode[entity] == key) entityToNode.remove(entity)
             entityToPart.remove(entity)
@@ -333,6 +339,21 @@ class FilamentRenderer(
         if (partsByNode.remove(key) != null) {
             modelPartListeners.toList().forEach { it(key, emptyList()) }
         }
+    }
+
+    override fun modelPartWorldPosition(anchor: ModelPartAnchor3D): Vec3? {
+        val binding = modelPartBindings[anchor.nodeKey]?.firstOrNull { it.key == anchor.partKey }
+            ?: return null
+        val engine = modelPartEngines[anchor.nodeKey] ?: return null
+        val transforms = engine.getTransformManager()
+        if (!transforms.hasComponent(binding.entity)) return null
+        val matrix = transforms.getWorldTransform(transforms.getInstance(binding.entity), FloatArray(16))
+        val point = anchor.localPosition
+        return Vec3(
+            matrix[0] * point.x + matrix[4] * point.y + matrix[8] * point.z + matrix[12],
+            matrix[1] * point.x + matrix[5] * point.y + matrix[9] * point.z + matrix[13],
+            matrix[2] * point.x + matrix[6] * point.y + matrix[10] * point.z + matrix[14],
+        )
     }
 
     internal fun applyModelPartOverrides(

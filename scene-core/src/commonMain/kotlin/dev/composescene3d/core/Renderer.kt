@@ -32,6 +32,11 @@ interface ModelPartProvider {
     ): SceneSubscription
 }
 
+/** Optional renderer service that resolves local model-part anchors into world coordinates. */
+interface ModelPartAnchorProvider {
+    fun modelPartWorldPosition(anchor: ModelPartAnchor3D): Vec3?
+}
+
 fun interface SceneSubscription {
     fun dispose()
 }
@@ -56,6 +61,10 @@ class SceneController(private val renderer: SceneRenderer) {
         listener: (nodeKey: NodeKey, parts: List<ModelPart3D>) -> Unit,
     ): SceneSubscription = (renderer as? ModelPartProvider)?.observeModelParts(listener)
         ?: SceneSubscription { }
+
+    /** Returns null while the model is loading or when the model/part is no longer present. */
+    fun modelPartWorldPosition(anchor: ModelPartAnchor3D): Vec3? =
+        (renderer as? ModelPartAnchorProvider)?.modelPartWorldPosition(anchor)
 
     fun close() {
         if (closed) return
