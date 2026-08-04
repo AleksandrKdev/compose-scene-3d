@@ -8,17 +8,17 @@ owned by a renderer implementation rather than by recomposition.
 
 ## Status
 
-Early architecture prototype with working Filament primitive and GLB rendering on Android,
-Desktop and iOS/Metal, plus an independent WebGL2 renderer for Web/Wasm. A stable public
-release is not available yet.
+Alpha-quality retained-mode library with Filament primitive and GLB rendering on Android,
+Desktop and iOS/Metal, plus an independent WebGL2 renderer for Web/Wasm. The API remains subject
+to change before the first stable release.
 
-Current release coordinates: `io.github.aleksandrkdev:*:0.1.0-alpha02`.
+Current release coordinates: `io.github.aleksandrkdev:*:0.1.0-alpha03`.
 
 Source repository: [AleksandrKdev/compose-scene-3d](https://github.com/AleksandrKdev/compose-scene-3d).
 
 ### Alpha03 migration
 
-The upcoming `alpha03` makes `box` consistent with every other primitive: replace the old
+`alpha03` makes `box` consistent with every other primitive: replace the old
 `color = Vec3(...)` argument with a backend-neutral material:
 
 ```kotlin
@@ -687,8 +687,8 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.aleksandrkdev:scene-compose:0.1.0-alpha02")
-    implementation("io.github.aleksandrkdev:renderer-filament:0.1.0-alpha02")
+    implementation("io.github.aleksandrkdev:scene-compose:0.1.0-alpha03")
+    implementation("io.github.aleksandrkdev:renderer-filament:0.1.0-alpha03")
 }
 ```
 
@@ -701,7 +701,7 @@ gpr.key=YOUR_PERSONAL_ACCESS_TOKEN
 
 ## Maven Central
 
-Version `0.1.0-alpha02` is available from Maven Central, the primary public repository. Consumers
+Version `0.1.0-alpha03` is available from Maven Central, the primary public repository. Consumers
 only need `mavenCentral()` and do not need GitHub credentials:
 
 ```kotlin
@@ -710,8 +710,8 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.aleksandrkdev:scene-compose:0.1.0-alpha02")
-    implementation("io.github.aleksandrkdev:renderer-filament:0.1.0-alpha02")
+    implementation("io.github.aleksandrkdev:scene-compose:0.1.0-alpha03")
+    implementation("io.github.aleksandrkdev:renderer-filament:0.1.0-alpha03")
 }
 ```
 

@@ -519,8 +519,8 @@ The original plan before publishing outside the local machine was:
   `publishAllPublicationsToGitHubPackagesRepository` task were verified locally. No remote package
   was pushed from the local machine.
 
-The original GitHub Packages alpha milestone is complete. Maven Central `0.1.0-alpha02` is the
-current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
+The original GitHub Packages alpha milestone is complete. `0.1.0-alpha03` is published to Maven
+Central and GitHub Packages from tag `v0.1.0-alpha03`.
 
 ## Alpha03 stabilization
 
@@ -548,8 +548,8 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
   removed `BoxNode.color` API was migrated to `BoxNode.material`.
 - A complete unsigned local Maven publication for `0.1.0-alpha03` and an independent JVM consumer
   resolving those local artifacts both build successfully.
-- The codebase is release-candidate ready; the next step is reviewing CI, choosing whether to cut
-  `v0.1.0-alpha03`, and then running the publication workflows.
+- Tag CI, Maven Central publication, GitHub Packages publication, and the external published
+  consumer verification all succeeded for `v0.1.0-alpha03`.
 
 ## Useful files
 
@@ -570,8 +570,10 @@ current public release; ongoing development uses `0.1.0-alpha03-SNAPSHOT`.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-Continue the final library milestones with API stabilization, documentation audit, and release
-preparation. Automatic opaque glTF fading is explicitly capability-gated.
+The `v0.1.0-alpha03` library release is complete. Start a separate Android/iOS KMP interactive
+machine-elements textbook application that consumes the published artifacts. Keep domain geometry
+such as shafts, pulleys and bearings outside the generic library. Automatic opaque glTF fading is
+explicitly capability-gated.
 Imported hierarchy, picking, part overrides, selection effects, exploded views, frame-tracked
 world-to-screen model-part annotations, solid 3D lines/arrows/callout leaders, and open clipping
 plane section views, CPU-generated concave/multi-contour/holed section caps for custom meshes, and
