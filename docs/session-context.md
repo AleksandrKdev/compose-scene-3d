@@ -1,6 +1,6 @@
 # Session context
 
-Updated: 2026-07-18
+Updated: 2026-08-04
 
 ## Goal
 
@@ -590,3 +590,16 @@ flags expose the distinction. Group opacity inheritance is done for declarative 
 The user explicitly allowed breaking the old empty GroupNode API before alpha03. Do not expose
 backend types in public commonMain API.
 ```
+
+## Separate machine-elements textbook
+
+The application requested after the alpha03 release now lives in a separate repository:
+
+```text
+/Users/darakucybala/AndroidStudioProjects/MachineElementsTutor
+https://github.com/AleksandrKdev/MachineElementsTutor
+```
+
+It consumes `scene-compose` and `renderer-filament` version `0.1.0-alpha03` from Maven Central.
+Its first Android/iOS lesson and GitHub Actions build are working. Continue application work using
+`MachineElementsTutor/docs/session-context.md`; do not move domain geometry into this library.
