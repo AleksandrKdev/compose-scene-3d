@@ -1403,6 +1403,20 @@ private fun Vec3.toFilamentScale() = Scale(x, y, z)
 private fun dev.composescene3d.core.Quaternion.toFilamentQuaternion() =
     Quaternion(x, y, z, w)
 
+private fun dev.composescene3d.core.Quaternion.rotate(vector: Vec3): Vec3 {
+    val qx = y * vector.z - z * vector.y
+    val qy = z * vector.x - x * vector.z
+    val qz = x * vector.y - y * vector.x
+    val ux = y * qz - z * qy
+    val uy = z * qx - x * qz
+    val uz = x * qy - y * qx
+    return Vec3(
+        vector.x + 2f * (w * qx + ux),
+        vector.y + 2f * (w * qy + uy),
+        vector.z + 2f * (w * qz + uz),
+    )
+}
+
 private data class CameraSyncSnapshot(
     val eye: Vec3,
     val target: Vec3,
@@ -1428,8 +1442,9 @@ private fun CameraProjection.toFilamentProjection(): Projection = when (this) {
 
 @Composable
 private fun FilamentSceneScope.FilamentLight(node: DirectionalLightNode) {
+    val direction = node.transform.rotation.rotate(Vec3(0.3f, -1f, -0.5f))
     DirectionalLight(
-        direction = Direction(0.3f, -1f, -0.5f),
+        direction = Direction(direction.x, direction.y, direction.z),
         color = Color(node.color.x, node.color.y, node.color.z),
         intensity = node.intensity,
         shadow = node.shadow?.toFilamentShadowConfig(),
