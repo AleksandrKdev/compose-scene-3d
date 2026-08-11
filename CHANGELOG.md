@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0-alpha04 — 2026-08-11
+
+- Fixed Filament directional lights so their world-space direction follows `Transform.rotation`.
+- Kept the existing public API and alpha03 binary compatibility unchanged.
+
 ## 0.1.0-alpha03 — 2026-08-04
 
 - Added Android/iOS/Web custom geometry, expanded materials, environment lighting and shadows.

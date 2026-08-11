@@ -12,9 +12,15 @@ Alpha-quality retained-mode library with Filament primitive and GLB rendering on
 Desktop and iOS/Metal, plus an independent WebGL2 renderer for Web/Wasm. The API remains subject
 to change before the first stable release.
 
-Current release coordinates: `io.github.aleksandrkdev:*:0.1.0-alpha03`.
+Current release coordinates: `io.github.aleksandrkdev:*:0.1.0-alpha04`.
 
 Source repository: [AleksandrKdev/compose-scene-3d](https://github.com/AleksandrKdev/compose-scene-3d).
+
+### Alpha04 lighting fix
+
+`alpha04` makes Filament directional-light orientation follow the light node's
+`Transform.rotation`. A directional light can therefore remain fixed in world space while scene
+content rotates, without changing the public API.
 
 ### Alpha03 migration
 
@@ -650,8 +656,8 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.aleksandrkdev:scene-compose:0.1.0-alpha03-SNAPSHOT")
-    implementation("io.github.aleksandrkdev:renderer-filament:0.1.0-alpha03-SNAPSHOT")
+    implementation("io.github.aleksandrkdev:scene-compose:0.1.0-alpha04-SNAPSHOT")
+    implementation("io.github.aleksandrkdev:renderer-filament:0.1.0-alpha04-SNAPSHOT")
 }
 ```
 
@@ -687,8 +693,8 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.aleksandrkdev:scene-compose:0.1.0-alpha03")
-    implementation("io.github.aleksandrkdev:renderer-filament:0.1.0-alpha03")
+    implementation("io.github.aleksandrkdev:scene-compose:0.1.0-alpha04")
+    implementation("io.github.aleksandrkdev:renderer-filament:0.1.0-alpha04")
 }
 ```
 
@@ -701,7 +707,7 @@ gpr.key=YOUR_PERSONAL_ACCESS_TOKEN
 
 ## Maven Central
 
-Version `0.1.0-alpha03` is available from Maven Central, the primary public repository. Consumers
+Version `0.1.0-alpha04` is available from Maven Central, the primary public repository. Consumers
 only need `mavenCentral()` and do not need GitHub credentials:
 
 ```kotlin
@@ -710,15 +716,15 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.aleksandrkdev:scene-compose:0.1.0-alpha03")
-    implementation("io.github.aleksandrkdev:renderer-filament:0.1.0-alpha03")
+    implementation("io.github.aleksandrkdev:scene-compose:0.1.0-alpha04")
+    implementation("io.github.aleksandrkdev:renderer-filament:0.1.0-alpha04")
 }
 ```
 
 Maintainers publish tags through the `Publish Maven Central` workflow. It expects Central Portal
 user-token secrets `MAVEN_CENTRAL_USERNAME` and `MAVEN_CENTRAL_PASSWORD`, plus the armored private
-key `SIGNING_KEY` and its `SIGNING_PASSWORD`. A `v0.1.0-alpha03` tag automatically publishes
-version `0.1.0-alpha03`; a manual workflow run requires the same version as an explicit input.
+key `SIGNING_KEY` and its `SIGNING_PASSWORD`. A `v0.1.0-alpha04` tag automatically publishes
+version `0.1.0-alpha04`; a manual workflow run requires the same version as an explicit input.
 
 For Android-only development Android Studio may use its bundled JDK 21. Do not configure a
 project-wide Gradle daemon JVM criterion for Java 22: that can prevent initial sync before Gradle's

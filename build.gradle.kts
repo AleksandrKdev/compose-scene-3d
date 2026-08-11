@@ -12,7 +12,7 @@ plugins {
 }
 
 val libraryVersion = providers.gradleProperty("libraryVersion")
-    .orElse("0.1.0-alpha03-SNAPSHOT")
+    .orElse("0.1.0-alpha04-SNAPSHOT")
 
 allprojects {
     group = "io.github.aleksandrkdev"
