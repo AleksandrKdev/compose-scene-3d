@@ -747,6 +747,15 @@ private fun FilamentViewportContent(
             cameraState = filamentCameraState,
             shadows = shadows.toFilamentShadows(),
         ) {
+            // PBR materials without an environment map are otherwise completely unlit on
+            // surfaces turned away from the scene's key light. A low-power camera fill keeps
+            // educational models readable from every orbit angle without contributing shadows.
+            PointLight(
+                position = filamentCameraState.eye,
+                color = Color(0.82f, 0.86f, 0.92f),
+                intensity = 1200f,
+                falloff = 18f,
+            )
             FilamentNodes(renderer, renderer.nodes)
         }
     }
