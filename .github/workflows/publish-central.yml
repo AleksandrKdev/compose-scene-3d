@@ -6,7 +6,7 @@ on:
       version:
         description: Version to publish without the v prefix
         required: true
-        default: 0.1.0-alpha04
+        default: 0.1.0-alpha05
   push:
     tags:
       - 'v*'

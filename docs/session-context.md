@@ -519,8 +519,8 @@ The original plan before publishing outside the local machine was:
   `publishAllPublicationsToGitHubPackagesRepository` task were verified locally. No remote package
   was pushed from the local machine.
 
-The original GitHub Packages alpha milestone is complete. `0.1.0-alpha04` is the current release;
-it fixes Filament directional-light rotation without changing the public API.
+The original GitHub Packages alpha milestone is complete. `0.1.0-alpha05` is the current release;
+it adds a camera-attached fill light while preserving key-light shadows.
 
 ## Alpha03 stabilization
 
@@ -570,7 +570,7 @@ it fixes Filament directional-light rotation without changing the public API.
 Continue developing ComposeScene3D in
 /Users/darakucybala/AndroidStudioProjects/ComposeScene3D.
 Read docs/session-context.md, docs/architecture.md and README.md first.
-The `v0.1.0-alpha04` library release is complete. Continue the separate Android/iOS KMP interactive
+The `v0.1.0-alpha05` library release is complete. Continue the separate Android/iOS KMP interactive
 machine-elements textbook application that consumes the published artifacts. Keep domain geometry
 such as shafts, pulleys and bearings outside the generic library. Automatic opaque glTF fading is
 explicitly capability-gated.
@@ -600,6 +600,6 @@ The application requested after the alpha03 release now lives in a separate repo
 https://github.com/AleksandrKdev/MachineElementsTutor
 ```
 
-It consumes `scene-compose` and `renderer-filament` version `0.1.0-alpha04` from Maven Central.
+It consumes `scene-compose` and `renderer-filament` version `0.1.0-alpha05` from Maven Central.
 Its first Android/iOS lesson and GitHub Actions build are working. Continue application work using
 `MachineElementsTutor/docs/session-context.md`; do not move domain geometry into this library.

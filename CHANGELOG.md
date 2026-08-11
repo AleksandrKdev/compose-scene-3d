@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.0-alpha05 — 2026-08-11
+
+- Added a low-power camera-attached fill light to Filament viewports so PBR surfaces remain
+  readable when the model is rotated away from the key light.
+- The fill light does not cast shadows; directional-light shadows remain unchanged.
+- Normalized Android sample PBR textures to 8-bit RGBA for Android 16/Filament compatibility.
+
 ## 0.1.0-alpha04 — 2026-08-11
 
 - Fixed Filament directional lights so their world-space direction follows `Transform.rotation`.
