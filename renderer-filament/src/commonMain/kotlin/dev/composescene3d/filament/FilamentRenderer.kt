@@ -44,6 +44,7 @@ import dev.composescene3d.core.ModelPartAnchorProvider
 import dev.composescene3d.core.ModelSource
 import dev.composescene3d.core.Material3D
 import dev.composescene3d.core.MeshNode
+import dev.composescene3d.core.EdgeNode
 import dev.composescene3d.core.LineNode
 import dev.composescene3d.core.LinearDimensionNode
 import dev.composescene3d.core.RadialDimensionNode
@@ -748,13 +749,13 @@ private fun FilamentViewportContent(
             shadows = shadows.toFilamentShadows(),
         ) {
             // PBR materials without an environment map are otherwise completely unlit on
-            // surfaces turned away from the scene's key light. A low-power camera fill keeps
-            // educational models readable from every orbit angle without contributing shadows.
+            // surfaces turned away from the scene's key light. A camera fill keeps educational
+            // models readable from every orbit angle without contributing shadows.
             PointLight(
                 position = filamentCameraState.eye,
-                color = Color(0.82f, 0.86f, 0.92f),
-                intensity = 1200f,
-                falloff = 18f,
+                color = Color(0.96f, 0.98f, 1f),
+                intensity = 9000f,
+                falloff = 36f,
             )
             FilamentNodes(renderer, renderer.nodes)
         }
@@ -808,6 +809,7 @@ private fun FilamentSceneScope.FilamentNodes(
                     FilamentMesh(renderer, MeshNode(node.key, geometry, node.material, node.transform, node.castShadows, node.receiveShadows))
                 }
                 is SectionedMeshNode -> FilamentSectionedMesh(renderer, node)
+                is EdgeNode -> FilamentEdges(renderer, node)
                 is MeshNode -> FilamentMesh(renderer, node)
                 is DirectionalLightNode -> FilamentLight(node)
                 is PointLightNode -> FilamentLight(node)

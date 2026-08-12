@@ -653,6 +653,32 @@ class Geometry3D(
     }
 }
 
+/** Indexed zero-radius line segments rendered in screen space by the backend. */
+class EdgeGeometry3D(
+    val positions: FloatArray,
+    val indices: IntArray,
+) {
+    val vertexCount: Int get() = positions.size / 3
+
+    init {
+        require(positions.size >= 6 && positions.size % 3 == 0) {
+            "Edge positions must contain at least two XYZ vertices"
+        }
+        require(indices.isNotEmpty() && indices.size % 2 == 0) {
+            "Edge indices must contain complete line pairs"
+        }
+        require(positions.all(Float::isFinite)) { "Edge positions must be finite" }
+        require(indices.all { it in 0 until vertexCount }) {
+            "Edge indices must reference an existing vertex"
+        }
+    }
+
+    override fun equals(other: Any?): Boolean = other is EdgeGeometry3D &&
+        positions.contentEquals(other.positions) && indices.contentEquals(other.indices)
+
+    override fun hashCode(): Int = 31 * positions.contentHashCode() + indices.contentHashCode()
+}
+
 private fun nullableContentEquals(first: FloatArray?, second: FloatArray?): Boolean =
     first === second || (first != null && second != null && first.contentEquals(second))
 
@@ -670,6 +696,14 @@ data class MeshNode(
         }
     }
 }
+
+/** Non-volumetric mesh edges. Unlike [LineNode], these never create cylinders. */
+data class EdgeNode(
+    override val key: NodeKey,
+    val geometry: EdgeGeometry3D,
+    val material: Material3D = UnlitMaterial(),
+    override val transform: Transform = Transform(),
+) : SceneNode
 
 /** A custom triangle mesh clipped and closed by one plane in the mesh's local coordinates. */
 data class SectionedMeshNode(

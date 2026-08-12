@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.0-alpha06 — 2026-08-12
+
+- Added backend-neutral `EdgeGeometry3D`, `EdgeNode` and the Compose `edges(...)` DSL for
+  zero-radius mesh-edge overlays without cylindrical geometry.
+- Added Filament `LINES` rendering for thin engineering outlines on Android, Desktop and iOS.
+- Increased the camera-attached fill light so rotating PBR parts remain readable from both sides.
+- Added validation and scene-DSL tests for indexed edge geometry.
+
 ## 0.1.0-alpha05 — 2026-08-11
 
 - Added a low-power camera-attached fill light to Filament viewports so PBR surfaces remain

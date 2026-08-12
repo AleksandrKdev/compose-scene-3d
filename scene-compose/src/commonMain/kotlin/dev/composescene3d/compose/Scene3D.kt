@@ -15,6 +15,8 @@ import dev.composescene3d.core.ArrowNode
 import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.Material3D
 import dev.composescene3d.core.Geometry3D
+import dev.composescene3d.core.EdgeGeometry3D
+import dev.composescene3d.core.EdgeNode
 import dev.composescene3d.core.MeshNode
 import dev.composescene3d.core.SectionedMeshNode
 import dev.composescene3d.core.ClippingPlane3D
@@ -216,6 +218,16 @@ class SceneScope internal constructor() {
         receiveShadows: Boolean = true,
     ) {
         nodes += MeshNode(NodeKey(key), geometry, material, transform, castShadows, receiveShadows)
+    }
+
+    /** Draws zero-radius indexed segments without cylindrical geometry. */
+    fun edges(
+        key: String,
+        geometry: EdgeGeometry3D,
+        material: Material3D = UnlitMaterial(),
+        transform: Transform = Transform(),
+    ) {
+        nodes += EdgeNode(NodeKey(key), geometry, material, transform)
     }
 
     fun sectionedMesh(

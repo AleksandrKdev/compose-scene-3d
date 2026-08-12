@@ -13,6 +13,8 @@ import dev.composescene3d.core.Color3D
 import dev.composescene3d.core.EmissiveMaterial
 import dev.composescene3d.core.GroupNode
 import dev.composescene3d.core.Geometry3D
+import dev.composescene3d.core.EdgeGeometry3D
+import dev.composescene3d.core.EdgeNode
 import dev.composescene3d.core.MeshNode
 import dev.composescene3d.core.ModelNode
 import dev.composescene3d.core.ModelPartKey
@@ -183,6 +185,18 @@ class SceneScopeTest {
         val scene = SceneScope().apply { mesh("triangle", geometry) }.build()
 
         assertEquals(geometry, assertIs<MeshNode>(scene.nodes.single()).geometry)
+    }
+
+    @Test
+    fun buildsNonVolumetricIndexedEdges() {
+        val geometry = EdgeGeometry3D(
+            positions = floatArrayOf(0f, 0f, 0f, 1f, 0f, 0f),
+            indices = intArrayOf(0, 1),
+        )
+
+        val scene = SceneScope().apply { edges("edge", geometry) }.build()
+
+        assertEquals(geometry, assertIs<EdgeNode>(scene.nodes.single()).geometry)
     }
 
     @Test

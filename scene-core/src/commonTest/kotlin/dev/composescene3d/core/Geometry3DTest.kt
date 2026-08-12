@@ -44,4 +44,23 @@ class Geometry3DTest {
             )
         }
     }
+
+    @Test
+    fun validatesIndexedZeroRadiusEdges() {
+        val first = EdgeGeometry3D(
+            positions = floatArrayOf(0f, 0f, 0f, 1f, 0f, 0f, 1f, 1f, 0f),
+            indices = intArrayOf(0, 1, 1, 2),
+        )
+        val copy = EdgeGeometry3D(first.positions.copyOf(), first.indices.copyOf())
+
+        assertEquals(3, first.vertexCount)
+        assertEquals(first, copy)
+        assertEquals(first.hashCode(), copy.hashCode())
+        assertFailsWith<IllegalArgumentException> {
+            EdgeGeometry3D(first.positions, intArrayOf(0, 1, 2))
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EdgeGeometry3D(first.positions, intArrayOf(0, 3))
+        }
+    }
 }

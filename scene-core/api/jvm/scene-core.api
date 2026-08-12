@@ -352,6 +352,33 @@ public final class dev/composescene3d/core/DirectionalLightNode : dev/composesce
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class dev/composescene3d/core/EdgeGeometry3D {
+	public fun <init> ([F[I)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIndices ()[I
+	public final fun getPositions ()[F
+	public final fun getVertexCount ()I
+	public fun hashCode ()I
+}
+
+public final class dev/composescene3d/core/EdgeNode : dev/composescene3d/core/SceneNode {
+	public synthetic fun <init> (Ljava/lang/String;Ldev/composescene3d/core/EdgeGeometry3D;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ldev/composescene3d/core/EdgeGeometry3D;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-V7PxYp4 ()Ljava/lang/String;
+	public final fun component2 ()Ldev/composescene3d/core/EdgeGeometry3D;
+	public final fun component3 ()Ldev/composescene3d/core/Material3D;
+	public final fun component4 ()Ldev/composescene3d/core/Transform;
+	public final fun copy-dKfVh_c (Ljava/lang/String;Ldev/composescene3d/core/EdgeGeometry3D;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;)Ldev/composescene3d/core/EdgeNode;
+	public static synthetic fun copy-dKfVh_c$default (Ldev/composescene3d/core/EdgeNode;Ljava/lang/String;Ldev/composescene3d/core/EdgeGeometry3D;Ldev/composescene3d/core/Material3D;Ldev/composescene3d/core/Transform;ILjava/lang/Object;)Ldev/composescene3d/core/EdgeNode;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getGeometry ()Ldev/composescene3d/core/EdgeGeometry3D;
+	public fun getKey-V7PxYp4 ()Ljava/lang/String;
+	public final fun getMaterial ()Ldev/composescene3d/core/Material3D;
+	public fun getTransform ()Ldev/composescene3d/core/Transform;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class dev/composescene3d/core/EmissiveMaterial : dev/composescene3d/core/Material3D {
 	public fun <init> ()V
 	public fun <init> (Ldev/composescene3d/core/Color3D;F)V
